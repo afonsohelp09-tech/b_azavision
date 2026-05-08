@@ -1,0 +1,53 @@
+══════════════════════════════════════════════════════════════════════════════
+  VENTE EN LIGNE TPE — Lot de déploiement (copie de travail / recette)
+  Date : 2026-05-07
+══════════════════════════════════════════════════════════════════════════════
+
+RÔLE DE CE DOSSIER
+  Ce répertoire « VENTE EN LIGNE TPE » contient les versions FINALES PACKAGÉES :
+  API + HTML autonomes (URL Web App intégrée dans les fichiers, avec instructions
+  et exemples dans les commentaires, comme sur vos projets Fligenio / précédents).
+  Les fichiers du dossier parent du projet ERP (admin_erp.html, boutique_client.html,
+  api_apps_script.gs) ne sont PAS modifiés automatiquement.
+
+  Quand vous avez validé ce lot : copiez-collez ou remplacez les originaux EN DEHORS
+  de ce dossier par ces fichiers, pour les aligner.
+
+CONTENU
+  • api_apps_script.gs   — Code serveur Google Apps Script (feuille liée).
+  • admin_erp.html       — Administration (menu mobile ≤900 px, overlays).
+  • boutique_client.html — Vitrine clients (menu ☰ + tiroir ≤768 px, zones safe-area).
+  • INSTRUCTIONS_INSTALLATION.txt — ce fichier.
+  • README.md            — Présentation du dépôt pour GitHub (aperçu, commandes git).
+  • .gitignore           — Fichiers système / locaux à ne pas pousser sur GitHub.
+
+  Option : dans le dossier parent du projet ERP, une archive
+  « VENTE-EN-LIGNE-TPE-GitHub.zip » peut regrouper les mêmes fichiers pour envoi /
+  release (régénérez-la après modification si besoin).
+
+ÉTAPES RAPIDES
+  1. Créer ou ouvrir le projet Apps Script lié à votre tableur ERP (Extensions >
+     Apps Script), coller api_apps_script.gs, enregistrer.
+  2. Ouvrir le Google Sheets lié à ce script : un menu « ERP Vente en ligne »
+     apparaît dans la barre (après rechargement de la page). Utilisez-le pour :
+       • Initialiser les feuilles (première configuration) — crée onglets,
+         compte admin admin@loja.com / admin123 si USERS vide, CONFIG / EMPRESA de base ;
+       • Enregistrer la liaison avec ce classeur ;
+       • Aide : rappel pour déployer l’API Web (/exec).
+     Si le menu n’apparaît pas : Apps Script → sélectionner la fonction onOpenManualRun
+     → Exécuter → autoriser, puis actualiser Sheets.
+  3. Déployer → Application Web → Exécuter en tant que moi → Accès : Toute personne
+     (Anyone) ; copier l’URL se terminant par /exec.
+  4. Dans admin_erp.html et boutique_client.html : renseigner la MÊME URL dans
+     window.ERP_API_URL_DEFAULT = '…' et/ou sur la ligne marquée COLAR (les deux
+     peuvent contenir le même texte ; localStorage garde la priorité après un test
+     de connexion depuis l’écran admin).
+  5. Héberger les HTML en HTTPS (Google Sites « Incorporer », hébergeur, Drive partagé
+     avec bons CORS si besoin) ; éviter d tester en file:// pour les appels fetch.
+
+SIGNATURE / SÉCURITÉ
+  La bannière en tête de api_apps_script.gs rappelle le contexte projet.
+  Ne mettez pas de clé secrète Stripe en clair dans la feuille ; utilisez les
+  Propriétés du script si votre code y fait référence.
+
+Support : relire les blocs commentés en tête de chaque HTML et le début du .gs.

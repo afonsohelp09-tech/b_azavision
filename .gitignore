@@ -1,0 +1,18 @@
+# Système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Fichiers locaux / secrets (ne pas versionner de vraies clés)
+.env
+.env.*
+*.local
+
+# Archives générées localement
+*.zip

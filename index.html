@@ -121,6 +121,16 @@
       color: var(--gold);
     }
 
+    .logo img {
+      max-height: 40px;
+      max-width: 200px;
+      width: auto;
+      height: auto;
+      vertical-align: middle;
+      object-fit: contain;
+      display: inline-block;
+    }
+
     nav {
       display: flex;
       gap: 28px;
@@ -2868,7 +2878,7 @@
        Source canonique : VENTE EN LIGNE TPE/boutique_client.html. Recopier puis ajuster ici si besoin.
        ERP_BOUTIQUE_URL = index.html (racine). Remplacez ERP_ADMIN_URL par l’URL HTTPS du dépôt ADMIN
        (…/index.html). Même URL API Web App (/exec) que l’admin et le script GAS. */
-    window.ERP_API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbztGNP_42KhnEpCQ2UQ4SJJECgbTZlAxaJCtU-0WjKaxiyBDcWdjJEvEFz9VFyg4xOv/exec';
+    window.ERP_API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwUEYjnXoEPzFpZKPN0NQ3HilMYQy4PEpslHyLpSVavcixzlf55Piv8nrAT_NsI441s/exec';
     window.ERP_BOUTIQUE_URL = 'index.html';
     window.ERP_ADMIN_URL = 'https://VOTRE-USER.github.io/VOTRE-REPO-ADMIN/index.html';
   </script>
@@ -2890,7 +2900,7 @@
 -->
   <script>
     // ▼▼▼ COLAR / COLLER LE URL ICI — APENAS NESTA LINHA ▼▼▼
-    var API_URL = 'https://script.google.com/macros/s/AKfycbztGNP_42KhnEpCQ2UQ4SJJECgbTZlAxaJCtU-0WjKaxiyBDcWdjJEvEFz9VFyg4xOv/exec';
+    var API_URL = 'https://script.google.com/macros/s/AKfycbwUEYjnXoEPzFpZKPN0NQ3HilMYQy4PEpslHyLpSVavcixzlf55Piv8nrAT_NsI441s/exec';
     // ▲▲▲ NÃO ALTERAR MAIS NADA AQUI / NE RIEN CHANGER D’AUTRE ICI ▲▲▲
   </script>
   <script>
@@ -5944,6 +5954,25 @@
       annBar.style.display = 'block';
     }
 
+    function escAttr_(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function applyStorefrontLogoMarkup(logoUrl, storeName) {
+      var url = String(logoUrl || '').trim();
+      var nm = String(storeName || 'Loja').trim();
+      window._storeLogoUrl = url;
+      document.querySelectorAll('.logo').forEach(function (el) {
+        if (!el) return;
+        if (url) {
+          el.innerHTML = '<img src="' + escAttr_(url) + '" alt="' + escAttr_(nm) + '" loading="lazy" decoding="async">';
+        } else {
+          var safe = escHtmlB(nm);
+          el.innerHTML = safe + '<span>.</span>';
+        }
+      });
+    }
+
     async function loadStoreDesign() {
       const r = await apiCall('getStoreData');
       if (!r?.success) return;
@@ -5957,11 +5986,12 @@
         }
       }
       syncDocumentHtmlLang();
-      if (r.storeName) {
-        window._footerStoreName = String(r.storeName);
-        document.querySelectorAll('.logo').forEach(el => { el.innerHTML = r.storeName + '<span>.</span>'; });
-        document.title = r.storeName.replace(/\s*\.\s*$/, '') + t('seoTitleSuffix');
+      var sn = r.storeName ? String(r.storeName) : '';
+      if (sn) {
+        window._footerStoreName = sn;
+        document.title = sn.replace(/\s*\.\s*$/, '') + t('seoTitleSuffix');
       }
+      applyStorefrontLogoMarkup(r.logoUrl || '', sn || 'Loja');
       window._storeColorMain = r.colors && r.colors.main;
       window._storeColorAccent = r.colors && r.colors.accent;
       if (r.colors) {

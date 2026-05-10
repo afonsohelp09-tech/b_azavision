@@ -17,7 +17,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" id="canonicalLink" href="">
   <script type="application/ld+json" id="jsonLdStore">{}</script>
-  <title>A minha loja — Moda e acessórios</title>
+  <title>Aza Vision — Moda e acessórios</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet"
@@ -1978,7 +1978,7 @@
     <div class="header-top">
       <div class="logo" onclick="showSection('home')" role="link" tabindex="0"
         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSection('home');}" id="logoHome"
-        aria-label="Início da loja">Moda<span>.</span></div>
+        aria-label="Início da loja">Aza Vision<span>.</span></div>
       <nav id="headerSiteNav" aria-label="Navigation principale">
         <a href="#" onclick="event.preventDefault();showSection('home')" class="active" id="nav-home">Início</a>
         <a href="#" onclick="event.preventDefault();showSection('catalog')" id="nav-catalog">Catálogo</a>
@@ -2881,6 +2881,9 @@
     window.ERP_API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwUEYjnXoEPzFpZKPN0NQ3HilMYQy4PEpslHyLpSVavcixzlf55Piv8nrAT_NsI441s/exec';
     window.ERP_BOUTIQUE_URL = 'index.html';
     window.ERP_ADMIN_URL = 'https://VOTRE-USER.github.io/VOTRE-REPO-ADMIN/index.html';
+    /** Logo fichiers statiques (dossier logo/ à publier avec cette page). Les URLs CONFIG/EMPRESA priment si renseignées. */
+    window.ERP_STOREFRONT_LOGO_STATIC = 'logo/aza-vision-logos3.jpeg';
+    window.ERP_STOREFRONT_BRAND_DEFAULT = 'Aza Vision';
   </script>
   <!--
 ╔══════════════════════════════════════════════════════════════════╗
@@ -5135,7 +5138,13 @@
       try {
         baseUrl = window.location.href.split('#')[0].split('?')[0];
       } catch (e) { }
-      var logo = s.store_logo_url || s.logo_url || '';
+      var logo = '';
+      if (r && r.logoUrl) logo = String(r.logoUrl).trim();
+      if (!logo) logo = String(s.store_logo_url || s.logo_url || '').trim();
+      if (!logo && window._storeLogoUrl) logo = String(window._storeLogoUrl).trim();
+      try {
+        if (logo && !/^https?:\/\//i.test(logo)) logo = new URL(logo, window.location.href).href;
+      } catch (eAbs) { }
       var sameAs = [s.facebook_url || s.social_facebook, s.instagram_url || s.social_instagram, s.twitter_url].filter(Boolean);
       var graph = [
         { '@type': 'Organization', name: name, url: baseUrl || undefined, logo: logo || undefined, sameAs: sameAs.length ? sameAs : undefined },
@@ -5991,7 +6000,10 @@
         window._footerStoreName = sn;
         document.title = sn.replace(/\s*\.\s*$/, '') + t('seoTitleSuffix');
       }
-      applyStorefrontLogoMarkup(r.logoUrl || '', sn || 'Loja');
+      var apiLogo = String(r.logoUrl || '').trim();
+      var staticLogo = (typeof window.ERP_STOREFRONT_LOGO_STATIC === 'string') ? window.ERP_STOREFRONT_LOGO_STATIC.trim() : '';
+      var brandFallback = (typeof window.ERP_STOREFRONT_BRAND_DEFAULT === 'string' && window.ERP_STOREFRONT_BRAND_DEFAULT.trim()) ? window.ERP_STOREFRONT_BRAND_DEFAULT.trim() : 'Loja';
+      applyStorefrontLogoMarkup(apiLogo || staticLogo, sn || brandFallback);
       window._storeColorMain = r.colors && r.colors.main;
       window._storeColorAccent = r.colors && r.colors.accent;
       if (r.colors) {
@@ -6297,6 +6309,11 @@
 
     // --- INIT (DOMContentLoaded : démarre avant images/fonts — vitrine plus réactive) ---
     document.addEventListener('DOMContentLoaded', async () => {
+      (function bootLogoEarly() {
+        var st = (typeof window.ERP_STOREFRONT_LOGO_STATIC === 'string') ? window.ERP_STOREFRONT_LOGO_STATIC.trim() : '';
+        var bd = (typeof window.ERP_STOREFRONT_BRAND_DEFAULT === 'string' && window.ERP_STOREFRONT_BRAND_DEFAULT.trim()) ? window.ERP_STOREFRONT_BRAND_DEFAULT.trim() : '';
+        if (st && typeof applyStorefrontLogoMarkup === 'function') applyStorefrontLogoMarkup(st, bd || 'Loja');
+      })();
       await loadStoreDesign();
       loadFeatured();
       document.querySelectorAll('.lang-btn').forEach(b => {
@@ -6407,7 +6424,7 @@
     <div class="mobile-drawer-overlay" onclick="closeMobileDrawer()"></div>
     <div class="mobile-drawer-panel">
       <div class="mobile-drawer-header">
-        <div class="logo" onclick="showSection('home'); closeMobileDrawer();">Moda<span>.</span></div>
+        <div class="logo" onclick="showSection('home'); closeMobileDrawer();">Aza Vision<span>.</span></div>
         <button type="button" class="mobile-drawer-close" onclick="closeMobileDrawer()">×</button>
       </div>
       <ul class="mobile-nav-list">

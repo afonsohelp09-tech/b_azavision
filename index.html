@@ -3979,27 +3979,39 @@
 
     // --- PRODUCTS ---
     async function loadFeatured() {
-      const raw = await apiCall('getProducts', { page: 1, pageSize: 120, sort: 'date_desc' });
+      const [raw, catApi] = await Promise.all([
+        apiCall('getProducts', { page: 1, pageSize: 48, sort: 'date_desc' }),
+        apiCall('getCategories', {}).catch(function () { return null; })
+      ]);
       const norm = normalizeProductsResponse(raw);
       const products = norm.products || [];
       if (!products.length) return;
       allProducts = products;
       renderProductGrid(products.slice(0, 8), 'featuredGrid', 'home');
-      loadHomeCategoryGrid();
+      loadHomeCategoryGrid(Array.isArray(catApi) && catApi.length ? catApi : null);
       loadHomeNewArrivals();
     }
 
-    function loadHomeCategoryGrid() {
-      var cats = [...new Set((allProducts || []).map(function (p) { return p.categoria || p.category; }).filter(Boolean))];
+    function loadHomeCategoryGrid(optionalCatApi) {
+      var cats = [];
+      if (Array.isArray(optionalCatApi) && optionalCatApi.length) {
+        cats = optionalCatApi.map(function (c) { return c.nome || c.name || c.category_id; }).filter(Boolean);
+      }
+      if (!cats.length) {
+        cats = [...new Set((allProducts || []).map(function (p) { return p.categoria || p.category; }).filter(Boolean))];
+      }
       var grid = document.getElementById('homeCategoryGrid');
       if (!grid || !cats.length) return;
       var catColors = ['#6c63ff', '#ff6584', '#00d4a0', '#ff9f43', '#4ecdc4', '#8b5cf6'];
       grid.innerHTML = cats.slice(0, 8).map(function (cat, i) {
-        var count = allProducts.filter(function (p) { return (p.categoria || p.category) === cat; }).length;
+        var count = (allProducts || []).filter(function (p) { return (p.categoria || p.category) === cat; }).length;
         var bg = catColors[i % catColors.length];
+        var sub = count > 0
+          ? '<div style="font-size:12px;opacity:.8;margin-top:4px;">' + count + ' produits</div>'
+          : '';
         return '<div onclick="setCategory(\'' + cat.replace(/'/g, "\\'") + '\')" style="background:' + bg + ';color:#fff;border-radius:14px;padding:24px 16px;text-align:center;cursor:pointer;transition:transform .2s;min-height:100px;display:flex;flex-direction:column;justify-content:center;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">' +
           '<div style="font-size:18px;font-weight:700;">' + cat + '</div>' +
-          '<div style="font-size:12px;opacity:.8;margin-top:4px;">' + count + ' produits</div>' +
+          sub +
           '</div>';
       }).join('');
     }
@@ -6362,8 +6374,7 @@
         var bd = (typeof window.ERP_STOREFRONT_BRAND_DEFAULT === 'string' && window.ERP_STOREFRONT_BRAND_DEFAULT.trim()) ? window.ERP_STOREFRONT_BRAND_DEFAULT.trim() : '';
         if (st && /^https?:\/\//i.test(st) && typeof applyStorefrontLogoMarkup === 'function') applyStorefrontLogoMarkup(st, bd || 'Loja');
       })();
-      await loadStoreDesign();
-      loadFeatured();
+      await Promise.all([loadStoreDesign(), loadFeatured()]);
       document.querySelectorAll('.lang-btn').forEach(b => {
         b.classList.toggle('active', b.textContent.trim().toLowerCase() === lang);
       });

@@ -1151,6 +1151,218 @@
       display: block;
     }
 
+    /* Panneaux latéraux — contact & newsletter (alignés sur l’expérience “drawer” pro) */
+    .storefront-panel-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 320;
+      background: rgba(12, 12, 14, 0.48);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+
+    .storefront-panel-overlay.open {
+      display: flex;
+    }
+
+    .storefront-side-panel {
+      width: min(428px, 100vw);
+      max-width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--white);
+      box-shadow: -16px 0 56px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(104%);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .storefront-panel-overlay.open .storefront-side-panel {
+      transform: translateX(0);
+    }
+
+    .storefront-panel-head {
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 22px 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--light, #f9f9f9) 0%, var(--white) 70%);
+    }
+
+    .storefront-panel-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin: 0 0 6px;
+    }
+
+    .storefront-panel-title {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 0;
+      line-height: 1.25;
+      color: var(--text);
+    }
+
+    .storefront-panel-sub {
+      font-size: 13px;
+      color: var(--gray);
+      margin: 10px 0 0;
+      line-height: 1.5;
+      max-width: 36ch;
+    }
+
+    .storefront-panel-close {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .storefront-panel-close:hover {
+      background: var(--light);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .storefront-panel-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 22px 28px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .storefront-panel-foot {
+      flex-shrink: 0;
+      padding: 16px 22px calc(18px + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid var(--border);
+      background: var(--white);
+    }
+
+    .contact-store-card {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--light, #f7f7f8);
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+
+    .contact-form-heading {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 14px;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .storefront-panel-scroll .contact-field {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .storefront-panel-scroll .contact-field:focus {
+      border-color: var(--gold, #c9a962);
+      box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.18);
+    }
+
+    .nl-side-panel .nl-panel-visual {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(140deg, var(--primary, #1a1a1a), #3d3d42);
+      color: var(--on-primary, #fff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .nl-side-panel .nl-panel-lead {
+      font-size: 15px;
+      color: var(--gray);
+      line-height: 1.55;
+      margin: 0 0 22px;
+    }
+
+    .nl-side-panel input[type=email] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      margin-bottom: 12px;
+      font-family: var(--font-sans);
+      outline: none;
+    }
+
+    .nl-side-panel input[type=email]:focus {
+      border-color: var(--gold, #c9a962);
+      box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.18);
+    }
+
+    .nl-side-panel .btn-nl {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--primary, #1a1a1a);
+      color: var(--on-primary, #fff);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .nl-side-panel .btn-nl:hover {
+      opacity: 0.93;
+    }
+
+    .nl-side-panel .nl-skip {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px;
+      font-size: 13px;
+      color: var(--gray);
+      cursor: pointer;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     /* MODALS */
     .modal-wrap {
       display: none;
@@ -1784,89 +1996,6 @@
     .color-opt.selected {
       border-color: var(--primary, #1a1a1a);
       box-shadow: 0 0 0 2px var(--primary, #1a1a1a);
-    }
-
-    /* NEWSLETTER POPUP */
-    .nl-popup-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .6);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn .3s;
-    }
-
-    .nl-popup {
-      background: var(--white, #fff);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 440px;
-      width: 90%;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
-    }
-
-    .nl-popup h2 {
-      font-family: var(--font-serif, Georgia, serif);
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .nl-popup p {
-      font-size: 14px;
-      color: var(--gray, #888);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    .nl-popup input[type=email] {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid var(--border-color, #ddd);
-      border-radius: 10px;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-
-    .nl-popup .btn-nl {
-      width: 100%;
-      padding: 14px;
-      background: var(--primary, #1a1a1a);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .nl-popup .btn-nl:hover {
-      opacity: .9;
-    }
-
-    .nl-popup .nl-close {
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: var(--gray, #888);
-    }
-
-    .nl-popup .nl-skip {
-      display: block;
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--gray, #888);
-      cursor: pointer;
-      background: none;
-      border: none;
-      text-decoration: underline;
     }
 
     /* PRODUCT COMPARISON */
@@ -2918,33 +3047,50 @@
     </div>
   </div>
 
-  <div class="modal-wrap" id="contactModal">
-    <div class="modal-box" style="max-width:520px;">
-      <h2 style="margin-bottom:8px;" id="contactModalTitle">Contacto</h2>
-      <p style="font-size:13px; color:var(--gray); margin-bottom:20px;" id="contactModalSub">Informações da loja (dados
-        da empresa no painel admin).</p>
-      <div id="contactModalBody" style="font-size:14px; line-height:1.7; color:var(--text);">
-        <p id="contactNome" style="font-weight:600;"></p>
-        <div id="contactLinhas"></div>
+  <div class="storefront-panel-overlay" id="contactModal" role="dialog" aria-modal="true"
+    aria-labelledby="contactModalTitle"
+    onclick="if(event.target===this)closeModal('contactModal')">
+    <div class="storefront-side-panel contact-side-panel" role="document">
+      <div class="storefront-panel-head">
+        <div class="storefront-panel-head-text">
+          <p class="storefront-panel-kicker" id="contactPanelKicker">Service client</p>
+          <h2 id="contactModalTitle" class="storefront-panel-title">Contacto</h2>
+          <p class="storefront-panel-sub" id="contactModalSub">Informações da loja (dados da empresa no painel admin).</p>
+        </div>
+        <button type="button" class="storefront-panel-close" onclick="closeModal('contactModal')">×</button>
       </div>
-      <div style="border-top:1px solid var(--border-color,#eee);margin-top:20px;padding-top:20px;">
-        <h3 style="font-size:16px;margin-bottom:12px;" id="contactFormTitle">Envoyez-nous un message</h3>
-        <div class="form-group" style="margin-bottom:12px;"><input type="text" id="contactFormName"
-            placeholder="Votre nom"
-            style="width:100%;padding:10px 14px;border:1px solid var(--border-color,#ddd);border-radius:8px;font-size:14px;">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;"><input type="email" id="contactFormEmail"
-            placeholder="Votre email"
-            style="width:100%;padding:10px 14px;border:1px solid var(--border-color,#ddd);border-radius:8px;font-size:14px;">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;"><textarea id="contactFormMsg" rows="4"
-            placeholder="Votre message..."
-            style="width:100%;padding:10px 14px;border:1px solid var(--border-color,#ddd);border-radius:8px;font-size:14px;resize:vertical;"></textarea>
-        </div>
-        <button class="btn btn-dark" style="width:100%;" id="contactFormSendBtn" onclick="submitContactForm()">📨 Envoyer</button>
+      <div class="storefront-panel-scroll">
+        <section class="contact-store-card" aria-label="Coordonnées">
+          <div id="contactModalBody">
+            <p id="contactNome" style="font-weight:600;margin-bottom:8px;"></p>
+            <div id="contactLinhas"></div>
+          </div>
+        </section>
+        <section class="contact-form-card" aria-label="Formulaire">
+          <h3 class="contact-form-heading" id="contactFormTitle">Envoyez-nous un message</h3>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="contactFormName" style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--gray);"
+              id="contactLblName">Nome</label>
+            <input type="text" id="contactFormName" class="contact-field" autocomplete="name">
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="contactFormEmail" style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--gray);"
+              id="contactLblEmail">E-mail</label>
+            <input type="email" id="contactFormEmail" class="contact-field" autocomplete="email">
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label for="contactFormMsg" style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--gray);"
+              id="contactLblMsg">Mensagem</label>
+            <textarea id="contactFormMsg" class="contact-field" rows="5" style="resize:vertical;min-height:120px;"></textarea>
+          </div>
+          <button type="button" class="btn btn-dark" style="width:100%;padding:14px;border-radius:10px;font-weight:600;"
+            id="contactFormSendBtn" onclick="submitContactForm()">📨 Envoyer</button>
+        </section>
       </div>
-      <button class="btn btn-outline" style="width:100%; margin-top:12px;" id="contactModalCloseBtn"
-        onclick="closeModal('contactModal')">Fechar</button>
+      <div class="storefront-panel-foot">
+        <button type="button" class="btn btn-outline" style="width:100%;padding:12px;border-radius:10px;"
+          id="contactModalCloseBtn" onclick="closeModal('contactModal')">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -3071,6 +3217,11 @@
         cookieToastReject: 'Cookies recusados — apenas cookies essenciais.',
         cookiePrefsMsg: 'Apenas cookies essenciais?\n\nOK = Recusar os restantes\nCancelar = Aceitar todos',
         contactFormTitle: 'Envie-nos uma mensagem',
+        contactPanelKicker: 'Serviço ao cliente',
+        nlPanelKicker: 'Newsletter · Ofertas exclusivas',
+        contactLblName: 'Nome',
+        contactLblEmail: 'E-mail',
+        contactLblMsg: 'Mensagem',
         contactFormNamePh: 'O seu nome',
         contactFormEmailPh: 'O seu e-mail',
         contactFormMsgPh: 'A sua mensagem…',
@@ -3142,6 +3293,11 @@
         cookieToastReject: 'Cookies refusés — uniquement les cookies essentiels.',
         cookiePrefsMsg: 'Cookies essentiels uniquement ?\n\nOK = Refuser les autres\nAnnuler = Tout accepter',
         contactFormTitle: 'Envoyez-nous un message',
+        contactPanelKicker: 'Service client',
+        nlPanelKicker: 'Newsletter · Offres exclusives',
+        contactLblName: 'Nom',
+        contactLblEmail: 'E-mail',
+        contactLblMsg: 'Message',
         contactFormNamePh: 'Votre nom',
         contactFormEmailPh: 'Votre e-mail',
         contactFormMsgPh: 'Votre message…',
@@ -3213,6 +3369,11 @@
         cookieToastReject: 'Cookies declined — essential only.',
         cookiePrefsMsg: 'Essential cookies only?\n\nOK = Decline non-essential\nCancel = Accept all',
         contactFormTitle: 'Send us a message',
+        contactPanelKicker: 'Customer care',
+        nlPanelKicker: 'Newsletter · Exclusive offers',
+        contactLblName: 'Name',
+        contactLblEmail: 'Email',
+        contactLblMsg: 'Message',
         contactFormNamePh: 'Your name',
         contactFormEmailPh: 'Your email',
         contactFormMsgPh: 'Your message…',
@@ -3284,6 +3445,11 @@
         cookieToastReject: 'Cookies rechazadas — solo esenciales.',
         cookiePrefsMsg: '¿Solo cookies esenciales?\n\nOK = Rechazar el resto\nCancelar = Aceptar todas',
         contactFormTitle: 'Envíenos un mensaje',
+        contactPanelKicker: 'Atención al cliente',
+        nlPanelKicker: 'Newsletter · Ofertas exclusivas',
+        contactLblName: 'Nombre',
+        contactLblEmail: 'Correo electrónico',
+        contactLblMsg: 'Mensaje',
         contactFormNamePh: 'Su nombre',
         contactFormEmailPh: 'Su correo electrónico',
         contactFormMsgPh: 'Su mensaje…',
@@ -3472,6 +3638,26 @@
       if (cfs) cfs.textContent = t('contactSendBtn');
       var cfc = document.getElementById('contactModalCloseBtn');
       if (cfc) cfc.textContent = t('contactCloseBtn');
+      var cpk = document.getElementById('contactPanelKicker');
+      if (cpk) cpk.textContent = t('contactPanelKicker');
+      var cln = document.getElementById('contactLblName');
+      if (cln) cln.textContent = t('contactLblName');
+      var cle = document.getElementById('contactLblEmail');
+      if (cle) cle.textContent = t('contactLblEmail');
+      var clm = document.getElementById('contactLblMsg');
+      if (clm) clm.textContent = t('contactLblMsg');
+      var cmo = document.getElementById('contactModal');
+      if (cmo) cmo.setAttribute('aria-label', t('contactTitle'));
+      var cheadX = document.querySelector('#contactModal .storefront-panel-head .storefront-panel-close');
+      if (cheadX) cheadX.setAttribute('aria-label', t('ariaClose'));
+      var nlk = document.getElementById('nlPanelKicker');
+      if (nlk) nlk.textContent = t('nlPanelKicker');
+      var nlel = document.getElementById('nlPopupEmailLbl');
+      if (nlel) nlel.textContent = t('contactLblEmail');
+      var nlcb = document.getElementById('nlPanelCloseBtn');
+      if (nlcb) nlcb.setAttribute('aria-label', t('ariaClose'));
+      var nlov = document.getElementById('nlPopupOverlay');
+      if (nlov) nlov.setAttribute('aria-label', t('nlTitle'));
       var cav = document.getElementById('cookieBtnAccept');
       if (cav) cav.textContent = t('cookieBtnAccept');
       var crj = document.getElementById('cookieBtnReject');
@@ -3564,7 +3750,7 @@
     }
 
     function updateTranslations() {
-      const els = { t_back: 'back', t_size: 'size', t_color: 'color', t_qty: 'qty', t_wishlist: 'wishlist', addCartBtn: 'addCart', 'nav-home': 'navHome', 'nav-catalog': 'navCatalog', 'nav-promo': 'navPromo', 'nav-contact': 'navContact', 'heroSub': 'heroSub', contactModalTitle: 'contactTitle', contactModalSub: 'contactSub', nlTitle: 'nlTitle', nlSub: 'nlSub', nlBtn: 'nlBtn', 'checkoutHeroTitle': 'checkoutTitle', 'chkDeliveryTitle': 'deliveryTitle', 'chkPaymentTitle': 'paymentTitle', 'chkSummaryTitle': 'summaryTitle', 'cartHeaderTitleText': 'cartTitle', 'btnContinueShop': 'continueShop', 'btnGoCheckout': 'cartGoCheckout', 'btnPlaceOrder': 'btnConfirm', 'catalogPageTitle': 'catalogTitle', 'featuredSub': 'featuredSub', 'heroBtn1': 'collectionBtn', 'heroBtn2': 'newBtn', 'lblTotalCheckout': 'lblTotalCheckout', 'shipModalTitle': 'shipHelpTitle', 'brandsModalTitle': 'brandsHelpTitle', 'footerColShopTitle': 'footerShop', 'footerColAccountTitle': 'footerAccount', 'footerColHelpTitle': 'footerHelp', 'footerLinkLogin': 'footerLogin', 'footerLinkOrders': 'footerMyOrders', 'footerLinkWishlist': 'footerWishlist', 'footerLinkNews': 'footerNews', 'footerAdminLink': 'footerAdmin', 'wishlistModalTitle': 'wishlistModalTitle', 'sizeGuideModalTitle': 'sizeGuideTitle', 'accountPageTitle': 'accTitle', 'accNavProfile': 'accProfile', 'accNavOrders': 'accOrders', 'accNavAddr': 'accAddresses', 'accNavWishlist': 'wishlist', 'wishlistModalOk': 'modalOk', 'sizeGuideModalOk': 'modalOk', shipModalOkBtn: 'modalOk', brandsModalOkBtn: 'modalOk', homeCatTitle: 'homeCatTitle', homeNewTitle: 'homeNewTitle', homeNewSub: 'homeNewSub', homeTestTitle: 'homeTestTitle', homeCTATitle: 'homeCTATitle', homeCTASub: 'homeCTASub', homeCTABtn: 'homeCTABtn', homeTest1: 'homeTest1', homeTest2: 'homeTest2', homeTest3: 'homeTest3', skipLinkMain: 'skipLink', chkStepLabel1: 'chkStepIdent', chkStepLabel2: 'chkStepAddr', chkStepLabel3: 'chkStepShip', chkStepLabel4: 'chkStepPay', chkAddrTitle: 'chkAddrTitle', chkShipMethodTitle: 'chkShipMethodTitle', chkShipMethodHint: 'chkShipMethodHint', lblSavedAddresses: 'lblSavedAddresses', trackingPageTitle: 'trackingPageTitle', trackingPageSub: 'trackingPageSub', btnTrackOrder: 'btnTrackOrder', similarProductsTitle: 'similarTitle', reviewFormTitle: 'reviewsTitle', reviewFormSubtitle: 'reviewSubmitTitle', btnSubmitReview: 'reviewSubmit', accNavLoyalty: 'accLoyalty', btnChkNext1: 'btnNext', btnChkNext2: 'btnNext', btnChkNext3: 'btnNext', btnChkPrev2: 'btnPrev', btnChkPrev3: 'btnPrev', btnChkPrev4: 'btnPrev', compareOpenBtn: 'compareBtn', compareClearBtn: 'compareClear', detailDescHeading: 'detailDescHeading' };
+      const els = { t_back: 'back', t_size: 'size', t_color: 'color', t_qty: 'qty', t_wishlist: 'wishlist', addCartBtn: 'addCart', 'nav-home': 'navHome', 'nav-catalog': 'navCatalog', 'nav-promo': 'navPromo', 'nav-contact': 'navContact', 'heroSub': 'heroSub', contactModalTitle: 'contactTitle', contactModalSub: 'contactModalAdminHint', nlTitle: 'nlTitle', nlSub: 'nlSub', nlBtn: 'nlBtn', 'checkoutHeroTitle': 'checkoutTitle', 'chkDeliveryTitle': 'deliveryTitle', 'chkPaymentTitle': 'paymentTitle', 'chkSummaryTitle': 'summaryTitle', 'cartHeaderTitleText': 'cartTitle', 'btnContinueShop': 'continueShop', 'btnGoCheckout': 'cartGoCheckout', 'btnPlaceOrder': 'btnConfirm', 'catalogPageTitle': 'catalogTitle', 'featuredSub': 'featuredSub', 'heroBtn1': 'collectionBtn', 'heroBtn2': 'newBtn', 'lblTotalCheckout': 'lblTotalCheckout', 'shipModalTitle': 'shipHelpTitle', 'brandsModalTitle': 'brandsHelpTitle', 'footerColShopTitle': 'footerShop', 'footerColAccountTitle': 'footerAccount', 'footerColHelpTitle': 'footerHelp', 'footerLinkLogin': 'footerLogin', 'footerLinkOrders': 'footerMyOrders', 'footerLinkWishlist': 'footerWishlist', 'footerLinkNews': 'footerNews', 'footerAdminLink': 'footerAdmin', 'wishlistModalTitle': 'wishlistModalTitle', 'sizeGuideModalTitle': 'sizeGuideTitle', 'accountPageTitle': 'accTitle', 'accNavProfile': 'accProfile', 'accNavOrders': 'accOrders', 'accNavAddr': 'accAddresses', 'accNavWishlist': 'wishlist', 'wishlistModalOk': 'modalOk', 'sizeGuideModalOk': 'modalOk', shipModalOkBtn: 'modalOk', brandsModalOkBtn: 'modalOk', homeCatTitle: 'homeCatTitle', homeNewTitle: 'homeNewTitle', homeNewSub: 'homeNewSub', homeTestTitle: 'homeTestTitle', homeCTATitle: 'homeCTATitle', homeCTASub: 'homeCTASub', homeCTABtn: 'homeCTABtn', homeTest1: 'homeTest1', homeTest2: 'homeTest2', homeTest3: 'homeTest3', skipLinkMain: 'skipLink', chkStepLabel1: 'chkStepIdent', chkStepLabel2: 'chkStepAddr', chkStepLabel3: 'chkStepShip', chkStepLabel4: 'chkStepPay', chkAddrTitle: 'chkAddrTitle', chkShipMethodTitle: 'chkShipMethodTitle', chkShipMethodHint: 'chkShipMethodHint', lblSavedAddresses: 'lblSavedAddresses', trackingPageTitle: 'trackingPageTitle', trackingPageSub: 'trackingPageSub', btnTrackOrder: 'btnTrackOrder', similarProductsTitle: 'similarTitle', reviewFormTitle: 'reviewsTitle', reviewFormSubtitle: 'reviewSubmitTitle', btnSubmitReview: 'reviewSubmit', accNavLoyalty: 'accLoyalty', btnChkNext1: 'btnNext', btnChkNext2: 'btnNext', btnChkNext3: 'btnNext', btnChkPrev2: 'btnPrev', btnChkPrev3: 'btnPrev', btnChkPrev4: 'btnPrev', compareOpenBtn: 'compareBtn', compareClearBtn: 'compareClear', detailDescHeading: 'detailDescHeading' };
       Object.entries(els).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
       var stripeSubBtn = document.getElementById('stripeSubmitBtn');
       var stripeCanBtn = document.getElementById('stripeCancelBtn');
@@ -4037,6 +4223,13 @@
         linhas.innerHTML = '<div style="color:var(--gray);">Configure os dados da empresa no painel admin (Configurações).</div>';
       }
       updateTranslations();
+      setTimeout(function () {
+        var n = document.getElementById('contactFormName');
+        if (n) {
+          n.focus();
+          try { n.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e0) { }
+        }
+      }, 400);
     }
 
     function isValidEmailForNewsletter_(s) {
@@ -5345,7 +5538,7 @@
       var main = document.getElementById('main-content');
       if (main) main.setAttribute('aria-hidden', 'true');
       setTimeout(function () {
-        var box = el.querySelector('.modal-box') || el;
+        var box = el.querySelector('.storefront-side-panel') || el.querySelector('.modal-box') || el;
         var f = box.querySelector('button:not([disabled]), input:not([disabled]), [href], select:not([disabled]), textarea:not([disabled])');
         if (f) f.focus();
       }, 0);
@@ -5424,7 +5617,9 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
           var nl = document.getElementById('nlPopupOverlay');
-          if (nl && nl.style.display === 'flex') { closeNlPopup(); e.preventDefault(); return; }
+          if (nl && nl.classList.contains('open')) { closeNlPopup(); e.preventDefault(); return; }
+          var cdm = document.getElementById('contactModal');
+          if (cdm && cdm.classList.contains('open')) { closeModal('contactModal'); e.preventDefault(); return; }
           var md = document.getElementById('mobileDrawer');
           if (md && md.classList.contains('open')) { closeMobileDrawer(); e.preventDefault(); return; }
           var cart = document.getElementById('cartSidebar');
@@ -5434,9 +5629,21 @@
           return;
         }
         if (e.key !== 'Tab') return;
-        var mod = document.querySelector('.modal-wrap.open');
-        if (!mod) return;
-        var box = mod.querySelector('.modal-box') || mod;
+        var nlOv = document.getElementById('nlPopupOverlay');
+        var cOv = document.getElementById('contactModal');
+        var mod = null;
+        var box = null;
+        if (nlOv && nlOv.classList.contains('open')) {
+          mod = nlOv;
+          box = nlOv.querySelector('.storefront-side-panel');
+        } else if (cOv && cOv.classList.contains('open')) {
+          mod = cOv;
+          box = cOv.querySelector('.storefront-side-panel');
+        } else {
+          mod = document.querySelector('.modal-wrap.open');
+          if (mod) box = mod.querySelector('.modal-box') || mod;
+        }
+        if (!mod || !box) return;
         var sel = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
         var nodes = Array.prototype.slice.call(box.querySelectorAll(sel)).filter(function (n) {
           return n.offsetParent !== null || (n.getClientRects && n.getClientRects().length);
@@ -5527,13 +5734,14 @@
     async function openLiveChatFromWidget(ev) {
       if (ev) ev.stopPropagation();
       closeContactWidget();
-      var email = prompt(t('widgetChatEmailPrompt'), '');
-      if (!email || !String(email).trim()) return;
-      var msg = prompt(t('widgetChatMsgPrompt'), '');
-      if (!msg || !String(msg).trim()) return;
-      var r = await apiCall('sendContactMessage', { name: 'Widget chat', email: String(email).trim(), message: '[Chat vitrine] ' + String(msg).trim() });
-      if (r && r.success) toast(t('widgetChatThanks'), 'success');
-      else toast((r && r.error) ? r.error : 'Erro', 'error');
+      await openContactModal();
+      setTimeout(function () {
+        var ta = document.getElementById('contactFormMsg');
+        if (ta) {
+          ta.focus();
+          try { ta.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e1) { }
+        }
+      }, 400);
     }
 
     document.addEventListener('click', function (e) {
@@ -6439,7 +6647,7 @@
         var overlay = document.getElementById('nlPopupOverlay');
         if (overlay) {
           window._focusBeforeNlPopup = document.activeElement;
-          overlay.style.display = 'flex';
+          overlay.classList.add('open');
           var main = document.getElementById('main-content');
           if (main) main.setAttribute('aria-hidden', 'true');
           setTimeout(function () {
@@ -6452,7 +6660,7 @@
 
     function closeNlPopup() {
       var overlay = document.getElementById('nlPopupOverlay');
-      if (overlay) overlay.style.display = 'none';
+      if (overlay) overlay.classList.remove('open');
       localStorage.setItem('nl_popup_dismissed', Date.now());
       var main = document.getElementById('main-content');
       if (main) main.removeAttribute('aria-hidden');
@@ -6772,17 +6980,27 @@
   </div>
 
   <!-- Newsletter Popup -->
-  <div id="nlPopupOverlay" class="nl-popup-overlay" style="display:none;" role="dialog" aria-modal="true"
+  <!-- Newsletter — panneau latéral -->
+  <div id="nlPopupOverlay" class="storefront-panel-overlay nl-panel-overlay" role="dialog" aria-modal="true"
     aria-labelledby="nlPopupTitle" onclick="if(event.target===this)closeNlPopup()">
-    <div class="nl-popup">
-      <button class="nl-close" onclick="closeNlPopup()">×</button>
-      <div style="font-size:40px;margin-bottom:12px;">✉️</div>
-      <h2 id="nlPopupTitle">Restez informé(e) !</h2>
-      <p id="nlPopupText">Inscrivez-vous à notre newsletter et recevez <strong>10% de réduction</strong> sur votre
-        première commande.</p>
-      <input type="email" id="nlPopupEmail" placeholder="Votre adresse email">
-      <button class="btn-nl" onclick="submitNlPopup()" id="nlPopupBtn">S'inscrire</button>
-      <button class="nl-skip" onclick="closeNlPopup()" id="nlPopupSkip">Non merci</button>
+    <div class="storefront-side-panel nl-side-panel" role="document">
+      <div class="storefront-panel-head">
+        <div>
+          <p class="storefront-panel-kicker" id="nlPanelKicker">Newsletter</p>
+          <h2 id="nlPopupTitle" class="storefront-panel-title">Restez informé(e) !</h2>
+        </div>
+        <button type="button" class="storefront-panel-close" id="nlPanelCloseBtn" onclick="closeNlPopup()">×</button>
+      </div>
+      <div class="storefront-panel-scroll">
+        <div class="nl-panel-visual" aria-hidden="true">✉️</div>
+        <p id="nlPopupText" class="nl-panel-lead">Inscrivez-vous à notre newsletter et recevez <strong>10% de réduction</strong> sur votre
+          première commande.</p>
+        <label for="nlPopupEmail" class="visually-hidden" id="nlPopupEmailLbl">Email</label>
+        <input type="email" id="nlPopupEmail" placeholder="Votre adresse email" autocomplete="email"
+          aria-labelledby="nlPopupEmailLbl">
+        <button type="button" class="btn-nl" onclick="submitNlPopup()" id="nlPopupBtn">S'inscrire</button>
+        <button type="button" class="nl-skip" onclick="closeNlPopup()" id="nlPopupSkip">Non merci</button>
+      </div>
     </div>
   </div>
 

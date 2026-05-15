@@ -3258,6 +3258,9 @@
         detailSizeUnique: 'Tamanho único',
         detailColorUnique: 'Cor única',
         badgeMadeToOrder: 'Peça feita por encomenda — o stock do ERP é apenas informativo.',
+        prodLeadHint: '~{days} dias (previsto até {date}). Indicativo — o estado da encomenda confirma a evolução.',
+        prodStockTrackedBadge: 'Com stock ERP (quantidades reais)',
+        trackFldEta: 'Entrega indicativa até',
         variantNoPhotoForChoice: 'Sem foto específica para esta combinação: é mostrada uma imagem de outra variante ou do artigo.',
         cookieBtnAccept: 'Aceitar',
         cookieAcceptToast: 'Cookies aceites.',
@@ -3334,6 +3337,9 @@
         detailSizeUnique: 'Taille unique',
         detailColorUnique: 'Couleur unique',
         badgeMadeToOrder: 'Article fabriqué sur commande — le stock dans l’ERP est indicatif.',
+        prodLeadHint: '~{days} jours (jusqu’au {date} env.). Indicatif — suivez l’état de la commande.',
+        prodStockTrackedBadge: 'Stock ERP (quantités suivies)',
+        trackFldEta: 'Livraison indiquée jusqu’au',
         variantNoPhotoForChoice: 'Pas de visuel pour cette taille / couleur : photo issue d’une autre variante ou de l’article.',
         cookieBtnAccept: 'Accepter',
         cookieAcceptToast: 'Cookies acceptés.',
@@ -3410,6 +3416,9 @@
         detailSizeUnique: 'One size',
         detailColorUnique: 'One colour',
         badgeMadeToOrder: 'Made to order — ERP stock is for reference only.',
+        prodLeadHint: '~{days} days (around {date}). Indicative — use order tracking for updates.',
+        prodStockTrackedBadge: 'Stock tracked',
+        trackFldEta: 'Estimated arrival by',
         variantNoPhotoForChoice: 'No photo for this size/colour: showing another variant or main product image.',
         cookieBtnAccept: 'Accept',
         cookieAcceptToast: 'Cookies accepted.',
@@ -3486,6 +3495,9 @@
         detailSizeUnique: 'Talla única',
         detailColorUnique: 'Color único',
         badgeMadeToOrder: 'Artículo bajo pedido — el stock en el ERP es orientativo.',
+        prodLeadHint: '~{days} días (previsto hasta {date}). Orientativo — vea el estado del pedido.',
+        prodStockTrackedBadge: 'Stock en ERP controlado',
+        trackFldEta: 'Entrega indicativa antes del',
         variantNoPhotoForChoice: 'Sin foto para esta talla / color: se muestra otra variante o la imagen principal.',
         cookieBtnAccept: 'Aceptar',
         cookieAcceptToast: 'Cookies aceptadas.',
@@ -4019,6 +4031,16 @@
       }
     }
 
+    function formatOrderEtaCustomer(iso) {
+      var s = String(iso || '').trim();
+      if (!s) return '';
+      var d = new Date(s.indexOf('T') === -1 ? s + 'T12:00:00' : s);
+      if (isNaN(d.getTime())) return s;
+      var locShop = (typeof shopLang === 'string' && shopLang) ? shopLang : (typeof lang !== 'undefined' ? lang : 'pt');
+      var localeMap = { pt: 'pt-PT', fr: 'fr-FR', en: 'en-GB', es: 'es-ES' };
+      return d.toLocaleDateString(localeMap[locShop] || 'pt-PT', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
     async function trackGuestOrder() {
       var inp = document.getElementById('trackOrderIdInput');
       var id = inp && inp.value.trim();
@@ -4046,6 +4068,7 @@
           '<div><strong>' + t('trackFldDate') + ':</strong> ' + (o.data || '-') + '</div>' +
           '<div><strong>' + t('trackFldTotal') + ':</strong> €' + (o.total || '0') + '</div>' +
           '<div><strong>' + t('trackFldStatus') + ':</strong> <span style="font-weight:700;color:' + getTrackStatusColor(o.status || o.estado) + ';">' + (o.status || o.estado || '-') + '</span></div>' +
+          (o.entrega_prevista ? '<div style="grid-column:1/-1;"><strong>' + t('trackFldEta') + ':</strong> ' + formatOrderEtaCustomer(o.entrega_prevista) + '</div>' : '') +
           (o.tracking_code ? '<div><strong>' + t('trackFldTracking') + ':</strong> ' + o.tracking_code + '</div>' : '') +
           (o.transporteur || o.carrier ? '<div><strong>' + t('trackFldCarrier') + ':</strong> ' + (o.transporteur || o.carrier) + '</div>' : '') +
           '</div>';
@@ -4674,9 +4697,32 @@
       var sch0 = document.getElementById('detailSurCommandeHint');
       if (sch0) {
         var cfg0 = window.storeSettings || {};
-        var mto0 = cfg0.boutique_sur_commande === '1' || cfg0.boutique_sur_commande === 'true' || cfg0.boutique_sur_commande === true;
-        sch0.style.display = mto0 ? 'block' : 'none';
-        sch0.textContent = mto0 ? t('badgeMadeToOrder') : '';
+        var globalMto = cfg0.boutique_sur_commande === '1' || cfg0.boutique_sur_commande === 'true' || cfg0.boutique_sur_commande === true;
+        var useStock = (typeof currentProduct.stock_management === 'boolean')
+          ? currentProduct.stock_management
+          : !globalMto;
+        if (!useStock) {
+          sch0.style.display = 'block';
+          var daysLead = parseInt(String(currentProduct.prazo_entrega_dias != null ? currentProduct.prazo_entrega_dias : '').trim(), 10);
+          var line = t('badgeMadeToOrder');
+          if (!isNaN(daysLead) && daysLead > 0) {
+            var approx = new Date();
+            approx.setHours(12, 0, 0, 0);
+            approx.setDate(approx.getDate() + daysLead);
+            var locShop = (typeof shopLang === 'string' && shopLang) ? shopLang : (typeof lang !== 'undefined' ? lang : 'pt');
+            var localeMap = { pt: 'pt-PT', fr: 'fr-FR', en: 'en-GB', es: 'es-ES' };
+            var localeStr = localeMap[locShop] || 'pt-PT';
+            var dateStr = approx.toLocaleDateString(localeStr, { year: 'numeric', month: 'short', day: 'numeric' });
+            line = t('prodLeadHint').replace(/\{days\}/g, String(daysLead)).replace(/\{date\}/g, dateStr);
+          }
+          sch0.textContent = line;
+        } else if (globalMto) {
+          sch0.style.display = 'block';
+          sch0.textContent = t('badgeMadeToOrder');
+        } else {
+          sch0.style.display = 'none';
+          sch0.textContent = '';
+        }
       }
       updateSeoMeta({
         title: currentProduct.nome + ' — ' + String(window.storeSettings?.store_name || 'Boutique').replace(/\s*\.\s*$/, ''),
@@ -5953,7 +5999,7 @@
             const canReturn = st !== 'cancelled' && st !== 'cancelado';
             return `<div style="border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;cursor:pointer;" onclick="openOrderDetailClient('${o.pedido_id.replace(/'/g, "\\'")}')">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
-          <div><strong>#${o.pedido_id}</strong><div style="font-size:12px;color:var(--gray);margin-top:4px;">${o.data}</div></div>
+          <div><strong>#${o.pedido_id}</strong><div style="font-size:12px;color:var(--gray);margin-top:4px;">${o.data}</div>${o.entrega_prevista ? `<div style="font-size:11px;color:var(--gray);margin-top:4px;">${escHtmlB(t('trackFldEta'))}: ${formatOrderEtaCustomer(o.entrega_prevista)}</div>` : ''}</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           ${canReturn ? `<button type="button" class="btn btn-outline btn-sm" onclick="event.stopPropagation();openReturnRequestModal(${htmlAttrJsonArg(o.pedido_id)})">${t('returnRequestBtn')}</button>` : ''}
           <button type="button" class="btn btn-outline btn-sm" onclick="event.stopPropagation();openClientInvoice(${htmlAttrJsonArg(o.pedido_id)})">🧾 ${t('invoicePdf')}</button>
@@ -6136,6 +6182,7 @@
     <div style="max-height:80vh;overflow-y:auto;padding:4px;">
       <h3 style="font-family:var(--font-serif);margin-bottom:12px;">Pedido #${orderId}</h3>
       <p style="color:var(--gray);font-size:13px;margin-bottom:12px;">Data: ${o.data} · Estado: <strong>${orderStatusLabel(o.estado)}</strong></p>
+      ${o.entrega_prevista ? `<p style="font-size:13px;margin-bottom:12px;padding:10px;background:var(--light);border-radius:8px;"><strong>${escHtmlB(t('trackFldEta'))}:</strong> ${formatOrderEtaCustomer(o.entrega_prevista)}</p>` : ''}
       ${o.endereco ? `<p style="font-size:13px;margin-bottom:12px;">📍 ${o.endereco}</p>` : ''}
       <table style="width:100%;font-size:13px;border-collapse:collapse;">
         <thead><tr style="background:var(--light);">

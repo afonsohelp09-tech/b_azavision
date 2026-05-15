@@ -264,6 +264,68 @@
       outline-offset: 2px;
     }
 
+    /* Faixa topo — modo ticker (ex. estilo Valore) */
+    #announcementBar {
+      display: none;
+      align-items: center;
+      position: relative;
+      z-index: 100;
+      background: linear-gradient(90deg, var(--primary), #3d3d3d);
+      color: #fff;
+      text-align: center;
+      padding: 10px 40px 10px 16px;
+      font-size: 13px;
+    }
+
+    #announcementBar.announcement-bar--marquee {
+      padding-top: 7px;
+      padding-bottom: 7px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+
+    .announcement-bar-inner {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+
+    #announcementMarqueeRoot {
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .announcement-marquee-track {
+      display: inline-flex;
+      white-space: nowrap;
+      animation: announcementMarquee 32s linear infinite;
+    }
+
+    .announcement-bar--marquee .announcement-marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    .announcement-marquee-seg {
+      padding-right: 3rem;
+      display: inline-block;
+    }
+
+    @keyframes announcementMarquee {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .announcement-marquee-track {
+        animation: none;
+      }
+    }
+
     a:focus-visible,
     button:focus-visible,
     .btn:focus-visible,
@@ -651,6 +713,12 @@
     .badge-lowstock {
       background: #6366f1 !important;
       color: #fff !important;
+    }
+
+    .variant-selector .color-opt.no-variant-photo,
+    .variant-selector .variant-opt.no-variant-photo {
+      opacity: 0.55;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
     }
 
     .product-info {
@@ -1971,10 +2039,17 @@
 
   <a href="#main-content" class="skip-link" id="skipLinkMain">Ir para o conteúdo principal</a>
 
-  <!-- ANNOUNCEMENT BAR -->
-  <div id="announcementBar"
-    style="display:none; background:linear-gradient(90deg, var(--primary), #3d3d3d); color:#fff; text-align:center; padding:10px 40px 10px 16px; font-size:13px; position:relative; z-index:100;">
-    <span id="announcementText">Envio grátis a partir de 50€ de compra!</span>
+  <!-- ANNOUNCEMENT BAR (texte : CONFIG → Faixa de anúncio ; option défilant type Valore) -->
+  <div id="announcementBar" class="announcement-bar"
+    style="display:none;">
+    <div class="announcement-bar-inner">
+      <span id="announcementText">Envio grátis a partir de 50€ de compra!</span>
+      <div id="announcementMarqueeRoot" style="display:none;">
+        <div class="announcement-marquee-viewport" style="overflow:hidden;width:100%;">
+          <div class="announcement-marquee-track" id="announcementMarqueeTrack"></div>
+        </div>
+      </div>
+    </div>
     <button type="button" onclick="closeAnnouncement()"
       style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#fff; font-size:18px; cursor:pointer; opacity:.7;"
       id="btnCloseAnnouncement" aria-label="Fechar">×</button>
@@ -2228,6 +2303,10 @@
             <h1 class="detail-name" id="detailName"></h1>
             <div class="stars" id="detailStars">★★★★★</div>
             <div class="detail-price" id="detailPrice"></div>
+            <p id="detailSurCommandeHint"
+              style="display:none;font-size:13px;color:var(--gray);margin:8px 0 0;line-height:1.45;"></p>
+            <p id="detailVariantImageHint"
+              style="display:none;font-size:12px;color:#b45309;margin:8px 0 0;line-height:1.4;"></p>
             <div id="detailDescBlock" style="display:none;margin-bottom:24px;" aria-live="polite">
               <h2 id="detailDescHeading" class="detail-desc-heading"
                 style="font-size:13px;font-weight:600;color:var(--text);margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em;">
@@ -3027,6 +3106,8 @@
         productNotFoundToast: 'Produto não encontrado',
         detailSizeUnique: 'Tamanho único',
         detailColorUnique: 'Cor única',
+        badgeMadeToOrder: 'Peça feita por encomenda — o stock do ERP é apenas informativo.',
+        variantNoPhotoForChoice: 'Sem foto específica para esta combinação: é mostrada uma imagem de outra variante ou do artigo.',
         cookieBtnAccept: 'Aceitar',
         cookieAcceptToast: 'Cookies aceites.',
         trackStCancelled: 'Cancelada',
@@ -3096,6 +3177,8 @@
         productNotFoundToast: 'Produit introuvable',
         detailSizeUnique: 'Taille unique',
         detailColorUnique: 'Couleur unique',
+        badgeMadeToOrder: 'Article fabriqué sur commande — le stock dans l’ERP est indicatif.',
+        variantNoPhotoForChoice: 'Pas de visuel pour cette taille / couleur : photo issue d’une autre variante ou de l’article.',
         cookieBtnAccept: 'Accepter',
         cookieAcceptToast: 'Cookies acceptés.',
         trackStCancelled: 'Annulée',
@@ -3165,6 +3248,8 @@
         productNotFoundToast: 'Product not found',
         detailSizeUnique: 'One size',
         detailColorUnique: 'One colour',
+        badgeMadeToOrder: 'Made to order — ERP stock is for reference only.',
+        variantNoPhotoForChoice: 'No photo for this size/colour: showing another variant or main product image.',
         cookieBtnAccept: 'Accept',
         cookieAcceptToast: 'Cookies accepted.',
         trackStCancelled: 'Cancelled',
@@ -3234,6 +3319,8 @@
         productNotFoundToast: 'Producto no encontrado',
         detailSizeUnique: 'Talla única',
         detailColorUnique: 'Color único',
+        badgeMadeToOrder: 'Artículo bajo pedido — el stock en el ERP es orientativo.',
+        variantNoPhotoForChoice: 'Sin foto para esta talla / color: se muestra otra variante o la imagen principal.',
         cookieBtnAccept: 'Aceptar',
         cookieAcceptToast: 'Cookies aceptadas.',
         trackStCancelled: 'Cancelada',
@@ -4387,9 +4474,17 @@
       if (!r?.success) { toast(t('productNotFoundToast'), 'error'); return; }
       currentProduct = r.product;
       selectedSize = ''; selectedColor = ''; quantity = 1;
+      selectedVariants = { size: '', color: '' };
       document.getElementById('detailName').textContent = currentProduct.nome;
       document.getElementById('detailCat').textContent = currentProduct.categoria || '';
       document.getElementById('detailPrice').textContent = formatPrice(currentProduct.preco_final || 0);
+      var sch0 = document.getElementById('detailSurCommandeHint');
+      if (sch0) {
+        var cfg0 = window.storeSettings || {};
+        var mto0 = cfg0.boutique_sur_commande === '1' || cfg0.boutique_sur_commande === 'true' || cfg0.boutique_sur_commande === true;
+        sch0.style.display = mto0 ? 'block' : 'none';
+        sch0.textContent = mto0 ? t('badgeMadeToOrder') : '';
+      }
       updateSeoMeta({
         title: currentProduct.nome + ' — ' + String(window.storeSettings?.store_name || 'Boutique').replace(/\s*\.\s*$/, ''),
         description: (currentProduct.descricao || currentProduct.nome || '').substring(0, 160),
@@ -4408,6 +4503,10 @@
         if (descBlock) descBlock.style.display = 'none';
       }
       document.getElementById('qtyDisplay').textContent = '1';
+      var vSizesEarly = (currentProduct.tamanhos || []).filter(Boolean);
+      var vColorsEarly = (currentProduct.cores || []).filter(Boolean);
+      var useUnifiedVariants = vSizesEarly.length > 0 || vColorsEarly.length > 0;
+
       var urls = parseProductImageUrls(currentProduct);
       var imgEl = document.getElementById('detailImg');
       var emoji = document.getElementById('detailImgEmoji');
@@ -4424,7 +4523,7 @@
           thumbsEl.style.display = 'none';
         }
       }
-      if (urls.length && imgEl) {
+      if (!useUnifiedVariants && urls.length && imgEl) {
         imgEl.onerror = function () {
           imgEl.style.display = 'none';
           if (emoji) emoji.style.display = '';
@@ -4432,23 +4531,31 @@
         imgEl.src = driveImageDisplayUrl(urls[0]);
         imgEl.style.display = 'block';
         if (emoji) emoji.style.display = 'none';
-      } else {
+      } else if (!useUnifiedVariants) {
         if (imgEl) { imgEl.style.display = 'none'; imgEl.removeAttribute('src'); }
         if (emoji) emoji.style.display = '';
       }
 
-      // Tamanhos
-      const sizes = currentProduct.tamanhos || [];
-      document.getElementById('sizeOptions').innerHTML = sizes.length
-        ? sizes.map(s => `<div class="size-btn" onclick="selectSize('${s}',this)">${s}</div>`).join('')
-        : '<span style="color:var(--gray);font-size:13px;">' + t('detailSizeUnique') + '</span>';
-
-      // Cores
-      const colors = currentProduct.cores || [];
-      const colorMap = { Preto: '#1a1a1a', Branco: '#f5f5f5', Azul: '#3498db', Vermelho: '#e74c3c', Verde: '#2ecc71', Cinza: '#95a5a6', Bege: '#f0d9b5', Rosa: '#ff9ff3', Castanho: '#8B4513', Amarelo: '#f1c40f' };
-      document.getElementById('colorOptions').innerHTML = colors.length
-        ? colors.map(c => `<div class="color-btn" style="background:${colorMap[c] || '#999'};" title="${c}" onclick="selectColor('${c}',this)"></div>`).join('')
-        : '<span style="color:var(--gray);font-size:13px;">' + t('detailColorUnique') + '</span>';
+      var lblSz = document.getElementById('t_size');
+      var lblCol = document.getElementById('t_color');
+      if (useUnifiedVariants) {
+        document.getElementById('sizeOptions').innerHTML = '';
+        document.getElementById('colorOptions').innerHTML = '';
+        if (lblSz) lblSz.style.display = 'none';
+        if (lblCol) lblCol.style.display = 'none';
+      } else {
+        const sizes = currentProduct.tamanhos || [];
+        document.getElementById('sizeOptions').innerHTML = sizes.length
+          ? sizes.map(s => `<div class="size-btn" onclick="selectSize('${String(s).replace(/'/g, "\\'")}',this)">${s}</div>`).join('')
+          : '<span style="color:var(--gray);font-size:13px;">' + t('detailSizeUnique') + '</span>';
+        const colors = currentProduct.cores || [];
+        const colorMap = { Preto: '#1a1a1a', Branco: '#f5f5f5', Azul: '#3498db', Vermelho: '#e74c3c', Verde: '#2ecc71', Cinza: '#95a5a6', Bege: '#f0d9b5', Rosa: '#ff9ff3', Castanho: '#8B4513', Amarelo: '#f1c40f' };
+        document.getElementById('colorOptions').innerHTML = colors.length
+          ? colors.map(c => `<div class="color-btn" style="background:${colorMap[c] || '#999'};" title="${String(c).replace(/"/g, '&quot;')}" onclick="selectColor('${String(c).replace(/'/g, "\\'")}',this)"></div>`).join('')
+          : '<span style="color:var(--gray);font-size:13px;">' + t('detailColorUnique') + '</span>';
+        if (lblSz) lblSz.style.display = '';
+        if (lblCol) lblCol.style.display = '';
+      }
 
       // Reviews inline summary
       const reviews = currentProduct.avaliacoes || [];
@@ -4456,38 +4563,50 @@
       document.getElementById('detailStars').textContent = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating)) + ` (${reviews.length})`;
       document.getElementById('reviewsSection').innerHTML = '';
 
-      // Build variant selectors
+      // Build variant selectors (même bloc que tailles / couleurs — pas de doublon au-dessus)
       var variantHtml = '';
-      var vSizes = (currentProduct.tamanhos || []).filter(Boolean);
-      var vColors = (currentProduct.cores || []).filter(Boolean);
+      var vSizes = vSizesEarly;
+      var vColors = vColorsEarly;
 
       if (vSizes.length > 0) {
         variantHtml += '<div style="margin:12px 0;"><label style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:6px;">' + t('size') + '</label>';
         variantHtml += '<div class="variant-selector" id="sizeSelector">';
         vSizes.forEach(function (s, i) {
-          variantHtml += '<span class="variant-opt' + (i === 0 ? ' selected' : '') + '" onclick="selectVariant(this,\'size\',\'' + s + '\')">' + s + '</span>';
+          var sEsc = String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          variantHtml += '<span class="variant-opt' + (i === 0 ? ' selected' : '') + '" onclick="selectVariant(this,\'size\',\'' + sEsc + '\')">' + String(s).replace(/</g, '&lt;') + '</span>';
         });
         variantHtml += '</div></div>';
-        if (vSizes[0]) selectedVariants.size = vSizes[0];
+        if (vSizes[0]) {
+          selectedVariants.size = vSizes[0];
+          selectedSize = vSizes[0];
+        }
       }
 
       if (vColors.length > 0) {
         variantHtml += '<div style="margin:12px 0;"><label style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:6px;">' + t('color') + '</label>';
         variantHtml += '<div class="variant-selector" id="colorSelector">';
         vColors.forEach(function (c, i) {
-          var isHex = c.startsWith('#');
+          var cEsc = String(c).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          var hasPhoto = colorHasAnyVariantPhoto(currentProduct, c);
+          var dimClass = hasPhoto ? '' : ' no-variant-photo';
+          var isHex = String(c).trim().startsWith('#');
           if (isHex) {
-            variantHtml += '<span class="color-opt' + (i === 0 ? ' selected' : '') + '" style="background:' + c + ';" onclick="selectVariant(this,\'color\',\'' + c + '\')" title="' + c + '"></span>';
+            variantHtml += '<span class="color-opt' + dimClass + (i === 0 ? ' selected' : '') + '" style="background:' + String(c).replace(/"/g, '') + ';" onclick="selectVariant(this,\'color\',\'' + cEsc + '\')" title="' + String(c).replace(/"/g, '&quot;') + '"></span>';
           } else {
-            variantHtml += '<span class="variant-opt' + (i === 0 ? ' selected' : '') + '" onclick="selectVariant(this,\'color\',\'' + c + '\')">' + c + '</span>';
+            variantHtml += '<span class="variant-opt' + dimClass + (i === 0 ? ' selected' : '') + '" onclick="selectVariant(this,\'color\',\'' + cEsc + '\')">' + String(c).replace(/</g, '&lt;') + '</span>';
           }
         });
         variantHtml += '</div></div>';
-        if (vColors[0]) selectedVariants.color = vColors[0];
+        if (vColors[0]) {
+          selectedVariants.color = vColors[0];
+          selectedColor = vColors[0];
+        }
       }
 
       var variantContainer = document.getElementById('productVariants');
       if (variantContainer) variantContainer.innerHTML = variantHtml;
+
+      if (useUnifiedVariants) updateProductDetailImageForSelection();
 
       showSection('detail');
       var bcCat = document.getElementById('detailBcCat');
@@ -4595,29 +4714,130 @@
     // --- CART ---
     var selectedVariants = { size: '', color: '' };
 
+    function _normVariantPart(a) {
+      var s = String(a == null ? '' : a).trim();
+      return s || '—';
+    }
+    function _visuelCatalogueVariant(v) {
+      var x = v.visuel_catalogue != null ? v.visuel_catalogue : v.visuel_catalogo;
+      return x === true || x === '1' || x === 'true' || String(x).toLowerCase() === 'sim';
+    }
+    function _variantImg(v) {
+      return String(v && v.imagem_variante ? v.imagem_variante : '').trim();
+    }
+    function colorHasAnyVariantPhoto(product, colorName) {
+      var co = _normVariantPart(colorName);
+      var vars = product && product.variantes ? product.variantes : [];
+      return vars.some(function (v) { return _normVariantPart(v.cor) === co && _variantImg(v); });
+    }
+    function findExactVariantRow(product, size, color) {
+      var vars = product && product.variantes ? product.variantes : [];
+      var sz = _normVariantPart(size);
+      var co = _normVariantPart(color);
+      if ((product.tamanhos || []).filter(Boolean).length === 0 && co && co !== '—') {
+        return vars.find(function (v) { return _normVariantPart(v.cor) === co; }) || null;
+      }
+      return vars.find(function (v) {
+        return _normVariantPart(v.tamanho) === sz && _normVariantPart(v.cor) === co;
+      });
+    }
+    function pickVariantDetailImageUrl(product, size, color) {
+      var vars = product && product.variantes ? product.variantes : [];
+      if (!vars.length) return '';
+      var sz = _normVariantPart(size);
+      var co = _normVariantPart(color);
+      var sizesList = (product.tamanhos || []).filter(Boolean);
+      var onlyColorMode = sizesList.length === 0 && co && co !== '—';
+      if (onlyColorMode) {
+        var byC = vars.filter(function (v) { return _normVariantPart(v.cor) === co; });
+        var vc = byC.find(function (v) { return _variantImg(v) && _visuelCatalogueVariant(v); });
+        if (vc) return vc.imagem_variante;
+        var anyC = byC.find(function (v) { return _variantImg(v); });
+        if (anyC) return anyC.imagem_variante;
+      }
+      var exact = vars.find(function (v) {
+        return _normVariantPart(v.tamanho) === sz && _normVariantPart(v.cor) === co && _variantImg(v);
+      });
+      if (exact) return exact.imagem_variante;
+      var sameColor = vars.filter(function (v) { return _normVariantPart(v.cor) === co; });
+      var vis = sameColor.find(function (v) { return _variantImg(v) && _visuelCatalogueVariant(v); });
+      if (vis) return vis.imagem_variante;
+      var anyC = sameColor.find(function (v) { return _variantImg(v); });
+      if (anyC) return anyC.imagem_variante;
+      var sameSize = vars.filter(function (v) { return _normVariantPart(v.tamanho) === sz; });
+      var sImg = sameSize.find(function (v) { return _variantImg(v); });
+      if (sImg) return sImg.imagem_variante;
+      var any = vars.find(function (v) { return _variantImg(v); });
+      return any ? any.imagem_variante : '';
+    }
+    function updateProductDetailImageForSelection() {
+      var p = currentProduct;
+      var hint = document.getElementById('detailVariantImageHint');
+      var imgEl = document.getElementById('detailImg');
+      var emoji = document.getElementById('detailImgEmoji');
+      if (!p || !imgEl) return;
+      var sz = selectedVariants.size || selectedSize || '';
+      var co = selectedVariants.color || selectedColor || '';
+      var picked = pickVariantDetailImageUrl(p, sz, co);
+      var primaryUrls = parseProductImageUrls(p);
+      var fallback = primaryUrls.length ? primaryUrls[0] : '';
+      var useUrl = picked || fallback;
+      var row = findExactVariantRow(p, sz, co);
+      var exactNoImg = row && !_variantImg(row);
+      if (hint) {
+        if (exactNoImg && useUrl) {
+          hint.style.display = '';
+          hint.textContent = t('variantNoPhotoForChoice');
+        } else {
+          hint.style.display = 'none';
+          hint.textContent = '';
+        }
+      }
+      if (useUrl) {
+        imgEl.onerror = function () {
+          imgEl.style.display = 'none';
+          if (emoji) emoji.style.display = '';
+        };
+        imgEl.src = driveImageDisplayUrl(useUrl);
+        imgEl.style.display = 'block';
+        if (emoji) emoji.style.display = 'none';
+      } else {
+        imgEl.style.display = 'none';
+        imgEl.removeAttribute('src');
+        if (emoji) emoji.style.display = '';
+      }
+      var thumbsEl = document.getElementById('productGalleryThumbs');
+      if (thumbsEl) thumbsEl.style.display = thumbsEl.innerHTML ? '' : 'none';
+    }
+
     function selectVariant(el, type, value) {
       selectedVariants[type] = value;
+      if (type === 'size') selectedSize = value;
+      if (type === 'color') selectedColor = value;
       var container = el.parentElement;
       container.querySelectorAll('.variant-opt, .color-opt').forEach(function (o) { o.classList.remove('selected'); });
       el.classList.add('selected');
+      updateProductDetailImageForSelection();
     }
 
     async function addToCart() {
       if (!currentProduct) return;
-      if (currentProduct.tamanhos?.length > 0 && !selectedSize) { toast(t('selectSize'), 'info'); return; }
-      if (currentProduct.cores?.length > 0 && !selectedColor) { toast(t('selectColor'), 'info'); return; }
+      var szPick = selectedVariants.size || selectedSize;
+      var colPick = selectedVariants.color || selectedColor;
+      if (currentProduct.tamanhos?.length > 0 && !szPick) { toast(t('selectSize'), 'info'); return; }
+      if (currentProduct.cores?.length > 0 && !colPick) { toast(t('selectColor'), 'info'); return; }
 
       if (!cartId) { cartId = 'CRT-' + Date.now(); localStorage.setItem('cartId', cartId); }
 
       // Find the right variant
       const variant = currentProduct.variantes?.find(v =>
-        (!selectedSize || v.tamanho === selectedSize) && (!selectedColor || v.cor === selectedColor)
+        (!szPick || _normVariantPart(v.tamanho) === _normVariantPart(szPick)) && (!colPick || _normVariantPart(v.cor) === _normVariantPart(colPick))
       ) || currentProduct.variantes?.[0];
 
       const r = await apiCall('addToCart', {
         cartId, clientId, produto_id: currentProduct.produto_id,
         variante_id: variant?.variante_id || 'VAR-DEFAULT',
-        tamanho: selectedSize || 'Único', cor: selectedColor || 'Único',
+        tamanho: szPick || 'Único', cor: colPick || 'Único',
         quantidade: quantity, preco: currentProduct.preco_final
       });
 
@@ -4626,9 +4846,9 @@
         const existing = cartData.find(i => i.variante_id === (variant?.variante_id || 'VAR-DEFAULT'));
         if (existing) existing.quantidade += quantity;
         else {
-          var item = { produto_id: currentProduct.produto_id, nome: currentProduct.nome, imagem: currentProduct.imagem, variante_id: variant?.variante_id || 'VAR-DEFAULT', tamanho: selectedSize, cor: selectedColor, quantidade: quantity, preco: currentProduct.preco_final };
-          item.size = selectedVariants.size;
-          item.color = selectedVariants.color;
+          var item = { produto_id: currentProduct.produto_id, nome: currentProduct.nome, imagem: currentProduct.imagem, variante_id: variant?.variante_id || 'VAR-DEFAULT', tamanho: szPick, cor: colPick, quantidade: quantity, preco: currentProduct.preco_final };
+          item.size = selectedVariants.size || szPick;
+          item.color = selectedVariants.color || colPick;
           cartData.push(item);
         }
         updateCartUI();
@@ -5986,6 +6206,7 @@
       var annEnabled = s.announcement_enabled === '1' || s.announcement_enabled === 'true' || s.announcement_enabled === true;
       if (!annEnabled) {
         annBar.style.display = 'none';
+        annBar.classList.remove('announcement-bar--marquee');
         return;
       }
       var annClosed = sessionStorage.getItem('ann_closed') === '1';
@@ -6003,8 +6224,31 @@
         return;
       }
       window._announcementResolvedText = msg;
-      at.textContent = msg;
-      annBar.style.display = 'block';
+      var mqRoot = document.getElementById('announcementMarqueeRoot');
+      var mqTrack = document.getElementById('announcementMarqueeTrack');
+      var useMarquee = s.announcement_marquee === '1' || s.announcement_marquee === 'true' || s.announcement_marquee === true;
+      if (useMarquee && mqRoot && mqTrack) {
+        annBar.classList.add('announcement-bar--marquee');
+        at.style.display = 'none';
+        mqRoot.style.display = 'block';
+        mqTrack.innerHTML = '';
+        var seg1 = document.createElement('span');
+        seg1.className = 'announcement-marquee-seg';
+        seg1.textContent = msg;
+        var seg2 = document.createElement('span');
+        seg2.className = 'announcement-marquee-seg';
+        seg2.setAttribute('aria-hidden', 'true');
+        seg2.textContent = msg;
+        mqTrack.appendChild(seg1);
+        mqTrack.appendChild(seg2);
+      } else {
+        annBar.classList.remove('announcement-bar--marquee');
+        at.style.display = '';
+        at.textContent = msg;
+        if (mqRoot) mqRoot.style.display = 'none';
+        if (mqTrack) mqTrack.innerHTML = '';
+      }
+      annBar.style.display = 'flex';
     }
 
     function escAttr_(s) {

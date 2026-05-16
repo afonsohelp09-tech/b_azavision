@@ -3951,10 +3951,16 @@
         if (typeof location !== 'undefined' && location.protocol === 'file:') {
           return { success: false, error: t('apiErrFileProtocol'), code: 'FILE_PROTOCOL' };
         }
+        var ac = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var timeoutMs = 35000;
+        var tid = ac ? setTimeout(function () {
+          try { ac.abort(); } catch (eAb) { }
+        }, timeoutMs) : null;
         try {
           // Pas de Content-Type: application/json (préflight CORS incompatible avec Apps Script Web App).
           const r = await fetch(url, {
             method: 'POST',
+            signal: ac ? ac.signal : undefined,
             body: JSON.stringify({ action, data, token: token || clientToken })
           });
           const text = await r.text();
@@ -3971,7 +3977,12 @@
           return parsed;
         } catch (e) {
           console.error(e);
+          if (e && (e.name === 'AbortError' || String(e.message || '').indexOf('aborted') >= 0)) {
+            return { success: false, error: typeof t === 'function' ? t('nlConnError') : 'Timeout', code: 'TIMEOUT' };
+          }
           return { success: false, error: e.message || String(e) };
+        } finally {
+          if (tid) clearTimeout(tid);
         }
       }
 
@@ -4285,13 +4296,38 @@
 
       // --- PRODUCTS ---
       async function loadFeatured() {
-        const [raw, catApi] = await Promise.all([
-          apiCall('getProducts', { page: 1, pageSize: 100, sort: 'date_desc' }),
-          apiCall('getCategories', {}).catch(function () { return null; })
-        ]);
+        var raw, catApi;
+        try {
+          var pair = await Promise.all([
+            apiCall('getProducts', { page: 1, pageSize: 100, sort: 'date_desc' }),
+            apiCall('getCategories', {}).catch(function () { return null; })
+          ]);
+          raw = pair[0];
+          catApi = pair[1];
+        } catch (eFeat) {
+          console.error(eFeat);
+          raw = { success: false };
+          catApi = null;
+        }
         const norm = normalizeProductsResponse(raw);
         const products = norm.products || [];
-        if (!products.length) return;
+        if (!products.length) {
+          renderProductGrid([], 'featuredGrid', 'home');
+          var na = document.getElementById('newArrivalsGrid');
+          if (na) na.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="emoji">📭</div><p>' + t('noProducts') + '</p></div>';
+          var hg = document.getElementById('homeCategoryGrid');
+          if (hg) hg.innerHTML = '';
+          if (!(raw && raw.success) && typeof toast === 'function' && !window._boutiqueHomeApiToastShown) {
+            window._boutiqueHomeApiToastShown = true;
+            var code = raw && raw.code;
+            var hint = t('nlConnError');
+            if (code === 'FILE_PROTOCOL') hint = t('apiErrFileProtocol');
+            else if (code === 'NO_API_URL' || code === 'BAD_RESPONSE') hint = (raw && raw.error) ? String(raw.error) : hint;
+            else if (code === 'TIMEOUT') hint = t('nlConnError');
+            toast('⚠️ ' + hint, 'info');
+          }
+          return;
+        }
         homeSpotlightProducts = products;
         renderProductGrid(products.slice(0, 8), 'featuredGrid', 'home');
         loadHomeCategoryGrid(Array.isArray(catApi) && catApi.length ? catApi : null);
@@ -7044,7 +7080,12 @@
           var bd = (typeof window.ERP_STOREFRONT_BRAND_DEFAULT === 'string' && window.ERP_STOREFRONT_BRAND_DEFAULT.trim()) ? window.ERP_STOREFRONT_BRAND_DEFAULT.trim() : '';
           if (st && /^https?:\/\//i.test(st) && typeof applyStorefrontLogoMarkup === 'function') applyStorefrontLogoMarkup(st, bd || 'Loja');
         })();
-        await Promise.all([loadStoreDesign(), loadFeatured()]);
+        try {
+          await Promise.all([loadStoreDesign(), loadFeatured()]);
+        } catch (eBoot) {
+          console.error(eBoot);
+          try { renderProductGrid([], 'featuredGrid', 'home'); } catch (eG) { }
+        }
         document.querySelectorAll('.lang-btn').forEach(b => {
           b.classList.toggle('active', b.textContent.trim().toLowerCase() === lang);
         });

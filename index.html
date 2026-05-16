@@ -3210,8 +3210,20 @@
       }
 
       function normalizeProductsResponse(res) {
-        if (res && res.success && Array.isArray(res.products)) return res;
-        if (Array.isArray(res)) return { success: true, products: res, total: res.length, page: 1, pageSize: res.length, hasMore: false };
+        if (!res) return { success: false, products: [], total: 0, page: 1, hasMore: false };
+        var plist = Array.isArray(res.products) ? res.products : (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : null));
+        if (plist) {
+          var sok = res.success;
+          var ok = sok !== false && sok !== 'false' && sok !== 0;
+          return {
+            success: ok,
+            products: plist,
+            total: res.total != null ? res.total : plist.length,
+            page: res.page != null ? res.page : 1,
+            pageSize: res.pageSize != null ? res.pageSize : plist.length,
+            hasMore: !!res.hasMore
+          };
+        }
         return { success: false, products: [], total: 0, page: 1, hasMore: false };
       }
 
@@ -7121,12 +7133,10 @@
           if (typeof applyBoutiqueTheme === 'function' && typeof resolveBoutiqueTheme === 'function')
             applyBoutiqueTheme(resolveBoutiqueTheme());
         } catch (eThemeBoot) { }
-        try {
-          await Promise.all([loadStoreDesign(), loadFeatured()]);
-        } catch (eBoot) {
-          console.error(eBoot);
-          try { renderProductGrid([], 'featuredGrid', 'home'); } catch (eG) { }
-        }
+        await Promise.allSettled([
+          loadStoreDesign().catch(function (e) { console.error('loadStoreDesign', e); }),
+          loadFeatured().catch(function (e) { console.error('loadFeatured', e); })
+        ]);
         document.querySelectorAll('.lang-btn').forEach(b => {
           b.classList.toggle('active', b.textContent.trim().toLowerCase() === lang);
         });

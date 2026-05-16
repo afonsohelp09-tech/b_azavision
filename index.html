@@ -3178,6 +3178,18 @@
       let activeSizes = [];
       let activeColors = [];
 
+      function normalizeCatalogCategoryKey_(s) {
+        if (s == null || s === '') return '';
+        var t = String(s).trim().replace(/\s+/g, ' ');
+        try { if (typeof t.normalize === 'function') t = t.normalize('NFKC'); } catch (e) { }
+        return t.toLowerCase();
+      }
+      function catalogProductCategoryLabel_(p) {
+        if (!p) return '';
+        var v = p.categoria != null && String(p.categoria).trim() !== '' ? p.categoria : p.category;
+        return v != null ? String(v) : '';
+      }
+
       function findProductInLocalCaches_(produtoId) {
         var pid = String(produtoId || '').trim();
         if (!pid) return null;

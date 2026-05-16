@@ -30,8 +30,9 @@
     <style>
       /* ============================================================
     VENTE EN LIGNE TPE — Instructions API (tout dans ce fichier, pas de config.js)
-    1. Remplacez l’URL du Web App Apps Script dans le script du bas :
-        window.ERP_API_URL_DEFAULT et/ou la ligne « COLAR ».
+      1. Remplacez l’URL du Web App Apps Script dans le script du bas :
+        window.ERP_API_URL_DEFAULT et/ou la ligne « COLAR » (ou la clé localStorage erp_api_url
+        enregistrée lors d’une connexion admin sur le même navigateur).
     2. Este ficheiro é para os CLIENTES — Google Sites « Incorporar HTML », ou HTTPS.
     3. Téléphone : menu ☰ (≤768px) ouvre le tiroir de navigation.
     4. Idiomas: português de Portugal (pt-PT) por defeito; PT, FR, EN, ES no cabeçalho.
@@ -3145,6 +3146,12 @@
         } else {
           API_URL = inline;
         }
+        try {
+          var lsRaw = typeof localStorage !== 'undefined' ? localStorage.getItem('erp_api_url') : '';
+          var ls = lsRaw ? String(lsRaw).trim() : '';
+          if (ls && ls.indexOf('https://script.google.com/macros') === 0 && ls.indexOf('/exec') !== -1)
+            API_URL = ls;
+        } catch (eLs) { }
       })();
     </script>
     <script>
@@ -4304,6 +4311,11 @@
           ]);
           raw = pair[0];
           catApi = pair[1];
+          if (catApi != null && !Array.isArray(catApi)) {
+            if (Array.isArray(catApi.categories)) catApi = catApi.categories;
+            else if (catApi.success && Array.isArray(catApi.data)) catApi = catApi.data;
+            else catApi = null;
+          }
         } catch (eFeat) {
           console.error(eFeat);
           raw = { success: false };
@@ -4360,7 +4372,9 @@
 
       function loadHomeNewArrivals() {
         var grid = document.getElementById('newArrivalsGrid');
-        var poolNA = homeSpotlightProducts.length ? homeSpotlightProducts : allProducts;
+        var poolNA = (homeSpotlightProducts && homeSpotlightProducts.length)
+          ? homeSpotlightProducts
+          : (allProducts || []);
         if (!grid || !poolNA.length) return;
         var sorted = poolNA.slice().sort(function (a, b) {
           return new Date(b.data_criacao || b.created_at || 0) - new Date(a.data_criacao || a.created_at || 0);
@@ -6730,8 +6744,19 @@
       async function loadStoreDesign() {
         const r = await apiCall('getStoreData');
         var brandFallback = (typeof window.ERP_STOREFRONT_BRAND_DEFAULT === 'string' && window.ERP_STOREFRONT_BRAND_DEFAULT.trim()) ? window.ERP_STOREFRONT_BRAND_DEFAULT.trim() : 'Loja';
-        if (!r?.success) {
-          applyStorefrontLogoMarkup('', brandFallback);
+        if (!r || !r.success) {
+          var rawStaticFail = (typeof window.ERP_STOREFRONT_LOGO_STATIC === 'string') ? window.ERP_STOREFRONT_LOGO_STATIC.trim() : '';
+          var staticLogoFail = /^https?:\/\//i.test(rawStaticFail) ? rawStaticFail : '';
+          if (staticLogoFail) applyStorefrontLogoMarkup(staticLogoFail, brandFallback);
+          else applyStorefrontLogoMarkup('', brandFallback);
+          applyPaymentMethodVisibility();
+          updateCheckoutTermsUI();
+          applyLegalFooter();
+          applyCookieBanner();
+          applyAnnouncementBarFromSettings();
+          applyBoutiqueTheme(resolveBoutiqueTheme());
+          applyContactWidgetFromSettings(window.storeSettings || {}, window.storeSettings || {});
+          applyShopFooterI18n();
           return;
         }
         window._contactWidgetMailFallback = '';
@@ -7080,6 +7105,10 @@
           var bd = (typeof window.ERP_STOREFRONT_BRAND_DEFAULT === 'string' && window.ERP_STOREFRONT_BRAND_DEFAULT.trim()) ? window.ERP_STOREFRONT_BRAND_DEFAULT.trim() : '';
           if (st && /^https?:\/\//i.test(st) && typeof applyStorefrontLogoMarkup === 'function') applyStorefrontLogoMarkup(st, bd || 'Loja');
         })();
+        try {
+          if (typeof applyBoutiqueTheme === 'function' && typeof resolveBoutiqueTheme === 'function')
+            applyBoutiqueTheme(resolveBoutiqueTheme());
+        } catch (eThemeBoot) { }
         try {
           await Promise.all([loadStoreDesign(), loadFeatured()]);
         } catch (eBoot) {

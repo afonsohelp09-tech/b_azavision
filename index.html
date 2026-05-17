@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Boutique</title>
+  <meta name="description" id="metaDesc" content="">
+  <meta property="og:title" id="ogTitle" content="">
+  <meta property="og:description" id="ogDesc" content="">
+  <meta name="keywords" id="metaKw" content="">
+  <link rel="icon" id="dynFavicon" href="data:,">
   <meta name="theme-color" content="#0a3349">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,8 +81,14 @@
       position: fixed; top: var(--announce-h); left: 0; right: 0; z-index: 100;
       height: var(--header-h); background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border); display: flex; align-items: center;
-      justify-content: space-between; padding: 0 20px; max-width: 1400px; margin: 0 auto;
+      justify-content: space-between; gap: 12px; padding: 0 16px; max-width: 1400px; margin: 0 auto;
     }
+    .site-nav {
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      font-size: 13px; font-weight: 600;
+    }
+    .site-nav a { color: var(--brand); text-decoration: none; white-space: nowrap; }
+    .site-nav a:hover { color: var(--brand-mid); text-decoration: underline; }
     .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--brand); }
     .logo-link img { height: 40px; width: auto; object-fit: contain; }
     .logo-text { font-family: var(--display); font-size: 1.35rem; font-weight: 600; letter-spacing: .02em; }
@@ -241,7 +252,18 @@
     @media (min-width: 900px) { .mobile-search { display: none; } }
     #payment-element { margin-top: 16px; min-height: 120px; }
     .sku-note { font-size: 13px; color: var(--text-muted); }
-  </style>
+    .order-lines-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px; }
+    .cart-line .cart-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .cart-qty { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 10px; padding: 4px 6px; }
+    .cart-qty button { width: 32px; height: 32px; padding: 0; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-weight: 700; }
+    .cart-line-sum { font-weight: 700; color: var(--brand); margin-top: 4px; }
+    .pay-hint-box { margin-top: 12px; padding: 14px; background: rgba(15,82,120,.06); border-radius: 10px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+    .invoice-print { margin-top: 16px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+    @media print {
+      body * { visibility: hidden; }
+      #invoicePrintZone, #invoicePrintZone * { visibility: visible; }
+      #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
+    }
 </head>
 <body>
   <div class="announce-bar" id="announceBar" aria-live="polite"></div>
@@ -250,6 +272,11 @@
       <img id="headerLogo" alt="" style="display:none;">
       <span class="logo-text" id="headerStoreName">Boutique</span>
     </a>
+    <nav class="site-nav" aria-label="Navigation">
+      <a href="#/" data-i18n="nav_home">Accueil</a>
+      <a href="#/catalog" data-i18n="catalogue">Catalogue</a>
+      <a href="#/wishlist" data-i18n="nav_wishlist">Souhaits</a>
+    </nav>
     <div class="search-wrap">
       <input type="search" id="headerSearch" placeholder="" autocomplete="off">
     </div>
@@ -270,15 +297,21 @@
       <div>
         <div class="logo-text" style="color:#fff;margin-bottom:12px;font-size:1.5rem;" id="footerBrand">Boutique</div>
         <p style="opacity:.85;margin:0 0 20px;line-height:1.55;font-size:15px;" id="footerTagline"></p>
+        <p id="footerEmpresaLine" style="display:none;margin:0 0 16px;line-height:1.65;font-size:14px;opacity:.88;"></p>
+        <div id="socialRow" style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;">
+          <a id="socialIg" href="#" style="display:none;color:rgba(255,255,255,.9);font-size:14px;">Instagram</a>
+          <a id="socialFb" href="#" style="display:none;color:rgba(255,255,255,.9);font-size:14px;">Facebook</a>
+        </div>
         <div class="newsletter-box" id="footerNewsletter" style="margin-top:16px;display:none;max-width:320px;">
           <h4 style="margin:0 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.85);" data-i18n="newsletter_footer_title">Newsletter</h4>
           <input type="email" id="footerNewsEmail" placeholder="">
           <button type="button" class="btn btn-accent btn-sm" style="width:100%" id="footerNewsBtn" data-i18n="newsletter_btn">Subscrever</button>
+          <p style="margin:10px 0 0;font-size:13px;opacity:.88;line-height:1.5;"><a href="#/newsletter/unsubscribe" data-i18n="nav_unsubscribe">Newsletter</a></p>
         </div>
       </div>
       <div>
         <h4 data-i18n="foot_shop">Boutique</h4>
-        <p style="margin:0;line-height:2;"><a href="#/catalog" data-i18n="catalogue">Catalogue</a><br><a href="#/contact" data-i18n="nav_contact">Contact</a><br><a href="#/account" data-i18n="nav_account">Mon compte</a></p>
+        <p style="margin:0;line-height:2;"><a href="#/catalog" data-i18n="catalogue">Catalogue</a><br><a href="#/wishlist" data-i18n="nav_wishlist">Souhaits</a><br><a href="#/contact" data-i18n="nav_contact">Contact</a><br><a href="#/account" data-i18n="nav_account">Mon compte</a></p>
       </div>
       <div>
         <h4 data-i18n="foot_legal">Légal</h4>
@@ -297,7 +330,10 @@
   <aside class="drawer" id="cartDrawer" aria-hidden="true">
     <div class="drawer-head">
       <strong data-i18n="cart_title">Panier</strong>
-      <button type="button" class="btn btn-ghost btn-sm" id="closeCart">×</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="button" class="btn btn-ghost btn-sm" id="clearCartBtn" style="display:none;" data-i18n="cart_clear">Vider</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="closeCart">×</button>
+      </div>
     </div>
     <div class="drawer-body" id="cartBody"></div>
     <div style="padding:16px;border-top:1px solid var(--border);">
@@ -434,6 +470,19 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 (function () {
   'use strict';
 
+  /** Images Drive dans <img> : vignette légère + repli uc?export=view (comme le backend ERP). */
+  window._erpImgFallback = function (el) {
+    try {
+      el.onerror = null;
+      var fb = el.getAttribute('data-img-fallback');
+      if (fb && el.src !== fb) {
+        el.src = fb;
+        return;
+      }
+    } catch (e1) { }
+    el.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="520"><rect fill="%23e8eef6" width="100%" height="100%"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14">IMG</text></svg>');
+  };
+
   var LANG = localStorage.getItem('boutique_lang') || 'pt';
   var CURRENCY_SYM = '\u20AC';
   var CURRENCY_CODE = 'eur';
@@ -463,7 +512,47 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       maintenance: 'Manutenção em curso.', api_missing: 'Configure o URL da API Web App neste ficheiro HTML.',
       order_ok: 'Encomenda registada!', order_id: 'N.º', payment_stripe_hint: 'Pagamento seguro com cartão.',
       account_orders_empty: 'Ainda não tem encomendas.',
-      load_more: 'Carregar mais', qty_label: 'Quantidade', variant_label: 'Tamanho / cor'
+      load_more: 'Carregar mais', qty_label: 'Quantidade', variant_label: 'Tamanho / cor',
+      nav_home: 'Início', nav_wishlist: 'Desejos',
+      pwd_forgot: 'Esqueci a palavra-passe', pwd_reset_hint: 'Receberá um código por email.',
+      pwd_reset_send: 'Enviar código', pwd_new_pass: 'Nova palavra-passe', pwd_reset_confirm: 'Definir palavra-passe',
+      pwd_mismatch: 'As palavras-passe não coincidem.',
+      pwd_repeat: 'Repita a palavra-passe',
+      btn_back_account: 'Voltar à conta', order_detail_title: 'Encomenda', order_lines: 'Artigos',
+      order_tracking: 'Transporte', tracking_no: 'Seguimento', order_ship_addr: 'Morada',
+      addr_book_title: 'Moradas guardadas', addr_pick_saved: 'Usar uma morada guardada',
+      addr_save_chk: 'Guardar esta morada na minha conta', lbl_city: 'Cidade', lbl_zip: 'Código postal', lbl_country: 'País',
+      addr_save_btn: 'Guardar morada', wishlist_title: 'Lista de desejos', wishlist_empty: 'Ainda não tem favoritos.',
+      fav_add: 'Adicionar aos favoritos', fav_remove: 'Retirar dos favoritos',
+      returns_title: 'Devoluções', return_open_btn: 'Pedir devolução', ret_reason: 'Motivo',
+      return_submit_btn: 'Enviar pedido',
+      order_date: 'Data', order_status: 'Estado', order_col_prod: 'Produto',
+      wishlist_login_hint: 'Inicie sessão para ver os seus favoritos.',
+      order_col_price: 'Preço',
+      cart_clear: 'Esvaziar', cart_clear_confirm: 'Esvaziar o carrinho?',
+      pay_multibanco: 'Multibanco', pay_paypal: 'PayPal',
+      pay_instr_transfer: 'IBAN para transferência:', pay_instr_mbway: 'Pagamento MB WAY — indicará ou confirmará os dados na próxima mensagem ou email da loja.',
+      pay_instr_multibanco: 'Referência Multibanco será enviada por email assim que validarmos o pedido.',
+      pay_instr_paypal: 'Instruções PayPal serão enviadas por email.',
+      invoice_breakdown: 'Detalhe fiscal (IVA)', invoice_sub_ht: 'Total sem IVA', invoice_vat: 'IVA', invoice_total_ttc: 'Total com IVA',
+      btn_print: 'Imprimir', order_pay_status: 'Pagamento', cancel_order_btn: 'Cancelar pedido pendente',
+      cancel_order_ok: 'Pedido cancelado.', profile_section_title: 'Os meus dados', btn_save_profile: 'Guardar perfil',
+      unsub_news_title: 'Cancelar newsletter', unsub_news_hint: 'Introduza o email para cancelar.',
+      unsub_news_btn: 'Cancelar subscrição', unsub_news_ok: 'Subscrição cancelada.',
+      legal_page_title: 'Informação legal', legal_fallback_terms: 'Texto completo das condições gerais de venda: utilize o URL configurado na CONFIG ou contacte-nos.',
+      legal_fallback_privacy: 'Política de privacidade completa: utilize o URL configurado ou contacte-nos.',
+      legal_fallback_returns: 'Política de devoluções: utilize o URL configurado ou contacte-nos. Prazo indicativo nas CONFIG.',
+      nav_unsubscribe: 'Cancelar newsletter',
+      no_variants_html: 'Este produto não tem variantes configuradas — não pode ser encomendado online. Contacte-nos.',
+      loyalty_pts: 'Pontos',
+      loyalty_info_hint: 'Os pontos são geridos pela loja; o resgate segue as regras da marca (loja ou contacto).',
+      cart_cleared: 'Carrinho esvaziado.',
+      legal_external_hint: 'Documento oficial disponível neste link:',
+      wishlist_guest_hint: 'Lista guardada neste dispositivo. Inicie sessão para sincronizar com a sua conta.',
+      wishlist_guest_empty: 'Ainda não tem favoritos guardados neste dispositivo.',
+      wishlist_guest_clear: 'Limpar lista local',
+      review_moderation_hint: 'Os comentários podem ser revistos antes de serem publicados.',
+      review_pending_toast: 'Obrigado. A sua avaliação será analisada antes de aparecer na página.'
     },
     fr: {
       nav_contact: 'Contact', nav_account: 'Mon compte', cart_title: 'Panier', total: 'Total', checkout_btn: 'Commander',
@@ -489,7 +578,47 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       maintenance: 'Maintenance en cours.', api_missing: 'Configurez l’URL de l’API Web App dans ce fichier HTML.',
       order_ok: 'Commande enregistrée !', order_id: 'N°', payment_stripe_hint: 'Paiement carte sécurisé.',
       account_orders_empty: 'Aucune commande pour le moment.',
-      load_more: 'Charger plus', qty_label: 'Quantité', variant_label: 'Taille / couleur'
+      load_more: 'Charger plus', qty_label: 'Quantité', variant_label: 'Taille / couleur',
+      nav_home: 'Accueil', nav_wishlist: 'Liste de souhaits',
+      pwd_forgot: 'Mot de passe oublié', pwd_reset_hint: 'Un code vous sera envoyé par email.',
+      pwd_reset_send: 'Envoyer le code', pwd_new_pass: 'Nouveau mot de passe', pwd_reset_confirm: 'Définir le mot de passe',
+      pwd_mismatch: 'Les mots de passe ne correspondent pas.',
+      pwd_repeat: 'Confirmez le mot de passe',
+      btn_back_account: 'Retour au compte', order_detail_title: 'Commande', order_lines: 'Articles',
+      order_tracking: 'Livraison', tracking_no: 'Suivi', order_ship_addr: 'Adresse',
+      addr_book_title: 'Adresses enregistrées', addr_pick_saved: 'Choisir une adresse',
+      addr_save_chk: 'Enregistrer cette adresse pour plus tard', lbl_city: 'Ville', lbl_zip: 'Code postal', lbl_country: 'Pays',
+      addr_save_btn: 'Enregistrer l\'adresse', wishlist_title: 'Liste de souhaits', wishlist_empty: 'Pas encore de favoris.',
+      fav_add: 'Ajouter aux favoris', fav_remove: 'Retirer des favoris',
+      returns_title: 'Retours', return_open_btn: 'Demander un retour', ret_reason: 'Motif',
+      return_submit_btn: 'Envoyer la demande',
+      order_date: 'Date', order_status: 'Statut', order_col_prod: 'Article',
+      wishlist_login_hint: 'Connectez-vous pour voir vos favoris.',
+      order_col_price: 'Prix',
+      cart_clear: 'Vider', cart_clear_confirm: 'Vider le panier ?',
+      pay_multibanco: 'Multibanco', pay_paypal: 'PayPal',
+      pay_instr_transfer: 'IBAN pour virement :', pay_instr_mbway: 'MB WAY — vous recevrez les instructions par email.',
+      pay_instr_multibanco: 'Référence Multibanco envoyée par email après validation.',
+      pay_instr_paypal: 'Instructions PayPal envoyées par email.',
+      invoice_breakdown: 'Détail TVA', invoice_sub_ht: 'Total HT', invoice_vat: 'TVA', invoice_total_ttc: 'Total TTC',
+      btn_print: 'Imprimer', order_pay_status: 'Paiement', cancel_order_btn: 'Annuler commande en attente',
+      cancel_order_ok: 'Commande annulée.', profile_section_title: 'Mes coordonnées', btn_save_profile: 'Enregistrer',
+      unsub_news_title: 'Se désabonner', unsub_news_hint: 'Saisissez votre email.', unsub_news_btn: 'Se désabonner',
+      unsub_news_ok: 'Désabonnement effectué.',
+      legal_page_title: 'Informations légales', legal_fallback_terms: 'Pour le texte complet des CGV, utilisez l’URL configurée dans CONFIG ou contactez-nous.',
+      legal_fallback_privacy: 'Politique de confidentialité complète : URL configurée ou contact.',
+      legal_fallback_returns: 'Politique de retours : URL configurée ou contact.',
+      nav_unsubscribe: 'Newsletter · désabo.',
+      no_variants_html: 'Produit sans variantes configurées — vente en ligne indisponible. Contactez-nous.',
+      loyalty_pts: 'Points',
+      loyalty_info_hint: 'Les points sont gérés par la boutique ; le règlement suit les règles de la marque (magasin ou contact).',
+      cart_cleared: 'Panier vidé.',
+      legal_external_hint: 'Document officiel disponible via ce lien :',
+      wishlist_guest_hint: 'Liste enregistrée sur cet appareil. Connectez-vous pour la synchroniser avec votre compte.',
+      wishlist_guest_empty: 'Pas encore de favoris enregistrés sur cet appareil.',
+      wishlist_guest_clear: 'Effacer la liste locale',
+      review_moderation_hint: 'Les avis peuvent être modérés avant publication.',
+      review_pending_toast: 'Merci. Votre avis sera vérifié avant d\'apparaître sur la page.'
     },
     en: {
       nav_contact: 'Contact', nav_account: 'Account', cart_title: 'Cart', total: 'Total', checkout_btn: 'Checkout',
@@ -515,7 +644,47 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       maintenance: 'Under maintenance.', api_missing: 'Set the Web App API URL in this HTML file.',
       order_ok: 'Order placed!', order_id: 'No.', payment_stripe_hint: 'Secure card payment.',
       account_orders_empty: 'No orders yet.',
-      load_more: 'Load more', qty_label: 'Quantity', variant_label: 'Size / color'
+      load_more: 'Load more', qty_label: 'Quantity', variant_label: 'Size / color',
+      nav_home: 'Home', nav_wishlist: 'Wishlist',
+      pwd_forgot: 'Forgot password', pwd_reset_hint: 'You will receive a code by email.',
+      pwd_reset_send: 'Send code', pwd_new_pass: 'New password', pwd_reset_confirm: 'Set password',
+      pwd_mismatch: 'Passwords do not match.',
+      pwd_repeat: 'Confirm password',
+      btn_back_account: 'Back to account', order_detail_title: 'Order', order_lines: 'Items',
+      order_tracking: 'Shipping', tracking_no: 'Tracking', order_ship_addr: 'Address',
+      addr_book_title: 'Saved addresses', addr_pick_saved: 'Use a saved address',
+      addr_save_chk: 'Save this address to my account', lbl_city: 'City', lbl_zip: 'Postal code', lbl_country: 'Country',
+      addr_save_btn: 'Save address', wishlist_title: 'Wishlist', wishlist_empty: 'No favourites yet.',
+      fav_add: 'Add to favourites', fav_remove: 'Remove from favourites',
+      returns_title: 'Returns', return_open_btn: 'Request a return', ret_reason: 'Reason',
+      return_submit_btn: 'Submit request',
+      order_date: 'Date', order_status: 'Status', order_col_prod: 'Item',
+      wishlist_login_hint: 'Sign in to see your wishlist.',
+      order_col_price: 'Price',
+      cart_clear: 'Empty cart', cart_clear_confirm: 'Empty your cart?',
+      pay_multibanco: 'Multibanco', pay_paypal: 'PayPal',
+      pay_instr_transfer: 'Bank transfer IBAN:', pay_instr_mbway: 'MB WAY — instructions will follow by email.',
+      pay_instr_multibanco: 'Multibanco reference sent by email after we validate your order.',
+      pay_instr_paypal: 'PayPal instructions sent by email.',
+      invoice_breakdown: 'VAT breakdown', invoice_sub_ht: 'Subtotal excl. VAT', invoice_vat: 'VAT', invoice_total_ttc: 'Total incl. VAT',
+      btn_print: 'Print', order_pay_status: 'Payment', cancel_order_btn: 'Cancel pending order',
+      cancel_order_ok: 'Order cancelled.', profile_section_title: 'My details', btn_save_profile: 'Save profile',
+      unsub_news_title: 'Unsubscribe', unsub_news_hint: 'Enter your email.', unsub_news_btn: 'Unsubscribe',
+      unsub_news_ok: 'You are unsubscribed.',
+      legal_page_title: 'Legal information', legal_fallback_terms: 'Full terms of sale: use the URL set in CONFIG or contact us.',
+      legal_fallback_privacy: 'Full privacy policy: configured URL or contact us.',
+      legal_fallback_returns: 'Returns policy: configured URL or contact us.',
+      nav_unsubscribe: 'Unsubscribe newsletter',
+      no_variants_html: 'This product has no variants configured — not available for online checkout. Contact us.',
+      loyalty_pts: 'Points',
+      loyalty_info_hint: 'Points are managed by the store; redemption follows the brand rules (in-store or contact).',
+      cart_cleared: 'Cart emptied.',
+      legal_external_hint: 'Full document at the official link:',
+      wishlist_guest_hint: 'List saved on this device. Sign in to sync with your account.',
+      wishlist_guest_empty: 'No favourites saved on this device yet.',
+      wishlist_guest_clear: 'Clear local list',
+      review_moderation_hint: 'Reviews may be moderated before they appear.',
+      review_pending_toast: 'Thanks. Your review will be checked before it is published.'
     },
     es: {
       nav_contact: 'Contacto', nav_account: 'Cuenta', cart_title: 'Carrito', total: 'Total', checkout_btn: 'Tramitar pedido',
@@ -541,7 +710,47 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       maintenance: 'En mantenimiento.', api_missing: 'Configure la URL de la API Web App en este HTML.',
       order_ok: '¡Pedido registrado!', order_id: 'N.º', payment_stripe_hint: 'Pago con tarjeta seguro.',
       account_orders_empty: 'Sin pedidos todavía.',
-      load_more: 'Cargar más', qty_label: 'Cantidad', variant_label: 'Talla / color'
+      load_more: 'Cargar más', qty_label: 'Cantidad', variant_label: 'Talla / color',
+      nav_home: 'Inicio', nav_wishlist: 'Lista de deseos',
+      pwd_forgot: 'He olvidado la contraseña', pwd_reset_hint: 'Recibirá un código por email.',
+      pwd_reset_send: 'Enviar código', pwd_new_pass: 'Nueva contraseña', pwd_reset_confirm: 'Establecer contraseña',
+      pwd_mismatch: 'Las contraseñas no coinciden.',
+      pwd_repeat: 'Repita la contraseña',
+      btn_back_account: 'Volver a la cuenta', order_detail_title: 'Pedido', order_lines: 'Artículos',
+      order_tracking: 'Envío', tracking_no: 'Seguimiento', order_ship_addr: 'Dirección',
+      addr_book_title: 'Direcciones guardadas', addr_pick_saved: 'Usar una dirección guardada',
+      addr_save_chk: 'Guardar esta dirección en mi cuenta', lbl_city: 'Ciudad', lbl_zip: 'Código postal', lbl_country: 'País',
+      addr_save_btn: 'Guardar dirección', wishlist_title: 'Lista de deseos', wishlist_empty: 'Todavía no tiene favoritos.',
+      fav_add: 'Añadir a favoritos', fav_remove: 'Quitar de favoritos',
+      returns_title: 'Devoluciones', return_open_btn: 'Solicitar devolución', ret_reason: 'Motivo',
+      return_submit_btn: 'Enviar solicitud',
+      order_date: 'Fecha', order_status: 'Estado', order_col_prod: 'Artículo',
+      wishlist_login_hint: 'Inicie sesión para ver sus favoritos.',
+      order_col_price: 'Precio',
+      cart_clear: 'Vaciar', cart_clear_confirm: '¿Vaciar el carrito?',
+      pay_multibanco: 'Multibanco', pay_paypal: 'PayPal',
+      pay_instr_transfer: 'IBAN para transferencia:', pay_instr_mbway: 'MB WAY — recibirá instrucciones por email.',
+      pay_instr_multibanco: 'Referencia Multibanco por email tras validar el pedido.',
+      pay_instr_paypal: 'Instrucciones PayPal por email.',
+      invoice_breakdown: 'Desglose IVA', invoice_sub_ht: 'Base imponible', invoice_vat: 'IVA', invoice_total_ttc: 'Total con IVA',
+      btn_print: 'Imprimir', order_pay_status: 'Pago', cancel_order_btn: 'Cancelar pedido pendiente',
+      cancel_order_ok: 'Pedido cancelado.', profile_section_title: 'Mis datos', btn_save_profile: 'Guardar perfil',
+      unsub_news_title: 'Cancelar newsletter', unsub_news_hint: 'Introduzca su email.', unsub_news_btn: 'Cancelar suscripción',
+      unsub_news_ok: 'Suscripción cancelada.',
+      legal_page_title: 'Información legal', legal_fallback_terms: 'Condiciones completas: URL en CONFIG o contáctenos.',
+      legal_fallback_privacy: 'Privacidad completa: URL configurada o contacto.',
+      legal_fallback_returns: 'Devoluciones: URL configurada o contacto.',
+      nav_unsubscribe: 'Cancelar newsletter',
+      no_variants_html: 'Producto sin variantes configuradas — no disponible online. Contáctenos.',
+      loyalty_pts: 'Puntos',
+      loyalty_info_hint: 'Los puntos los gestiona la tienda; el canje sigue las reglas de la marca (tienda o contacto).',
+      cart_cleared: 'Carrito vaciado.',
+      legal_external_hint: 'Documento completo en este enlace:',
+      wishlist_guest_hint: 'Lista guardada en este dispositivo. Inicie sesión para sincronizarla con su cuenta.',
+      wishlist_guest_empty: 'Aún no tiene favoritos guardados en este dispositivo.',
+      wishlist_guest_clear: 'Borrar lista local',
+      review_moderation_hint: 'Los comentarios pueden moderarse antes de publicarse.',
+      review_pending_toast: 'Gracias. Su valoración se revisará antes de mostrarse en la página.'
     }
   };
 
@@ -556,10 +765,162 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     return d.innerHTML;
   }
 
+  function printHtmlFragment(title, html) {
+    var w = window.open('', '_blank');
+    if (!w) {
+      toast('Popup');
+      return;
+    }
+    w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + esc(title) + '</title></head><body style="font-family:system-ui,sans-serif;padding:20px;">' + html + '</body></html>');
+    w.document.close();
+    w.focus();
+    w.print();
+  }
+
+  function extractDriveFileId(url) {
+    if (!url || typeof url !== 'string') return '';
+    var s = url.trim();
+    if (/^data:/i.test(s)) return '';
+    if (/googleusercontent\.com/i.test(s)) return '';
+    var m = s.match(/\/file\/d\/([a-zA-Z0-9_-]{10,})\/?/);
+    if (m) return m[1];
+    m = s.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+    if (m) return m[1];
+    return '';
+  }
+
+  /** Google Drive : vignettes servies pour liste (léger) ou fiche (plus grand). */
+  function erpImgUrlForDisplay(rawUrl, opts) {
+    opts = opts || {};
+    var sz = opts.grid ? 'w280' : 'w960';
+    if (!rawUrl || typeof rawUrl !== 'string') return '';
+    var u = rawUrl.trim();
+    if (!u) return '';
+    if (/^data:/i.test(u)) return u;
+    if (/googleusercontent\.com/i.test(u)) return u;
+    var fid = extractDriveFileId(u);
+    if (fid) return 'https://drive.google.com/thumbnail?id=' + fid + '&sz=' + sz;
+    return u;
+  }
+
+  function erpImgFallbackUrl(rawUrl) {
+    var fid = extractDriveFileId(rawUrl || '');
+    if (fid) return 'https://drive.google.com/uc?export=view&id=' + fid;
+    return '';
+  }
+
+  function productPrimaryImageRaw(p) {
+    var im = (p.imagem && String(p.imagem).trim()) ? String(p.imagem).trim() : '';
+    if (im) return im;
+    var vars = p.variantes || [];
+    for (var i = 0; i < vars.length; i++) {
+      var iv = vars[i].imagem_variante;
+      if (iv && String(iv).trim()) return String(iv).trim();
+    }
+    return '';
+  }
+
+  function driveImgMarkup(rawUrl, isGrid) {
+    if (!rawUrl || !String(rawUrl).trim()) return '';
+    var raw = String(rawUrl).trim();
+    var thumb = erpImgUrlForDisplay(raw, { grid: !!isGrid });
+    var fb = erpImgFallbackUrl(raw);
+    var attrs = ' alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"';
+    if (fb)
+      attrs += ' data-img-fallback="' + esc(fb) + '" onerror="if(window._erpImgFallback)window._erpImgFallback(this)"';
+    else
+      attrs += ' onerror="if(window._erpImgFallback)window._erpImgFallback(this)"';
+    return '<img src="' + esc(thumb) + '"' + attrs + '>';
+  }
+
   function fmtMoney(n) {
     var x = parseFloat(n);
     if (isNaN(x)) x = 0;
     return CURRENCY_SYM + x.toFixed(2).replace('.', ',');
+  }
+
+  /** Prix catalogue / PDP : prix barré si promo (preco > preco_final). */
+  function priceMarkup(p) {
+    var pf = parseFloat(p.preco_final);
+    var po = parseFloat(p.preco);
+    if (isNaN(pf)) pf = 0;
+    if (!isNaN(po) && po > pf + 0.009) {
+      return '<span class="price"><span class="old">' + fmtMoney(po) + '</span> ' + fmtMoney(pf) + '</span>';
+    }
+    return '<span class="price">' + fmtMoney(pf) + '</span>';
+  }
+
+  /** Morada ERP (feuille ENDERECOS) → une ligne pour formulaires. */
+  function formatAddrLines(row) {
+    if (!row) return '';
+    return [row.morada, row.cidade, row.codigo_postal, row.pais].filter(function (x) { return x && String(x).trim(); }).join(', ');
+  }
+
+  var GUEST_WL_KEY = 'boutique_guest_wishlist_ids';
+
+  function parseGuestWishlistIds() {
+    try {
+      var raw = localStorage.getItem(GUEST_WL_KEY);
+      if (!raw) return [];
+      var a = JSON.parse(raw);
+      if (!Array.isArray(a)) return [];
+      return a.map(function (x) { return String(x); }).filter(Boolean);
+    } catch (e) { return []; }
+  }
+
+  function persistGuestWishlistIds(ids) {
+    var uniq = [];
+    ids.forEach(function (id) {
+      var s = String(id);
+      if (s && uniq.indexOf(s) < 0) uniq.push(s);
+    });
+    if (!uniq.length) localStorage.removeItem(GUEST_WL_KEY);
+    else localStorage.setItem(GUEST_WL_KEY, JSON.stringify(uniq.slice(0, 80)));
+  }
+
+  function guestWishlistHas(pid) {
+    return parseGuestWishlistIds().indexOf(String(pid)) >= 0;
+  }
+
+  function toggleGuestWishlist(pid) {
+    var ids = parseGuestWishlistIds();
+    var s = String(pid);
+    var i = ids.indexOf(s);
+    if (i >= 0) ids.splice(i, 1);
+    else ids.push(s);
+    persistGuestWishlistIds(ids);
+  }
+
+  async function mergeGuestWishlistIntoAccount() {
+    var ids = parseGuestWishlistIds();
+    if (!ids.length || !state.clientToken || !state.clientId) return;
+    for (var i = 0; i < ids.length; i++) {
+      await api('addToWishlist', { clientId: state.clientId, produtoId: ids[i] }, state.clientToken);
+    }
+    localStorage.removeItem(GUEST_WL_KEY);
+  }
+
+  /** Synchronise la recherche (état + champ header) et ouvre le catalogue. */
+  function applySearchAndGoCatalog(q) {
+    state.filters.search = (q == null ? '' : String(q)).trim();
+    var hs = document.getElementById('headerSearch');
+    if (hs) hs.value = state.filters.search;
+    location.hash = '#/catalog';
+  }
+
+  /** Après retour Stripe : le paramètre utile est payment_intent (stripe_return=1 est seulement un marqueur dans return_url). */
+  function getStripePaymentIntentFromLocation() {
+    try {
+      var qs = new URLSearchParams(location.search);
+      var pi = qs.get('payment_intent');
+      if (pi) return pi;
+      var href = String(location.href || '');
+      var marker = 'payment_intent=';
+      var idx = href.indexOf(marker);
+      if (idx < 0) return null;
+      var rest = href.slice(idx + marker.length);
+      return decodeURIComponent(rest.split(/[&#'"]/)[0] || '') || null;
+    } catch (e) { return null; }
   }
 
   function toast(msg) {
@@ -586,6 +947,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   var state = {
     brand: null,
+    empresa: null,
     config: {},
     categories: [],
     products: [],
@@ -603,7 +965,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     couponCode: '',
     selectedPayment: 'transfer',
     _bootDone: false,
-    _maintenance: false
+    _maintenance: false,
+    _sessionValidated: false
   };
 
   function saveCartId(id) {
@@ -615,6 +978,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     state.clientToken = tok || '';
     state.clientId = cid || '';
     state.clientNome = nome || '';
+    state._sessionValidated = false;
     if (tok) localStorage.setItem('erp_client_token', tok); else localStorage.removeItem('erp_client_token');
     if (cid) localStorage.setItem('erp_client_id', cid); else localStorage.removeItem('erp_client_id');
     if (nome) localStorage.setItem('erp_client_nome', nome); else localStorage.removeItem('erp_client_nome');
@@ -654,6 +1018,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     openCart();
   }
 
+  async function ensureClientSession() {
+    if (!state.clientToken) return;
+    if (state._sessionValidated) return;
+    var v = await api('validateToken', {}, state.clientToken);
+    state._sessionValidated = true;
+    if (!v.success || v.type !== 'client') {
+      saveSession('', '', '');
+      return;
+    }
+    if (v.nome) {
+      state.clientNome = v.nome;
+      localStorage.setItem('erp_client_nome', v.nome);
+    }
+  }
+
   function openCart() {
     document.getElementById('cartOverlay').classList.add('open');
     document.getElementById('cartDrawer').classList.add('open');
@@ -666,42 +1045,104 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   async function renderCartDrawer() {
     var box = document.getElementById('cartBody');
+    var clr = document.getElementById('clearCartBtn');
     if (!state.cartId) {
       box.innerHTML = '<div class="empty-state">' + esc(tr('cart_empty')) + '</div>';
       document.getElementById('cartTotal').textContent = fmtMoney(0);
+      if (clr) clr.style.display = 'none';
       return;
     }
     var res = await api('getCart', { cartId: state.cartId });
     if (!res.success) {
       box.innerHTML = '<div class="empty-state">' + esc(res.error || '') + '</div>';
+      if (clr) clr.style.display = 'none';
       return;
     }
     var items = res.items || [];
     document.getElementById('cartTotal').textContent = fmtMoney(res.total);
     if (!items.length) {
       box.innerHTML = '<div class="empty-state">' + esc(tr('cart_empty')) + '</div>';
+      if (clr) clr.style.display = 'none';
       return;
     }
+    if (clr) clr.style.display = 'inline-flex';
     var pmap = {};
     (state.products || []).forEach(function (p) { pmap[p.produto_id] = p; });
     var html = '';
     for (var i = 0; i < items.length; i++) {
       var it = items[i];
       var pr = pmap[it.produto_id];
-      var img = pr && pr.imagem ? pr.imagem : '';
+      var rawImg = pr ? productPrimaryImageRaw(pr) : '';
+      var cartThumb = rawImg ? erpImgUrlForDisplay(rawImg, { grid: true }) : '';
+      var cartFb = rawImg ? erpImgFallbackUrl(rawImg) : '';
       var nome = pr ? pr.nome : (it.produto_id || '');
       var line = it.tamanho || it.cor ? ((it.tamanho || '') + ' · ' + (it.cor || '')) : '';
+      var qty = parseInt(String(it.quantidade), 10) || 1;
+      var lineTot = qty * (parseFloat(it.preco) || 0);
       html += '<div class="cart-line">';
-      html += '<img src="' + esc(img || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2280%22%3E%3Crect fill=%22%23e8eef6%22 width=%2264%22 height=%2280%22/%3E%3C/svg%3E') + '" alt="">';
+      if (cartThumb) {
+        html += '<img src="' + esc(cartThumb) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"' +
+          (cartFb ? ' data-img-fallback="' + esc(cartFb) + '"' : '') +
+          ' onerror="if(window._erpImgFallback)window._erpImgFallback(this)">';
+      } else {
+        html += '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2280%22%3E%3Crect fill=%22%23e8eef6%22 width=%2264%22 height=%2280%22/%3E%3C/svg%3E" alt="">';
+      }
       html += '<div><strong>' + esc(nome) + '</strong><div class="sku-note">' + esc(line) + '</div>';
-      html += '<div>' + esc(String(it.quantidade)) + ' × ' + fmtMoney(it.preco) + '</div></div>';
-      html += '<button type="button" class="btn btn-ghost btn-sm rm-cart" data-vid="' + esc(it.variante_id) + '">' + esc(tr('remove')) + '</button>';
+      html += '<div class="cart-qty"><button type="button" class="cq-dec" data-vid="' + esc(it.variante_id) + '" title="">−</button>';
+      html += '<span>' + esc(String(qty)) + '</span>';
+      html += '<button type="button" class="cq-inc" data-vid="' + esc(it.variante_id) + '" title="">+</button></div>';
+      html += '<div class="cart-line-sum">' + fmtMoney(lineTot) + '</div></div>';
+      html += '<div class="cart-actions"><button type="button" class="btn btn-ghost btn-sm rm-cart" data-vid="' + esc(it.variante_id) + '">' + esc(tr('remove')) + '</button></div>';
       html += '</div>';
     }
     box.innerHTML = html;
     box.querySelectorAll('.rm-cart').forEach(function (btn) {
       btn.onclick = async function () {
         await api('removeFromCart', { cartId: state.cartId, variante_id: btn.getAttribute('data-vid') });
+        await refreshCartCount();
+        renderCartDrawer();
+      };
+    });
+    box.querySelectorAll('.cq-inc').forEach(function (btn) {
+      btn.onclick = async function () {
+        var vid = btn.getAttribute('data-vid');
+        var r2 = await api('getCart', { cartId: state.cartId });
+        var row = (r2.items || []).find(function (x) { return String(x.variante_id) === String(vid); });
+        if (!row) return;
+        await api('addToCart', {
+          cartId: state.cartId,
+          produto_id: row.produto_id,
+          variante_id: row.variante_id,
+          tamanho: row.tamanho || '',
+          cor: row.cor || '',
+          quantidade: 1,
+          preco: row.preco,
+          clientId: state.clientId || undefined
+        });
+        await refreshCartCount();
+        renderCartDrawer();
+      };
+    });
+    box.querySelectorAll('.cq-dec').forEach(function (btn) {
+      btn.onclick = async function () {
+        var vid = btn.getAttribute('data-vid');
+        var r2 = await api('getCart', { cartId: state.cartId });
+        var row = (r2.items || []).find(function (x) { return String(x.variante_id) === String(vid); });
+        if (!row) return;
+        var q = parseInt(String(row.quantidade), 10) || 1;
+        await api('removeFromCart', { cartId: state.cartId, variante_id: vid });
+        if (q > 1) {
+          await api('addToCart', {
+            cartId: state.cartId,
+            produto_id: row.produto_id,
+            variante_id: row.variante_id,
+            tamanho: row.tamanho || '',
+            cor: row.cor || '',
+            quantidade: q - 1,
+            preco: row.preco,
+            clientId: state.clientId || undefined
+          });
+        }
         await refreshCartCount();
         renderCartDrawer();
       };
@@ -716,17 +1157,25 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   async function loadBootstrap() {
     if (state._bootDone) return !state._maintenance;
-    var pb = await api('getPublicBrand', {});
+    var results = await Promise.all([
+      api('getPublicBrand', {}),
+      api('getConfig', {}),
+      api('getCategories', {}),
+      api('getEmpresa', {})
+    ]);
+    var pb = results[0];
+    var cf = results[1];
+    var cats = results[2];
+    var emp = results[3];
     if (pb && pb.success && pb.brand) state.brand = pb.brand;
-    var cf = await api('getConfig', {});
     if (cf && cf.success && cf.config) state.config = cf.config;
+    if (emp && emp.success && emp.empresa) state.empresa = emp.empresa;
     if (state.config.currency_symbol) CURRENCY_SYM = state.config.currency_symbol;
     if (state.config.currency_code) CURRENCY_CODE = String(state.config.currency_code).toLowerCase();
 
     var def = (state.brand && state.brand.defaultLang) || state.config.boutique_default_lang || 'pt';
     if (!localStorage.getItem('boutique_lang') && ['pt', 'fr', 'en', 'es'].indexOf(def) >= 0) LANG = def;
 
-    var cats = await api('getCategories', {});
     state.categories = Array.isArray(cats) ? cats : ((cats && cats.categories) ? cats.categories : []);
 
     applyBrandUi();
@@ -752,6 +1201,17 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     document.getElementById('footerBrand').textContent = b.storeName || 'Boutique';
     document.getElementById('footerCopy').textContent = b.storeName || 'Boutique';
     document.getElementById('footerTagline').textContent = b.tagline || '';
+    var md = document.getElementById('metaDesc');
+    var ogT = document.getElementById('ogTitle');
+    var ogD = document.getElementById('ogDesc');
+    var kw = document.getElementById('metaKw');
+    var fv = document.getElementById('dynFavicon');
+    var desc = ((b.tagline || '') + ' · ' + (b.storeName || 'Boutique')).replace(/\s*·\s*$/, '').trim() || (b.storeName || 'Boutique');
+    if (md) md.setAttribute('content', desc.slice(0, 320));
+    if (ogT) ogT.setAttribute('content', name.slice(0, 200));
+    if (ogD) ogD.setAttribute('content', (b.tagline || desc).slice(0, 320));
+    if (kw && state.config.meta_keywords) kw.setAttribute('content', state.config.meta_keywords);
+    if (fv && state.config.favicon_url && /^https?:\/\//i.test(String(state.config.favicon_url))) fv.href = state.config.favicon_url;
     if (b.logoUrl) {
       var lg = document.getElementById('headerLogo');
       lg.src = b.logoUrl;
@@ -778,30 +1238,57 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       document.documentElement.style.setProperty('--announce-h', '0px');
     }
 
-    function linkOrHide(el, url) {
-      if (url && /^https?:\/\//i.test(url)) { el.href = url; el.style.display = ''; }
-      else el.style.display = 'none';
+    function linkLegal(el, url, fallbackHash) {
+      if (!el) return;
+      if (url && /^https?:\/\//i.test(String(url))) {
+        el.href = url;
+        el.target = '_blank';
+        el.rel = 'noopener noreferrer';
+        el.style.display = '';
+      } else {
+        el.href = fallbackHash;
+        el.removeAttribute('target');
+        el.removeAttribute('rel');
+        el.style.display = '';
+      }
     }
-    linkOrHide(document.getElementById('linkTerms'), state.config.legal_terms_url);
-    linkOrHide(document.getElementById('linkPrivacy'), state.config.legal_privacy_url);
-    linkOrHide(document.getElementById('linkReturns'), state.config.legal_returns_url);
+    linkLegal(document.getElementById('linkTerms'), state.config.legal_terms_url, '#/legal/terms');
+    linkLegal(document.getElementById('linkPrivacy'), state.config.legal_privacy_url, '#/legal/privacy');
+    linkLegal(document.getElementById('linkReturns'), state.config.legal_returns_url, '#/legal/returns');
 
-    if (state.config.social_instagram) {
-      var ig = document.getElementById('socialIg');
-      ig.href = state.config.social_instagram;
-      ig.style.display = '';
+    var ig = document.getElementById('socialIg');
+    if (ig) {
+      if (state.config.social_instagram && /^https?:\/\//i.test(String(state.config.social_instagram))) {
+        ig.href = state.config.social_instagram;
+        ig.style.display = '';
+      } else ig.style.display = 'none';
     }
-    if (state.config.social_facebook) {
-      var fb = document.getElementById('socialFb');
-      fb.href = state.config.social_facebook;
-      fb.style.display = '';
+    var fba = document.getElementById('socialFb');
+    if (fba) {
+      if (state.config.social_facebook && /^https?:\/\//i.test(String(state.config.social_facebook))) {
+        fba.href = state.config.social_facebook;
+        fba.style.display = '';
+      } else fba.style.display = 'none';
     }
 
     if (window.ERP_ADMIN_URL && /^https?:\/\//i.test(window.ERP_ADMIN_URL)) {
       var adm = document.getElementById('adminLinkP');
-      adm.style.display = 'block';
-      adm.innerHTML = '<a href="' + esc(window.ERP_ADMIN_URL) + '" style="color:inherit;">Admin ERP</a>';
+      if (adm) {
+        adm.style.display = 'block';
+        adm.innerHTML = '<a href="' + esc(window.ERP_ADMIN_URL) + '" style="color:inherit;">Admin ERP</a>';
+      }
     }
+
+    var fel = document.getElementById('footerEmpresaLine');
+    var em = state.empresa || {};
+    if (fel && (em.telefone || em.email || em.nif)) {
+      fel.style.display = 'block';
+      var bits = [];
+      if (em.telefone) bits.push(esc(em.telefone));
+      if (em.email) bits.push('<a href="mailto:' + esc(em.email) + '" style="color:inherit;">' + esc(em.email) + '</a>');
+      if (em.nif) bits.push('<span style="opacity:.85;">NIF · ' + esc(em.nif) + '</span>');
+      fel.innerHTML = bits.join('<br>');
+    } else if (fel) fel.style.display = 'none';
 
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -845,29 +1332,34 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   function productCard(p) {
     var avail = p.disponivel !== false;
     var href = '#/product/' + encodeURIComponent(p.produto_id);
+    var imgHtml = driveImgMarkup(productPrimaryImageRaw(p), true);
+    if (!imgHtml)
+      imgHtml = '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="lazy">';
     return (
       '<a class="card" href="' + href + '">' +
         '<div class="card-img-wrap">' +
-          (p.imagem ? '<img src="' + esc(p.imagem) + '" alt="" loading="lazy">' : '') +
+          imgHtml +
           (!avail ? '<span class="card-badge">' + esc(tr('unavailable')) + '</span>' : '') +
         '</div>' +
         '<div class="card-body">' +
           '<div class="card-cat">' + esc(p.categoria || '') + '</div>' +
           '<h3>' + esc(p.nome || '') + '</h3>' +
-          '<div class="price">' + fmtMoney(p.preco_final) + '</div>' +
+          priceMarkup(p) +
         '</div>' +
       '</a>'
     );
   }
 
-  async function fetchProducts(resetPage) {
+  async function fetchProducts(resetPage, fetchOpts) {
+    fetchOpts = fetchOpts || {};
     if (resetPage) state.page = 1;
+    var ps = fetchOpts.pageSize != null ? fetchOpts.pageSize : state.pageSize;
     var payload = {
       search: state.filters.search || undefined,
       categoria: state.filters.categoria || undefined,
       sort: state.filters.sort || 'date_desc',
       page: state.page,
-      pageSize: state.pageSize,
+      pageSize: ps,
       in_stock: state.filters.in_stock ? true : undefined
     };
     var res = await api('getProducts', payload);
@@ -890,12 +1382,19 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '<input type="search" class="mobile-search" id="mobileSearch" placeholder="' + esc(tr('search_ph')) + '">' +
       '<div id="homeFeatured"></div>';
 
-    document.getElementById('mobileSearch').onchange = function () {
-      state.filters.search = this.value;
-      location.hash = '#/catalog';
-    };
+    (function bindMs(el) {
+      if (!el) return;
+      el.addEventListener('change', function () { applySearchAndGoCatalog(el.value); });
+      el.addEventListener('search', function () { applySearchAndGoCatalog(el.value); });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applySearchAndGoCatalog(el.value);
+        }
+      });
+    })(document.getElementById('mobileSearch'));
 
-    await fetchProducts(true);
+    await fetchProducts(true, { pageSize: 8 });
     var feat = document.getElementById('homeFeatured');
     feat.innerHTML = '<h2 style="margin:8px 0 20px;font-family:var(--display);font-size:1.75rem;">' + esc(tr('catalogue')) + '</h2>' +
       '<div class="grid-products">' + state.products.slice(0, 8).map(productCard).join('') + '</div>' +
@@ -958,11 +1457,13 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     };
 
     await reload();
+    var hs = document.getElementById('headerSearch');
+    if (hs) hs.value = state.filters.search || '';
   }
 
-  function pickVariantImage(p, v) {
-    if (v && v.imagem_variante) return v.imagem_variante;
-    return p.imagem || '';
+  function pickVariantImageRaw(p, v) {
+    if (v && v.imagem_variante && String(v.imagem_variante).trim()) return String(v.imagem_variante).trim();
+    return productPrimaryImageRaw(p);
   }
 
   async function renderProduct(id) {
@@ -976,14 +1477,46 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var p = res.product;
     state.products = [p];
 
+    var pdpWishlisted = false;
+    if (state.clientId && state.clientToken) {
+      var wl = await api('getWishlist', { clientId: state.clientId }, state.clientToken);
+      if (wl.success && wl.wishlist) {
+        pdpWishlisted = wl.wishlist.some(function (w) { return String(w.produto_id) === String(p.produto_id); });
+      }
+    } else if (p.produto_id) {
+      pdpWishlisted = guestWishlistHas(p.produto_id);
+    }
+
+    var revsVisible = (p.avaliacoes || []).filter(function (r) {
+      var st = String(r.estado || r.status || '').toLowerCase();
+      return st !== 'pendente' && st !== 'pending';
+    });
+
     var vars = p.variantes || [];
+    if (!vars.length) {
+      var rawOnly = productPrimaryImageRaw(p);
+      var imgOnly = rawOnly ? driveImgMarkup(rawOnly, false) : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="lazy">';
+      main.innerHTML =
+        '<div class="breadcrumb"><a href="#/catalog">' + esc(tr('catalogue')) + '</a> / ' + esc(p.nome) + '</div>' +
+        '<div class="pdp-layout">' +
+        '<div class="pdp-gallery"><div class="pdp-main-img">' + imgOnly + '</div></div>' +
+        '<div class="pdp-info"><h1>' + esc(p.nome) + '</h1>' +
+        '<div style="margin:12px 0;">' + priceMarkup(p) + '</div>' +
+        '<div class="panel"><p>' + esc(tr('no_variants_html')) + '</p>' +
+        '<a href="#/contact" class="btn btn-primary">' + esc(tr('nav_contact')) + '</a></div>' +
+        '</div></div>';
+      return;
+    }
     var selected = vars[0] || null;
 
     function renderPdp(selV) {
-      var imgUrl = pickVariantImage(p, selV);
+      var rawImgPdp = pickVariantImageRaw(p, selV);
+      var pdpImgHtml = rawImgPdp
+        ? driveImgMarkup(rawImgPdp, false)
+        : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="lazy">';
       var stars = '';
-      var avg = parseFloat(p.avaliacoes && p.avaliacoes.length ? (p.avaliacoes.reduce(function (s, r) { return s + parseInt(r.nota || 0, 10); }, 0) / p.avaliacoes.length) : 0);
-      if (avg > 0) stars = '<span class="stars">' + '★'.repeat(Math.round(avg)) + '</span> <span class="sku-note">(' + p.avaliacoes.length + ')</span>';
+      var avg = parseFloat(revsVisible.length ? (revsVisible.reduce(function (s, r) { return s + parseInt(r.nota || 0, 10); }, 0) / revsVisible.length) : 0);
+      if (avg > 0) stars = '<span class="stars">' + '★'.repeat(Math.round(avg)) + '</span> <span class="sku-note">(' + revsVisible.length + ')</span>';
 
       var chips = '';
       vars.forEach(function (v) {
@@ -996,22 +1529,24 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       main.innerHTML =
         '<div class="breadcrumb"><a href="#/catalog">' + esc(tr('catalogue')) + '</a> / ' + esc(p.nome) + '</div>' +
         '<div class="pdp-layout">' +
-        '<div class="pdp-gallery"><div class="pdp-main-img"><img src="' + esc(imgUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E') + '" alt=""></div></div>' +
+        '<div class="pdp-gallery"><div class="pdp-main-img">' + pdpImgHtml + '</div></div>' +
         '<div class="pdp-info">' +
         '<h1>' + esc(p.nome) + '</h1>' + stars +
-        '<div class="price" style="margin:12px 0;">' + fmtMoney(p.preco_final) + '</div>' +
+        '<div style="margin:12px 0;">' + priceMarkup(p) + '</div>' +
         '<p style="line-height:1.6;color:var(--text-muted);">' + esc(p.descricao || '').replace(/\n/g, '<br>') + '</p>' +
         (vars.length ? '<p style="margin-top:16px;font-weight:600;">' + esc(tr('variant_label')) + '</p><div class="variant-grid" id="vChips">' + chips + '</div>' : '') +
         '<div class="qty-row"><label>' + esc(tr('qty_label')) + '</label><input type="number" id="pdpQty" min="1" value="1" max="99"></div>' +
-        '<div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">' +
+        '<div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;align-items:center;">' +
         '<button type="button" class="btn btn-primary" id="btnAdd">' + esc(tr('btn_add_cart')) + '</button>' +
         '<button type="button" class="btn btn-accent" id="btnBuy">' + esc(tr('btn_buy')) + '</button>' +
+        '<button type="button" class="btn btn-ghost" id="btnFav">' + esc(pdpWishlisted ? tr('fav_remove') : tr('fav_add')) + '</button>' +
         '</div>' +
         '<div style="margin-top:32px;"><h3 style="font-family:var(--display);">' + esc(tr('reviews')) + '</h3>' +
-        '<div id="revList">' + (p.avaliacoes || []).map(function (r) {
+        '<div id="revList">' + revsVisible.map(function (r) {
           return '<div style="border-bottom:1px solid var(--border);padding:12px 0;"><strong>' + esc('★'.repeat(parseInt(r.nota || 0, 10))) + '</strong><p style="margin:8px 0 0;">' + esc(r.comentario || '') + '</p></div>';
         }).join('') + '</div>' +
         (state.clientId ? '<div class="panel" style="margin-top:16px;"><h4>' + esc(tr('write_review')) + '</h4>' +
+          '<p class="sku-note" style="margin-top:0;line-height:1.5;">' + esc(tr('review_moderation_hint')) + '</p>' +
           '<div class="field"><textarea id="rvText" rows="3"></textarea></div>' +
           '<div class="field"><label>1–5</label><input type="number" id="rvStars" min="1" max="5" value="5"></div>' +
           '<button type="button" class="btn btn-primary" id="rvSend">' + esc(tr('submit_review')) + '</button></div>' : '') +
@@ -1037,12 +1572,37 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         addToCartLine(p, selV, q);
         location.hash = '#/checkout';
       };
+      var btnFav = document.getElementById('btnFav');
+      if (btnFav) btnFav.onclick = async function () {
+        if (state.clientId && state.clientToken) {
+          if (pdpWishlisted) {
+            var rm = await api('removeFromWishlist', { clientId: state.clientId, produtoId: p.produto_id }, state.clientToken);
+            if (rm.success) {
+              pdpWishlisted = false;
+              toast(tr('fav_remove'));
+              renderPdp(selV);
+            } else toast(rm.error || '—');
+          } else {
+            var ad = await api('addToWishlist', { clientId: state.clientId, produtoId: p.produto_id }, state.clientToken);
+            if (ad.success) {
+              pdpWishlisted = true;
+              toast(tr('fav_add'));
+              renderPdp(selV);
+            } else toast(ad.error || '—');
+          }
+        } else {
+          toggleGuestWishlist(p.produto_id);
+          pdpWishlisted = guestWishlistHas(p.produto_id);
+          toast(pdpWishlisted ? tr('fav_add') : tr('fav_remove'));
+          renderPdp(selV);
+        }
+      };
       var rvBtn = document.getElementById('rvSend');
       if (rvBtn) rvBtn.onclick = async function () {
         var txt = document.getElementById('rvText').value;
         var n = parseInt(document.getElementById('rvStars').value, 10) || 5;
         var r = await api('createReview', { produtoId: p.produto_id, clientId: state.clientId, nota: n, comentario: txt }, state.clientToken);
-        if (r.success) toast('OK');
+        if (r.success) toast(tr('review_pending_toast'));
         else toast(r.error || '—');
       };
     }
@@ -1058,7 +1618,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var pmap = {};
     state.products.forEach(function (p) { pmap[p.produto_id] = p; });
     if (!Object.keys(pmap).length) {
-      var pres = await api('getProducts', { pageSize: 200, page: 1 });
+      var pres = await api('getProducts', { pageSize: 120, page: 1 });
       (pres.products || []).forEach(function (p) { pmap[p.produto_id] = p; });
     }
     return items.map(function (it) {
@@ -1091,8 +1651,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var total = Math.max(0, sub - discount);
 
     var payStripe = String(state.config.pay_stripe_enabled) === '1' && String(state.config.pay_show_stripe) === '1' && window.STRIPE_PUBLISHABLE_KEY;
+    var payCartaoManual = String(state.config.pay_show_cartao) !== '0' && !payStripe;
     var payTransfer = String(state.config.pay_transfer_enabled) !== '0' && String(state.config.pay_show_transfer) !== '0';
     var payCod = String(state.config.pay_cod_enabled) !== '0' && String(state.config.pay_show_cod) !== '0';
+    var payMbway = String(state.config.pay_show_mbway) !== '0';
+    var payPaypal = String(state.config.pay_show_paypal) !== '0';
+    var payMulti = String(state.config.pay_show_multibanco) !== '0';
 
     main.innerHTML =
       '<h1 style="font-family:var(--display);font-size:2rem;margin:0 0 24px;">' + esc(tr('checkout_title')) + '</h1>' +
@@ -1101,11 +1665,18 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="coName" value="' + esc(state.clientNome) + '"></div>' +
       '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="coEmail" type="email"></div>' +
       '<div class="field"><label>' + esc(tr('lbl_phone')) + '</label><input id="coPhone"></div>' +
+      '<div class="field" id="coAddrPickWrap" style="display:none;"><label>' + esc(tr('addr_pick_saved')) + '</label><select id="coAddrPick"><option value="">—</option></select></div>' +
       '<div class="field"><label>' + esc(tr('lbl_address')) + '</label><textarea id="coAddr" rows="3"></textarea></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+      '<div class="field"><label>' + esc(tr('lbl_city')) + '</label><input id="coCity"></div>' +
+      '<div class="field"><label>' + esc(tr('lbl_zip')) + '</label><input id="coZip"></div></div>' +
+      '<div class="field"><label>' + esc(tr('lbl_country')) + '</label><input id="coCountry"></div>' +
+      '<div class="field" id="coSaveAddrWrap" style="display:none;"><label><input type="checkbox" id="coSaveAddr"> ' + esc(tr('addr_save_chk')) + '</label></div>' +
       '<div class="field" style="display:flex;gap:8px;">' +
       '<input id="coCoupon" placeholder="' + esc(tr('lbl_coupon')) + '" style="flex:1"><button type="button" class="btn btn-ghost" id="coCoupBtn">' + esc(tr('coupon_apply')) + '</button></div>' +
       '<div class="field"><label class="payment-options"><input type="checkbox" id="coTerms"> ' + esc(tr('terms_chk')) + '</label></div>' +
       '<h3>' + esc(tr('pay_method')) + '</h3><div class="payment-options" id="payOpts"></div>' +
+      '<div id="payInstr" class="pay-hint-box" style="display:none;"></div>' +
       '<div id="payment-element"></div>' +
       '<button type="button" class="btn btn-primary" id="coSubmit" style="width:100%;margin-top:16px;">' + esc(tr('place_order')) + '</button>' +
       '</div>' +
@@ -1117,15 +1688,73 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '</div></div>';
 
     var po = document.getElementById('payOpts');
+    po.innerHTML = '';
     function addPay(val, label, chk) {
       var lab = document.createElement('label');
       lab.innerHTML = '<input type="radio" name="paym" value="' + esc(val) + '"' + (chk ? ' checked' : '') + '> ' + esc(label);
       po.appendChild(lab);
     }
-    if (payStripe) addPay('stripe', tr('payment_stripe_hint'), true);
-    if (payTransfer) addPay('transfer', tr('pay_transfer'), !payStripe);
-    if (payCod) addPay('cod', tr('pay_cod'), !payStripe && !payTransfer);
-    addPay('other', tr('pay_other'), !payStripe && !payTransfer && !payCod);
+    var picked = false;
+    function pickPay(label, val) {
+      addPay(val, label, !picked);
+      picked = true;
+    }
+    if (payStripe) pickPay(tr('payment_stripe_hint'), 'stripe');
+    if (payCartaoManual) pickPay(tr('pay_card_manual'), 'cartao_manual');
+    if (payMbway) pickPay(tr('pay_mbway'), 'mbway');
+    if (payPaypal) pickPay(tr('pay_paypal'), 'paypal');
+    if (payMulti) pickPay(tr('pay_multibanco'), 'multibanco');
+    if (payTransfer) pickPay(tr('pay_transfer'), 'transfer');
+    if (payCod) pickPay(tr('pay_cod'), 'cod');
+    pickPay(tr('pay_other'), 'other');
+
+    function refreshPayInstr() {
+      var el = document.getElementById('payInstr');
+      var rd = document.querySelector('input[name="paym"]:checked');
+      if (!el || !rd) return;
+      var v = rd.value;
+      var parts = [];
+      if (v === 'transfer') {
+        parts.push(tr('pay_instr_transfer'));
+        if (state.config.transfer_iban) parts.push(state.config.transfer_iban);
+      } else if (v === 'mbway') parts.push(tr('pay_instr_mbway'));
+      else if (v === 'multibanco') parts.push(tr('pay_instr_multibanco'));
+      else if (v === 'paypal') parts.push(tr('pay_instr_paypal'));
+      else if (v === 'cartao_manual') parts.push(tr('pay_card_manual'));
+      var txt = parts.filter(Boolean).join('\n');
+      el.textContent = txt;
+      el.style.display = txt.trim() ? 'block' : 'none';
+    }
+    po.addEventListener('change', refreshPayInstr);
+    refreshPayInstr();
+
+    var addrPickWrap = document.getElementById('coAddrPickWrap');
+    var addrPick = document.getElementById('coAddrPick');
+    var saveAddrWrap = document.getElementById('coSaveAddrWrap');
+    if (state.clientToken && state.clientId && saveAddrWrap) saveAddrWrap.style.display = '';
+    if (state.clientToken && state.clientId && addrPickWrap && addrPick) {
+      var arList = await api('getClientAddresses', { clientId: state.clientId }, state.clientToken);
+      if (arList.success && arList.addresses && arList.addresses.length) {
+        addrPickWrap.style.display = '';
+        arList.addresses.forEach(function (a, idx) {
+          var opt = document.createElement('option');
+          opt.value = String(idx);
+          opt.textContent = formatAddrLines(a).slice(0, 96) || ('#' + String(idx));
+          opt._addrRow = a;
+          addrPick.appendChild(opt);
+        });
+        addrPick.onchange = function () {
+          var opt = addrPick.options[addrPick.selectedIndex];
+          if (opt && opt._addrRow) {
+            var rw = opt._addrRow;
+            document.getElementById('coAddr').value = (rw.morada != null && String(rw.morada).trim()) ? String(rw.morada) : '';
+            document.getElementById('coCity').value = rw.cidade != null ? String(rw.cidade) : '';
+            document.getElementById('coZip').value = rw.codigo_postal != null ? String(rw.codigo_postal) : '';
+            document.getElementById('coCountry').value = rw.pais != null ? String(rw.pais) : '';
+          }
+        };
+      }
+    }
 
     document.getElementById('coCoupBtn').onclick = async function () {
       state.couponCode = document.getElementById('coCoupon').value.trim();
@@ -1149,6 +1778,17 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       var termsOk = document.getElementById('coTerms').checked || String(state.config.checkout_require_terms) === '0';
       if (!em || !nm) { toast('Email / nome'); return; }
       if (!termsOk) { toast(tr('terms_chk')); return; }
+      var saveChkEl = document.getElementById('coSaveAddr');
+      if (state.clientToken && saveChkEl && saveChkEl.checked && ad) {
+        await api('saveClientAddress', {
+          clientId: state.clientId,
+          tipo: 'envio',
+          morada: ad,
+          cidade: document.getElementById('coCity').value.trim(),
+          codigo_postal: document.getElementById('coZip').value.trim(),
+          pais: document.getElementById('coCountry').value.trim()
+        }, state.clientToken);
+      }
       var payEl = document.querySelector('input[name="paym"]:checked');
       var payM = payEl ? payEl.value : 'transfer';
       var awaitPay = payM === 'stripe' && payStripe;
@@ -1223,6 +1863,201 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     }
   }
 
+  function renderLegalPage(slug) {
+    var main = document.getElementById('main');
+    var s = String(slug || '').toLowerCase();
+    var cfgUrl = '';
+    var fbKey = 'legal_fallback_terms';
+    if (s === 'terms') {
+      cfgUrl = state.config.legal_terms_url;
+      fbKey = 'legal_fallback_terms';
+    } else if (s === 'privacy') {
+      cfgUrl = state.config.legal_privacy_url;
+      fbKey = 'legal_fallback_privacy';
+    } else if (s === 'returns') {
+      cfgUrl = state.config.legal_returns_url;
+      fbKey = 'legal_fallback_returns';
+    } else {
+      main.innerHTML =
+        '<div class="panel"><h1 style="font-family:var(--display);">' + esc(tr('legal_page_title')) + '</h1>' +
+        '<p>' + esc(tr('legal_fallback_terms')) + '</p>' +
+        '<p><a href="#/contact" class="btn btn-primary">' + esc(tr('nav_contact')) + '</a></p></div>';
+      return;
+    }
+    var ext = cfgUrl && String(cfgUrl).trim();
+    if (ext && /^https?:\/\//i.test(ext)) {
+      main.innerHTML =
+        '<div class="panel"><h1 style="font-family:var(--display);">' + esc(tr('legal_page_title')) + '</h1>' +
+        '<p>' + esc(tr('legal_external_hint')) + '</p>' +
+        '<p><a href="' + esc(ext) + '" target="_blank" rel="noopener noreferrer">' + esc(ext) + '</a></p>' +
+        '<p><a href="#/contact" class="btn btn-ghost">' + esc(tr('nav_contact')) + '</a></p></div>';
+      return;
+    }
+    main.innerHTML =
+      '<div class="panel"><h1 style="font-family:var(--display);">' + esc(tr('legal_page_title')) + '</h1>' +
+      '<p>' + esc(tr(fbKey)) + '</p>' +
+      '<p><a href="#/contact" class="btn btn-ghost">' + esc(tr('nav_contact')) + '</a></p></div>';
+  }
+
+  function renderNewsletterUnsub() {
+    var main = document.getElementById('main');
+    main.innerHTML =
+      '<h1 style="font-family:var(--display);">' + esc(tr('unsub_news_title')) + '</h1>' +
+      '<div class="panel" style="max-width:520px">' +
+      '<p class="sku-note">' + esc(tr('unsub_news_hint')) + '</p>' +
+      '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input type="email" id="unsubEmail" placeholder="' + esc(tr('newsletter_ph')) + '"></div>' +
+      '<button type="button" class="btn btn-primary" id="unsubNewsBtn">' + esc(tr('unsub_news_btn')) + '</button></div>';
+    document.getElementById('unsubNewsBtn').onclick = async function () {
+      var em = document.getElementById('unsubEmail').value.trim().toLowerCase();
+      if (!em) return;
+      var r = await api('unsubscribeNewsletter', { email: em });
+      if (r.success) toast(tr('unsub_news_ok'));
+      else toast(r.error || '—');
+    };
+  }
+
+  async function renderWishlist() {
+    var main = document.getElementById('main');
+    if (!state.clientToken || !state.clientId) {
+      var gid = parseGuestWishlistIds();
+      main.innerHTML =
+        '<h1 style="font-family:var(--display);">' + esc(tr('wishlist_title')) + '</h1>' +
+        '<p class="sku-note" style="margin:8px 0 16px;max-width:560px;line-height:1.55;">' + esc(tr('wishlist_guest_hint')) + '</p>' +
+        '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px;">' +
+        '<button type="button" class="btn btn-primary" id="wlLogin">' + esc(tr('login')) + '</button>' +
+        '<a href="#/catalog" class="btn btn-ghost">' + esc(tr('catalogue')) + '</a>' +
+        (gid.length ? '<button type="button" class="btn btn-ghost btn-sm" id="wlGuestClear">' + esc(tr('wishlist_guest_clear')) + '</button>' : '') +
+        '</div>' +
+        '<div id="wlGuestMount"></div>';
+      document.getElementById('wlLogin').onclick = function () { openAuth('login'); };
+      var wgc = document.getElementById('wlGuestClear');
+      if (wgc) {
+        wgc.onclick = function () {
+          persistGuestWishlistIds([]);
+          renderWishlist();
+        };
+      }
+      if (!gid.length) {
+        document.getElementById('wlGuestMount').innerHTML = '<div class="empty-state">' + esc(tr('wishlist_guest_empty')) + '</div>';
+        return;
+      }
+      document.getElementById('wlGuestMount').innerHTML = '<div class="spinner"></div>';
+      var prods = [];
+      for (var g = 0; g < gid.length; g++) {
+        var pr = await api('getProduct', { id: gid[g] });
+        if (pr.success && pr.product) prods.push(pr.product);
+      }
+      if (!prods.length) {
+        document.getElementById('wlGuestMount').innerHTML = '<div class="empty-state">' + esc(tr('wishlist_guest_empty')) + '</div>';
+        return;
+      }
+      document.getElementById('wlGuestMount').innerHTML = '<div class="grid-products">' + prods.map(productCard).join('') + '</div>';
+      return;
+    }
+    main.innerHTML = '<div class="spinner"></div>';
+    var wr = await api('getWishlist', { clientId: state.clientId }, state.clientToken);
+    main.innerHTML = '<h1 style="font-family:var(--display);">' + esc(tr('wishlist_title')) + '</h1>';
+    if (!wr.success || !(wr.wishlist || []).length) {
+      main.innerHTML += '<div class="empty-state">' + esc(tr('wishlist_empty')) + '</div>';
+      return;
+    }
+    main.innerHTML += '<div class="grid-products">' + wr.wishlist.map(function (w) {
+      var pr = w.produto || {};
+      return productCard(pr);
+    }).join('') + '</div>';
+  }
+
+  async function renderOrderDetail(orderId) {
+    var main = document.getElementById('main');
+    if (!state.clientToken) {
+      main.innerHTML = '<div class="empty-state"><button type="button" class="btn btn-primary" id="odLogin">' + esc(tr('login')) + '</button></div>';
+      document.getElementById('odLogin').onclick = function () { openAuth('login'); };
+      return;
+    }
+    main.innerHTML = '<div class="spinner"></div>';
+    var chk = await api('getOrders', { clientId: state.clientId, email: '' }, state.clientToken);
+    var ok = (chk.orders || []).some(function (o) { return String(o.pedido_id) === String(orderId); });
+    if (!ok) {
+      main.innerHTML = '<div class="empty-state">' + esc(tr('account_orders_empty')) + '</div>';
+      return;
+    }
+    var res = await api('getOrder', { orderId: orderId });
+    if (!res.success || !res.order) {
+      main.innerHTML = '<div class="empty-state">' + esc(res.error || '—') + '</div>';
+      return;
+    }
+    var o = res.order;
+    var showCancel = String(o.estado_pagamento || '').toLowerCase() === 'aguardando_pagamento' && !!(o.email || '').trim();
+    var cancelBtn = showCancel ? '<p style="margin-top:12px;"><button type="button" class="btn btn-ghost" id="btnCancelOrd">' + esc(tr('cancel_order_btn')) + '</button></p>' : '';
+    var det = res.details || [];
+    var ent = res.entrega || null;
+    var rows = det.map(function (d) {
+      return '<tr><td>' + esc(d.nome_produto || d.produto_id || '') + '</td><td>' + esc(String(d.quantidade || '')) + '</td><td>' + fmtMoney(d.preco) + '</td></tr>';
+    }).join('');
+    main.innerHTML =
+      '<div class="breadcrumb"><a href="#/account">' + esc(tr('btn_back_account')) + '</a></div>' +
+      '<h1 style="font-family:var(--display);">' + esc(tr('order_detail_title')) + ' ' + esc(o.pedido_id) + '</h1>' +
+      '<div class="panel">' +
+      '<p><strong>' + esc(tr('order_date')) + '</strong> ' + esc(o.data || '') + '</p>' +
+      '<p><strong>' + esc(tr('order_status')) + '</strong> ' + esc(o.estado || '') + '</p>' +
+      (o.endereco ? '<p><strong>' + esc(tr('order_ship_addr')) + '</strong><br>' + esc(o.endereco).replace(/\n/g, '<br>') + '</p>' : '') +
+      (ent && ent.tracking_number ? '<p><strong>' + esc(tr('tracking_no')) + '</strong> ' + esc(ent.tracking_number) +
+        (ent.transportadora ? ' · ' + esc(ent.transportadora) : '') + '</p>' : '') +
+      '<h4 style="margin-top:16px;">' + esc(tr('order_lines')) + '</h4>' +
+      '<table class="order-lines-table"><thead><tr><th>' + esc(tr('order_col_prod')) + '</th><th>' + esc(tr('qty_label')) + '</th><th>' + esc(tr('order_col_price')) + '</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p style="margin-top:16px;font-size:18px;font-weight:700;">' + esc(tr('total')) + ' ' + fmtMoney(o.total) + '</p>' +
+      '<p style="margin-top:12px;"><strong>' + esc(tr('order_pay_status')) + '</strong> ' + esc(o.estado_pagamento || '—') + '</p>' +
+      cancelBtn +
+      '<p style="margin-top:12px;"><button type="button" class="btn btn-accent btn-sm" id="btnInvDetail">' + esc(tr('invoice_breakdown')) + '</button></p>' +
+      '<div id="invMount"></div>' +
+      '</div>' +
+      '<div class="panel" style="margin-top:16px;">' +
+      '<h4>' + esc(tr('return_open_btn')) + '</h4>' +
+      '<div class="field"><label>' + esc(tr('ret_reason')) + '</label><input id="retReasonIn"></div>' +
+      '<div class="field"><label>' + esc(tr('contact_msg')) + '</label><textarea id="retNotesIn" rows="2"></textarea></div>' +
+      '<button type="button" class="btn btn-primary" id="retSubmitBtn">' + esc(tr('return_submit_btn')) + '</button>' +
+      '</div>';
+    var btnCx = document.getElementById('btnCancelOrd');
+    if (btnCx) btnCx.onclick = async function () {
+      if (!window.confirm(tr('cancel_order_btn') + '?')) return;
+      var cr = await api('cancelPendingOrder', { orderId: orderId, email: String(o.email || '').trim() });
+      if (cr.success) {
+        toast(tr('cancel_order_ok'));
+        location.hash = '#/account';
+      } else toast(cr.error || '—');
+    };
+    document.getElementById('btnInvDetail').onclick = async function () {
+      var inv = await api('getInvoiceData', { orderId: orderId }, state.clientToken);
+      if (!inv.success) { toast(inv.error || '—'); return; }
+      var lines = (inv.lines || []).map(function (l) {
+        return '<tr><td>' + esc(l.nome) + '</td><td>' + esc(l.quantidade) + '</td><td>' + fmtMoney(l.preco_unit_ttc) + '</td><td>' + fmtMoney(l.subtotal_ttc) + '</td><td>' + esc(String(l.tva_pct != null ? l.tva_pct : '')) + '</td></tr>';
+      }).join('');
+      var emp = inv.empresa || {};
+      var tot = inv.totals || {};
+      var hdr = '<h3>' + esc(emp.nome || '') + '</h3><p class="sku-note">' + esc(tr('order_detail_title')) + ' ' + esc(orderId) + '</p>';
+      var tbl = '<table class="order-lines-table"><thead><tr><th>' + esc(tr('order_col_prod')) + '</th><th>' + esc(tr('qty_label')) + '</th><th>' + esc(tr('order_col_price')) + '</th><th>TTC</th><th>TVA %</th></tr></thead><tbody>' + lines + '</tbody></table>';
+      var summ = '<p><strong>' + esc(tr('invoice_sub_ht')) + '</strong> ' + fmtMoney(tot.subtotal_ht) + '</p>' +
+        '<p><strong>' + esc(tr('invoice_vat')) + '</strong> ' + fmtMoney(tot.iva) + '</p>' +
+        '<p><strong>' + esc(tr('invoice_total_ttc')) + '</strong> ' + fmtMoney(tot.total) + '</p>';
+      document.getElementById('invMount').innerHTML = '<div class="invoice-print" id="invoicePrintZone">' + hdr + tbl + summ + '</div>' +
+        '<button type="button" class="btn btn-primary btn-sm" style="margin-top:12px;" id="btnPrintInv">' + esc(tr('btn_print')) + '</button>';
+      document.getElementById('btnPrintInv').onclick = function () {
+        printHtmlFragment(tr('invoice_breakdown') + ' ' + orderId, document.getElementById('invoicePrintZone').innerHTML);
+      };
+    };
+    document.getElementById('retSubmitBtn').onclick = async function () {
+      var rr = await api('createClientReturn', {
+        order_id: orderId,
+        reason: document.getElementById('retReasonIn').value,
+        notes: document.getElementById('retNotesIn').value,
+        product: '',
+        qty: 1
+      }, state.clientToken);
+      if (rr.success) toast(tr('return_submit_btn') + ' ✓');
+      else toast(rr.error || '—');
+    };
+  }
+
   async function renderContact() {
     document.getElementById('main').innerHTML =
       '<h1 style="font-family:var(--display);">' + esc(tr('contact_title')) + '</h1>' +
@@ -1249,10 +2084,22 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     document.getElementById('authTitle').textContent = mode === 'reg' ? tr('register') : tr('login');
     if (mode === 'login') {
       body.innerHTML =
+        '<div id="loginMain">' +
         '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="lgEmail" type="email"></div>' +
         '<div class="field"><label>' + esc(tr('lbl_pass')) + '</label><input id="lgPass" type="password"></div>' +
         '<button type="button" class="btn btn-primary" style="width:100%" id="lgGo">' + esc(tr('login')) + '</button>' +
-        '<p style="margin-top:14px;"><a href="#" id="swReg">' + esc(tr('register')) + '</a></p>';
+        '<p style="margin-top:14px;"><a href="#" id="swReg">' + esc(tr('register')) + '</a> · <a href="#" id="pwdForgot">' + esc(tr('pwd_forgot')) + '</a></p>' +
+        '</div>' +
+        '<div id="pwdResetBox" style="display:none;">' +
+        '<p class="sku-note">' + esc(tr('pwd_reset_hint')) + '</p>' +
+        '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="prEmail" type="email"></div>' +
+        '<button type="button" class="btn btn-ghost" style="width:100%" id="prSend">' + esc(tr('pwd_reset_send')) + '</button>' +
+        '<div class="field"><label>' + esc(tr('otp_placeholder')) + '</label><input id="prCode"></div>' +
+        '<div class="field"><label>' + esc(tr('pwd_new_pass')) + '</label><input id="prNew1" type="password"></div>' +
+        '<div class="field"><label>' + esc(tr('pwd_repeat')) + '</label><input id="prNew2" type="password"></div>' +
+        '<button type="button" class="btn btn-primary" style="width:100%" id="prConfirm">' + esc(tr('pwd_reset_confirm')) + '</button>' +
+        '<p style="margin-top:14px;"><a href="#" id="pwdBack">' + esc(tr('login')) + '</a></p>' +
+        '</div>';
       document.getElementById('lgGo').onclick = async function () {
         var r = await api('clientLogin', {
           email: document.getElementById('lgEmail').value,
@@ -1260,12 +2107,43 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         });
         if (r.success) {
           saveSession(r.token, r.clientId, r.nome);
+          await mergeGuestWishlistIntoAccount();
           m.classList.remove('open');
           toast(tr('login'));
           router();
         } else toast(r.error || '—');
       };
       document.getElementById('swReg').onclick = function (e) { e.preventDefault(); openAuth('reg'); };
+      document.getElementById('pwdForgot').onclick = function (e) {
+        e.preventDefault();
+        document.getElementById('loginMain').style.display = 'none';
+        document.getElementById('pwdResetBox').style.display = 'block';
+        document.getElementById('authTitle').textContent = tr('pwd_forgot');
+      };
+      document.getElementById('pwdBack').onclick = function (e) {
+        e.preventDefault();
+        document.getElementById('pwdResetBox').style.display = 'none';
+        document.getElementById('loginMain').style.display = 'block';
+        document.getElementById('authTitle').textContent = tr('login');
+      };
+      document.getElementById('prSend').onclick = async function () {
+        var em = document.getElementById('prEmail').value.trim();
+        var r = await api('requestPasswordReset', { email: em });
+        if (r.success) toast(tr('pwd_reset_send'));
+        else toast(r.error || '—');
+      };
+      document.getElementById('prConfirm').onclick = async function () {
+        var em = document.getElementById('prEmail').value.trim();
+        var c = document.getElementById('prCode').value.trim();
+        var p1 = document.getElementById('prNew1').value;
+        var p2 = document.getElementById('prNew2').value;
+        if (p1 !== p2) { toast(tr('pwd_mismatch')); return; }
+        var r = await api('confirmPasswordReset', { email: em, code: c, newPassword: p1 });
+        if (r.success) {
+          toast(tr('pwd_reset_confirm'));
+          document.getElementById('pwdBack').click();
+        } else toast(r.error || '—');
+      };
     } else {
       body.innerHTML =
         '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="rgName"></div>' +
@@ -1294,6 +2172,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         });
         if (r.success && r.token) {
           saveSession(r.token, r.clientId, r.nome);
+          await mergeGuestWishlistIntoAccount();
           m.classList.remove('open');
           router();
         } else toast(r.error || '—');
@@ -1310,28 +2189,120 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       document.getElementById('goLogin').onclick = function () { openAuth('login'); };
       return;
     }
-    main.innerHTML = '<h1 style="font-family:var(--display);">' + esc(tr('account_title')) + '</h1>' +
-      '<p>' + esc(state.clientNome) + '</p>' +
-      '<button type="button" class="btn btn-ghost btn-sm" id="lgOut">' + esc(tr('logout')) + '</button>' +
+    main.innerHTML =
+      '<h1 style="font-family:var(--display);">' + esc(tr('account_title')) + '</h1>' +
+      '<div style="margin-bottom:16px;"><button type="button" class="btn btn-ghost btn-sm" id="lgOut">' + esc(tr('logout')) + '</button></div>' +
+      '<div class="panel" style="margin-bottom:24px;">' +
+      '<h3 style="margin-top:0;">' + esc(tr('profile_section_title')) + '</h3>' +
+      '<p class="sku-note" style="margin-top:0;margin-bottom:12px;line-height:1.55;">' + esc(tr('loyalty_info_hint')) + '</p>' +
+      '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="profNome"></div>' +
+      '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="profEmail" type="email" readonly style="opacity:.85;background:rgba(15,82,120,.06);"></div>' +
+      '<div class="field"><label>' + esc(tr('lbl_phone')) + '</label><input id="profTel"></div>' +
+      '<p id="profLoyalty" class="sku-note" style="display:none;margin-top:8px;"></p>' +
+      '<button type="button" class="btn btn-primary btn-sm" id="profSave">' + esc(tr('btn_save_profile')) + '</button>' +
+      '</div>' +
       '<h3 style="margin-top:28px;">' + esc(tr('orders')) + '</h3>' +
-      '<div id="ordList"></div>';
+      '<div id="ordList"><div class="spinner"></div></div>' +
+      '<h3 style="margin-top:28px;">' + esc(tr('addr_book_title')) + '</h3>' +
+      '<div id="addrList"><div class="spinner"></div></div>' +
+      '<div class="panel" style="margin-top:12px;">' +
+      '<div class="field"><label>' + esc(tr('lbl_address')) + '</label><textarea id="newAddrMorada" rows="2"></textarea></div>' +
+      '<button type="button" class="btn btn-primary btn-sm" id="btnSaveAddr">' + esc(tr('addr_save_btn')) + '</button></div>' +
+      '<h3 style="margin-top:28px;">' + esc(tr('returns_title')) + '</h3>' +
+      '<div id="retList"><div class="spinner"></div></div>';
 
     document.getElementById('lgOut').onclick = function () { saveSession('', '', ''); router(); };
+
+    var pf = await api('getClientProfile', { clientId: state.clientId }, state.clientToken);
+    if (pf.success && pf.client) {
+      var c = pf.client;
+      document.getElementById('profNome').value = c.nome || state.clientNome || '';
+      document.getElementById('profEmail').value = c.email || '';
+      document.getElementById('profTel').value = c.telefone || '';
+      var loyaltyEl = document.getElementById('profLoyalty');
+      if (c.loyalty_points != null && String(c.loyalty_points).trim() !== '') {
+        loyaltyEl.style.display = 'block';
+        loyaltyEl.textContent = tr('loyalty_pts') + ': ' + String(c.loyalty_points);
+      }
+    }
+
+    document.getElementById('profSave').onclick = async function () {
+      var nm = document.getElementById('profNome').value.trim();
+      var tel = document.getElementById('profTel').value.trim();
+      if (!nm) { toast(tr('lbl_name')); return; }
+      var ur = await api('updateClient', { clientId: state.clientId, nome: nm, telefone: tel }, state.clientToken);
+      if (ur.success) {
+        saveSession(state.clientToken, state.clientId, nm);
+        toast(tr('btn_save_profile') + ' ✓');
+      } else toast(ur.error || '—');
+    };
+
+    async function refreshAddrBox() {
+      var box = document.getElementById('addrList');
+      var ar = await api('getClientAddresses', { clientId: state.clientId }, state.clientToken);
+      var rows = (ar.success && ar.addresses) ? ar.addresses : [];
+      if (!rows.length) {
+        box.innerHTML = '<p class="sku-note">—</p>';
+        return;
+      }
+      box.innerHTML = rows.map(function (a) {
+        return '<div class="panel" style="margin-bottom:8px;"><div>' + esc(formatAddrLines(a)) + '</div>' +
+          '<button type="button" class="btn btn-ghost btn-sm rm-adr" data-aid="' + esc(a.address_id) + '" style="margin-top:8px;">' + esc(tr('remove')) + '</button></div>';
+      }).join('');
+      box.querySelectorAll('.rm-adr').forEach(function (btn) {
+        btn.onclick = async function () {
+          await api('deleteClientAddress', { clientId: state.clientId, address_id: btn.getAttribute('data-aid') }, state.clientToken);
+          refreshAddrBox();
+        };
+      });
+    }
+
+    document.getElementById('btnSaveAddr').onclick = async function () {
+      var txt = document.getElementById('newAddrMorada').value.trim();
+      if (!txt) return;
+      var sr = await api('saveClientAddress', {
+        clientId: state.clientId,
+        tipo: 'envio',
+        morada: txt,
+        cidade: '',
+        codigo_postal: '',
+        pais: ''
+      }, state.clientToken);
+      if (sr.success) {
+        document.getElementById('newAddrMorada').value = '';
+        toast(tr('addr_save_btn'));
+        refreshAddrBox();
+      } else toast(sr.error || '—');
+    };
+
     var r = await api('getOrders', { clientId: state.clientId, email: '' }, state.clientToken);
     var orders = (r.orders || []);
-    if (!orders.length) {
-      document.getElementById('ordList').innerHTML = '<p class="sku-note">' + esc(tr('account_orders_empty')) + '</p>';
-      return;
+    var ordHtml = '';
+    if (!orders.length) ordHtml = '<p class="sku-note">' + esc(tr('account_orders_empty')) + '</p>';
+    else {
+      ordHtml = orders.map(function (o) {
+        return '<div class="panel" style="margin-bottom:12px;"><a href="#/order/' + encodeURIComponent(o.pedido_id) + '" style="font-weight:700;">' + esc(o.pedido_id) + '</a> — ' + esc(o.data || '') +
+          '<div>' + fmtMoney(o.total) + ' · ' + esc(o.estado || '') + '</div></div>';
+      }).join('');
     }
-    document.getElementById('ordList').innerHTML = orders.map(function (o) {
-      return '<div class="panel" style="margin-bottom:12px;"><strong>' + esc(o.pedido_id) + '</strong> — ' + esc(o.data) +
-        '<div>' + fmtMoney(o.total) + ' · ' + esc(o.estado) + '</div></div>';
-    }).join('');
+    document.getElementById('ordList').innerHTML = ordHtml;
+
+    await refreshAddrBox();
+
+    var rr = await api('getClientReturns', {}, state.clientToken);
+    var retRows = (rr.success && rr.returns) ? rr.returns : [];
+    var retBox = document.getElementById('retList');
+    if (!retRows.length) retBox.innerHTML = '<p class="sku-note">—</p>';
+    else {
+      retBox.innerHTML = retRows.map(function (x) {
+        return '<div class="panel" style="margin-bottom:8px;"><strong>' + esc(x.return_id || x.retorno_id || '') + '</strong> · ' + esc(x.estado || x.status || '') +
+          '<div class="sku-note">' + esc(x.order_id || x.pedido_id || '') + ' · ' + esc(x.date || '') + '</div></div>';
+      }).join('');
+    }
   }
 
   async function maybeStripeReturn() {
-    var qs = new URLSearchParams(location.search);
-    var piId = qs.get('payment_intent');
+    var piId = getStripePaymentIntentFromLocation();
     if (!piId) return;
     var pend = sessionStorage.getItem('stripe_pending_order');
     if (!pend) return;
@@ -1358,28 +2329,55 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   async function router() {
     if (!await loadBootstrap()) return;
-    await refreshCartCount();
-
+    await ensureClientSession();
     var r = parseRoute();
     var p = r.parts[0] || '';
-    if (p === '' || p === 'home') { await renderHome(); return; }
-    if (p === 'catalog') { await renderCatalog(); return; }
-    if (p === 'product' && r.parts[1]) { await renderProduct(decodeURIComponent(r.parts[1])); return; }
-    if (p === 'checkout') { await renderCheckout(); return; }
-    if (p === 'contact') { await renderContact(); return; }
-    if (p === 'account') { await renderAccount(); return; }
-    await renderHome();
+    await Promise.all([
+      refreshCartCount(),
+      (async function () {
+        if (p === '' || p === 'home') { await renderHome(); return; }
+        if (p === 'catalog') {
+          if (r.parts[1]) state.filters.categoria = decodeURIComponent(r.parts[1]);
+          else state.filters.categoria = '';
+          await renderCatalog();
+          return;
+        }
+        if (p === 'product' && r.parts[1]) { await renderProduct(decodeURIComponent(r.parts[1])); return; }
+        if (p === 'checkout') { await renderCheckout(); return; }
+        if (p === 'contact') { await renderContact(); return; }
+        if (p === 'legal' && r.parts[1]) { renderLegalPage(r.parts[1]); return; }
+        if (p === 'newsletter' && r.parts[1] === 'unsubscribe') { renderNewsletterUnsub(); return; }
+        if (p === 'wishlist') { await renderWishlist(); return; }
+        if (p === 'order' && r.parts[1]) { await renderOrderDetail(decodeURIComponent(r.parts[1])); return; }
+        if (p === 'account') { await renderAccount(); return; }
+        await renderHome();
+      })()
+    ]);
   }
 
   document.getElementById('btnCart').onclick = openCart;
   document.getElementById('cartOverlay').onclick = closeCart;
   document.getElementById('closeCart').onclick = closeCart;
   document.getElementById('gotoCheckout').onclick = function () { location.hash = '#/checkout'; closeCart(); };
+  document.getElementById('clearCartBtn').onclick = async function () {
+    if (!state.cartId) return;
+    if (!window.confirm(tr('cart_clear_confirm'))) return;
+    var cr = await api('clearCart', { cartId: state.cartId });
+    if (!cr.success) { toast(cr.error || '—'); return; }
+    await refreshCartCount();
+    renderCartDrawer();
+    toast(tr('cart_cleared'));
+  };
   document.getElementById('btnAccount').onclick = function () { location.hash = '#/account'; };
 
   document.getElementById('headerSearch').addEventListener('change', function () {
-    state.filters.search = this.value;
-    location.hash = '#/catalog';
+    applySearchAndGoCatalog(this.value);
+  });
+  document.getElementById('headerSearch').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applySearchAndGoCatalog(this.value);
+    }
   });
 
   document.getElementById('modalAuth').addEventListener('click', function (e) {

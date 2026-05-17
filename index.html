@@ -1152,8 +1152,22 @@
     var COUPON_STORE_KEY = 'boutique_coupon_code';
     var productCache = Object.create(null);
     var productFetchInflight = Object.create(null);
-    var _routeGeneration = 0;
-    var _imgPreloaded = Object.create(null);
+  var _routeGeneration = 0;
+  var _imgPreloaded = Object.create(null);
+  var BOOT_CACHE_KEY = 'boutique_boot_cache_v1';
+  var BOOT_CACHE_MS = 600000;
+  var API_CACHE_TTL_MS = {
+    getPublicBrand: 600000,
+    getConfig: 600000,
+    getCategories: 600000,
+    getEmpresa: 600000,
+    getProducts: 90000,
+    getProduct: 120000,
+    getCart: 10000,
+    getWishlist: 45000
+  };
+  var _apiCache = Object.create(null);
+  var _apiInflight = Object.create(null);
     var COMPARE_MAX = 3;
     var NEW_PRODUCT_DAYS = 30;
 
@@ -1196,6 +1210,7 @@
         order_ok: 'Encomenda registada!', order_id: 'N.º', payment_stripe_hint: 'Pagamento seguro com cartão.',
         account_orders_empty: 'Ainda não tem encomendas.',
         load_more: 'Carregar mais', qty_label: 'Quantidade', variant_label: 'Tamanho / cor',
+        variant_label_size: 'Tamanho', variant_label_color: 'Cor',
         nav_home: 'Início', nav_wishlist: 'Desejos',
         pwd_forgot: 'Esqueci a palavra-passe', pwd_reset_hint: 'Receberá um código por email.',
         pwd_reset_send: 'Enviar código', pwd_new_pass: 'Nova palavra-passe', pwd_reset_confirm: 'Definir palavra-passe',
@@ -1317,6 +1332,7 @@
         order_ok: 'Commande enregistrée !', order_id: 'N°', payment_stripe_hint: 'Paiement carte sécurisé.',
         account_orders_empty: 'Aucune commande pour le moment.',
         load_more: 'Charger plus', qty_label: 'Quantité', variant_label: 'Taille / couleur',
+        variant_label_size: 'Taille', variant_label_color: 'Couleur',
         nav_home: 'Accueil', nav_wishlist: 'Liste de souhaits',
         pwd_forgot: 'Mot de passe oublié', pwd_reset_hint: 'Un code vous sera envoyé par email.',
         pwd_reset_send: 'Envoyer le code', pwd_new_pass: 'Nouveau mot de passe', pwd_reset_confirm: 'Définir le mot de passe',
@@ -1438,6 +1454,7 @@
         order_ok: 'Order placed!', order_id: 'No.', payment_stripe_hint: 'Secure card payment.',
         account_orders_empty: 'No orders yet.',
         load_more: 'Load more', qty_label: 'Quantity', variant_label: 'Size / color',
+        variant_label_size: 'Size', variant_label_color: 'Colour',
         nav_home: 'Home', nav_wishlist: 'Wishlist',
         pwd_forgot: 'Forgot password', pwd_reset_hint: 'You will receive a code by email.',
         pwd_reset_send: 'Send code', pwd_new_pass: 'New password', pwd_reset_confirm: 'Set password',
@@ -1559,6 +1576,7 @@
         order_ok: '¡Pedido registrado!', order_id: 'N.º', payment_stripe_hint: 'Pago con tarjeta seguro.',
         account_orders_empty: 'Sin pedidos todavía.',
         load_more: 'Cargar más', qty_label: 'Cantidad', variant_label: 'Talla / color',
+        variant_label_size: 'Talla', variant_label_color: 'Color',
         nav_home: 'Inicio', nav_wishlist: 'Lista de deseos',
         pwd_forgot: 'He olvidado la contraseña', pwd_reset_hint: 'Recibirá un código por email.',
         pwd_reset_send: 'Enviar código', pwd_new_pass: 'Nueva contraseña', pwd_reset_confirm: 'Establecer contraseña',
@@ -2051,7 +2069,8 @@
       }, true);
     }
 
-    async function refreshWishlistCache() {
+    async function refreshWishlistCache(force) {
+      if (!force && state._wlTs && (Date.now() - state._wlTs) < 45000) return;
       if (state.clientId && state.clientToken) {
         var wl = await api('getWishlist', { clientId: state.clientId }, state.clientToken);
         state._wlIds = (wl.success && wl.wishlist)
@@ -2060,6 +2079,7 @@
       } else {
         state._wlIds = parseGuestWishlistIds();
       }
+      state._wlTs = Date.now();
     }
 
     function wishlistedPid(pid) {
@@ -2343,6 +2363,163 @@
       return String(id == null ? '' : id).trim();
     }
 
+    function isVariantAxisEmpty(val) {
+      var t = String(val == null ? '' : val).trim();
+      if (!t) return true;
+      if (t === '—' || t === '–' || t === '-') return true;
+      var low = t.toLowerCase();
+      return low === 'n/a' || low === 'na';
+    }
+
+    function variantAxisValue(val) {
+      if (isVariantAxisEmpty(val)) return '';
+      return String(val).trim();
+    }
+
+    function getVariantLabelSize() {
+      var c = state.config || {};
+      return String(c.boutique_label_tamanho || '').trim() || tr('variant_label_size');
+    }
+
+    function getVariantLabelColor() {
+      var c = state.config || {};
+      return String(c.boutique_label_cor || '').trim() || tr('variant_label_color');
+    }
+
+    function analyzeVariantAxes(vars) {
+      var sizes = [];
+      var colors = [];
+      var seenS = Object.create(null);
+      var seenC = Object.create(null);
+      (vars || []).forEach(function (v) {
+        var s = variantAxisValue(v.tamanho);
+        var c = variantAxisValue(v.cor);
+        if (s && !seenS[s]) { seenS[s] = 1; sizes.push(s); }
+        if (c && !seenC[c]) { seenC[c] = 1; colors.push(c); }
+      });
+      var mode = 'combo';
+      if (sizes.length && colors.length) mode = 'both';
+      else if (sizes.length) mode = 'size';
+      else if (colors.length) mode = 'color';
+      return { sizes: sizes, colors: colors, mode: mode };
+    }
+
+    function variantChipLabel(v) {
+      var s = variantAxisValue(v.tamanho);
+      var c = variantAxisValue(v.cor);
+      if (s && c) return s + ' / ' + c;
+      if (s) return s;
+      if (c) return c;
+      return '—';
+    }
+
+    function variantLineLabel(tamanho, cor) {
+      var s = variantAxisValue(tamanho);
+      var c = variantAxisValue(cor);
+      if (s && c) return s + ' · ' + c;
+      if (s) return s;
+      if (c) return c;
+      return '';
+    }
+
+    function findVariantByAxes(vars, size, color) {
+      var axes = analyzeVariantAxes(vars);
+      for (var i = 0; i < (vars || []).length; i++) {
+        var v = vars[i];
+        if (axes.mode === 'both') {
+          if (variantAxisValue(v.tamanho) === size && variantAxisValue(v.cor) === color) return v;
+        } else if (axes.mode === 'size' && variantAxisValue(v.tamanho) === size) return v;
+        else if (axes.mode === 'color' && variantAxisValue(v.cor) === color) return v;
+      }
+      return null;
+    }
+
+    function pickVariantForAxes(prod, vars, size, color) {
+      var axes = analyzeVariantAxes(vars);
+      var list = vars || [];
+      if (axes.mode === 'both') {
+        var candidates = list.filter(function (v) {
+          return variantAxisValue(v.tamanho) === size &&
+            (!color || variantAxisValue(v.cor) === color);
+        });
+        if (!candidates.length && size) {
+          candidates = list.filter(function (v) { return variantAxisValue(v.tamanho) === size; });
+        }
+        var ok = candidates.find(function (v) { return variantInStock(prod, v); });
+        return ok || candidates[0] || null;
+      }
+      if (axes.mode === 'size') return findVariantByAxes(list, size, '') || null;
+      if (axes.mode === 'color') return findVariantByAxes(list, '', color) || null;
+      return list.find(function (v) { return variantInStock(prod, v); }) || list[0] || null;
+    }
+
+    function variantAxisOptionEnabled(prod, vars, axis, value, selSize, selColor) {
+      var axes = analyzeVariantAxes(vars);
+      if (axis === 'size') {
+        return (vars || []).some(function (v) {
+          if (variantAxisValue(v.tamanho) !== value) return false;
+          if (axes.mode !== 'both') return true;
+          return !selColor || variantAxisValue(v.cor) === selColor;
+        });
+      }
+      if (axis === 'color') {
+        return (vars || []).some(function (v) {
+          if (variantAxisValue(v.cor) !== value) return false;
+          if (axes.mode !== 'both') return true;
+          return !selSize || variantAxisValue(v.tamanho) === selSize;
+        });
+      }
+      return true;
+    }
+
+    function buildVariantPickerHtml(prod, vars, selSize, selColor, selV) {
+      var axes = analyzeVariantAxes(vars);
+      var html = '';
+      if (axes.mode === 'both') {
+        html += '<p class="variant-axis-label" style="margin-top:16px;font-weight:600;">' + esc(getVariantLabelSize()) + '</p>' +
+          '<div class="variant-grid" id="vSizeChips">';
+        axes.sizes.forEach(function (sz) {
+          var cls = selSize === sz ? 'chip selected' : 'chip';
+          var en = variantAxisOptionEnabled(prod, vars, 'size', sz, selSize, selColor);
+          var hasStock = (vars || []).some(function (v) {
+            return variantAxisValue(v.tamanho) === sz && variantInStock(prod, v) &&
+              (!selColor || variantAxisValue(v.cor) === selColor);
+          });
+          html += '<button type="button" class="' + cls + '" data-size="' + esc(sz) + '"' +
+            (!en || !hasStock ? ' disabled' : '') + '>' + esc(sz) + '</button>';
+        });
+        html += '</div><p class="variant-axis-label" style="margin-top:14px;font-weight:600;">' + esc(getVariantLabelColor()) + '</p>' +
+          '<div class="variant-grid" id="vColorChips">';
+        axes.colors.forEach(function (co) {
+          var cls2 = selColor === co ? 'chip selected' : 'chip';
+          var en2 = variantAxisOptionEnabled(prod, vars, 'color', co, selSize, selColor);
+          var hasStock2 = (vars || []).some(function (v) {
+            return variantAxisValue(v.cor) === co && variantInStock(prod, v) &&
+              (!selSize || variantAxisValue(v.tamanho) === selSize);
+          });
+          html += '<button type="button" class="' + cls2 + '" data-color="' + esc(co) + '"' +
+            (!en2 || !hasStock2 ? ' disabled' : '') + '>' + esc(co) + '</button>';
+        });
+        html += '</div>';
+        return { html: html, mode: 'both' };
+      }
+      var label = axes.mode === 'size' ? getVariantLabelSize() : (axes.mode === 'color' ? getVariantLabelColor() : tr('variant_label'));
+      html += '<p style="margin-top:16px;font-weight:600;">' + esc(label) + '</p><div class="variant-grid" id="vChips">';
+      (vars || []).forEach(function (v) {
+        var ok = variantInStock(prod, v);
+        var cls3 = 'chip';
+        var isSel = false;
+        if (axes.mode === 'size') isSel = variantAxisValue(v.tamanho) === selSize;
+        else if (axes.mode === 'color') isSel = variantAxisValue(v.cor) === selColor;
+        else isSel = selV && normalizeVariantId(v.variante_id) === normalizeVariantId(selV.variante_id);
+        if (isSel) cls3 += ' selected';
+        html += '<button type="button" class="' + cls3 + '" data-vid="' + esc(v.variante_id) + '"' + (!ok ? ' disabled' : '') + '>' +
+          esc(variantChipLabel(v)) + '</button>';
+      });
+      html += '</div>';
+      return { html: html, mode: axes.mode };
+    }
+
     function findVariantInProduct(prod, varianteId) {
       var vid = normalizeVariantId(varianteId);
       if (!vid || !prod || !prod.variantes) return null;
@@ -2415,8 +2592,28 @@
      * @param {string} [token] Jeton session client pour les routes protégées.
      * @returns {Promise<Record<string, unknown>>} Objet parsé ou `{ success:false, error }`.
      */
-    async function api(action, data, token) {
-      /* Aligné 02-admin-erp : même contrôle URL ; pas de Content-Type: application/json (préflight OPTIONS non géré par les Web Apps). */
+    function apiCacheKey(action, data, token) {
+      return action + '|' + (token || '') + '|' + JSON.stringify(data || {});
+    }
+
+    function invalidateApiCache(actions) {
+      (actions || []).forEach(function (act) {
+        Object.keys(_apiCache).forEach(function (k) {
+          if (k.indexOf(act + '|') === 0) delete _apiCache[k];
+        });
+      });
+    }
+
+    function apiCacheableSuccess(action, res) {
+      if (!res || res.success === false) return false;
+      if (action === 'getProducts') return !!(res.products || res.total != null);
+      if (action === 'getProduct') return !!res.product;
+      if (action === 'getCart') return res.success === true;
+      if (action === 'getWishlist') return res.success === true;
+      return res.success === true;
+    }
+
+    async function apiFetch(action, data, token) {
       if (!API_URL || String(API_URL).indexOf('INSEREZ_VOTRE') !== -1) {
         return { success: false, error: tr('api_missing') };
       }
@@ -2438,6 +2635,26 @@
           : '';
         return { success: false, error: (e && e.message ? e.message : String(e)) + hint };
       }
+    }
+
+    async function api(action, data, token) {
+      var ttl = API_CACHE_TTL_MS[action];
+      var key = apiCacheKey(action, data, token);
+      if (ttl) {
+        var hit = _apiCache[key];
+        if (hit && (Date.now() - hit.ts) < ttl) return hit.data;
+        if (_apiInflight[key]) return _apiInflight[key];
+      }
+      var req = apiFetch(action, data, token);
+      if (ttl) {
+        _apiInflight[key] = req;
+        req = req.then(function (res) {
+          delete _apiInflight[key];
+          if (apiCacheableSuccess(action, res)) _apiCache[key] = { ts: Date.now(), data: res };
+          return res;
+        });
+      }
+      return req;
     }
 
     // --- État SPA : catalogue paginé/filtré, panier, session, caches perf. ---
@@ -2650,11 +2867,18 @@
     /**
      * Recharge les lignes panier depuis l’API, met à jour le badge et `state._cartSnap`.
      */
-    async function refreshCartCount() {
+    async function refreshCartCount(force) {
       if (!state.cartId) {
         state._cartSnap = null;
         document.getElementById('cartBadge').style.display = 'none';
         state.cartLines = [];
+        return;
+      }
+      if (!force && state._cartSnap && state._cartSnap.ts && (Date.now() - state._cartSnap.ts) < 12000) {
+        var b0 = document.getElementById('cartBadge');
+        var n0 = state._cartSnap.count != null ? state._cartSnap.count : (state._cartSnap.items || []).length;
+        if (n0 > 0) { b0.style.display = 'flex'; b0.textContent = String(n0); }
+        else b0.style.display = 'none';
         return;
       }
       var res = await api('getCart', { cartId: state.cartId });
@@ -2702,7 +2926,8 @@
       });
       if (!res.success) { toast(res.error || '—'); return false; }
       if (res.cartId) saveCartId(res.cartId);
-      await refreshCartCount();
+      invalidateApiCache(['getCart']);
+      await refreshCartCount(true);
       toast(tr('add_cart_ok'));
       openCart();
       return true;
@@ -2802,7 +3027,7 @@
         var cartThumb = rawImg ? erpImgUrlForDisplay(rawImg, { grid: true }) : '';
         var cartFb = rawImg ? erpImgFallbackUrl(rawImg) : '';
         var nome = pr ? pr.nome : (it.produto_id || '');
-        var line = it.tamanho || it.cor ? ((it.tamanho || '') + ' · ' + (it.cor || '')) : '';
+        var line = variantLineLabel(it.tamanho, it.cor);
         var qty = parseInt(String(it.quantidade), 10) || 1;
         var lineTot = qty * (parseFloat(it.preco) || 0);
         html += '<div class="cart-line">';
@@ -2825,7 +3050,8 @@
       box.querySelectorAll('.rm-cart').forEach(function (btn) {
         btn.onclick = async function () {
           await api('removeFromCart', { cartId: state.cartId, variante_id: btn.getAttribute('data-vid') });
-          await refreshCartCount();
+          invalidateApiCache(['getCart']);
+          await refreshCartCount(true);
           renderCartDrawer();
         };
       });
@@ -2845,7 +3071,8 @@
             preco: row.preco,
             clientId: state.clientId || undefined
           });
-          await refreshCartCount();
+          invalidateApiCache(['getCart']);
+          await refreshCartCount(true);
           renderCartDrawer();
         };
       });
@@ -2869,7 +3096,8 @@
               clientId: state.clientId || undefined
             });
           }
-          await refreshCartCount();
+          invalidateApiCache(['getCart']);
+          await refreshCartCount(true);
           renderCartDrawer();
         };
       });
@@ -2883,6 +3111,72 @@
       return { parts: parts };
     }
 
+    function readBootCache() {
+      try {
+        var raw = sessionStorage.getItem(BOOT_CACHE_KEY);
+        if (!raw) return null;
+        var o = JSON.parse(raw);
+        if (!o || !o.ts || (Date.now() - o.ts) > BOOT_CACHE_MS) return null;
+        return o;
+      } catch (e) { return null; }
+    }
+
+    function writeBootCache(pb, cf, cats, emp) {
+      try {
+        sessionStorage.setItem(BOOT_CACHE_KEY, JSON.stringify({
+          ts: Date.now(),
+          brand: pb && pb.brand ? pb.brand : null,
+          config: cf && cf.config ? cf.config : {},
+          categories: Array.isArray(cats) ? cats : ((cats && cats.categories) ? cats.categories : []),
+          empresa: emp && emp.empresa ? emp.empresa : null
+        }));
+      } catch (e) {}
+    }
+
+    function applyBootPayload(o) {
+      if (o.brand) state.brand = o.brand;
+      if (o.config) state.config = o.config || {};
+      if (o.empresa) state.empresa = o.empresa;
+      if (o.categories) state.categories = o.categories;
+      if (state.config.currency_symbol) CURRENCY_SYM = state.config.currency_symbol;
+      if (state.config.currency_code) CURRENCY_CODE = String(state.config.currency_code).toLowerCase();
+      var cfgCur = String(state.config.currency_code || 'EUR').toUpperCase();
+      if (!localStorage.getItem('boutique_currency') && CURRENCY_RATES[cfgCur.toLowerCase()]) {
+        DISPLAY_CURRENCY = cfgCur.toLowerCase();
+      }
+      var def = (state.brand && state.brand.defaultLang) || state.config.boutique_default_lang || 'pt';
+      if (!localStorage.getItem('boutique_lang') && ['pt', 'fr', 'en', 'es'].indexOf(def) >= 0) LANG = def;
+      applyBrandUi();
+      renderLangSwitcher();
+      applyI18nDom();
+    }
+
+    function refreshBootstrapAsync() {
+      if (refreshBootstrapAsync._busy) return;
+      refreshBootstrapAsync._busy = true;
+      Promise.all([
+        apiFetch('getPublicBrand', {}),
+        apiFetch('getConfig', {}),
+        apiFetch('getCategories', {}),
+        apiFetch('getEmpresa', {})
+      ]).then(function (results) {
+        var pb = results[0];
+        var cf = results[1];
+        var cats = results[2];
+        var emp = results[3];
+        if (!(pb && pb.success) || !(cf && cf.success)) return;
+        if (pb.brand) state.brand = pb.brand;
+        if (cf.config) state.config = cf.config;
+        if (emp && emp.success && emp.empresa) state.empresa = emp.empresa;
+        state.categories = Array.isArray(cats) ? cats : ((cats && cats.categories) ? cats.categories : []);
+        writeBootCache(pb, cf, cats, emp);
+        applyBootPayload({ brand: state.brand, config: state.config, empresa: state.empresa, categories: state.categories });
+        invalidateApiCache(['getPublicBrand', 'getConfig', 'getCategories', 'getEmpresa']);
+      }).catch(function () {}).finally(function () {
+        refreshBootstrapAsync._busy = false;
+      });
+    }
+
     /**
      * Charge brand, config, catégories ; gère maintenance et écran d’erreur avec nouvel essai.
      * @returns {Promise<boolean>} `true` si la boutique peut afficher les pages catalogue/commande.
@@ -2890,6 +3184,18 @@
     async function loadBootstrap() {
       erpSyncApiUrlNow();
       if (state._bootDone) return !state._maintenance;
+      var cached = readBootCache();
+      if (cached) {
+        applyBootPayload(cached);
+        state._maintenance = String(state.config.maintenance_mode) === '1';
+        state._bootDone = true;
+        if (state._maintenance) {
+          document.getElementById('main').innerHTML = '<div class="hero"><div class="hero-inner"><h1>' + esc(tr('maintenance')) + '</h1><p>' + esc(state.config.maintenance_message || '') + '</p></div></div>';
+          return false;
+        }
+        refreshBootstrapAsync();
+        return true;
+      }
       var results = await Promise.all([
         api('getPublicBrand', {}),
         api('getConfig', {}),
@@ -2966,6 +3272,7 @@
       }
       state._maintenance = false;
       state._bootDone = true;
+      writeBootCache(pb, cf, cats, emp);
       return true;
     }
 
@@ -3457,12 +3764,8 @@
 
       bindSearchInput(document.getElementById('mobileSearch'));
 
-      var homeLoads = await Promise.all([
-        fetchProducts(true, { pageSize: 8 }),
-        api('getProducts', { promo_only: true, page: 1, pageSize: 4, sort: 'price_asc' })
-      ]);
-      var promoRes = homeLoads[1];
-      var promoHome = (promoRes.products || []).filter(isProductPromo);
+      await fetchProducts(true, { pageSize: 24 });
+      var promoHome = state.products.filter(isProductPromo).slice(0, 4);
       cacheProductsIntoStore(promoHome);
       var feat = document.getElementById('homeFeatured');
       if (!state.products.length) {
@@ -3505,7 +3808,7 @@
         '<section class="home-cta"><h2 class="home-section-title">' + esc(tr('home_cta_title')) + '</h2>' +
         '<a href="#/catalog/promo" class="btn btn-accent" style="margin-right:10px;">' + esc(tr('nav_promo')) + '</a>' +
         '<a href="#/catalog" class="btn btn-primary">' + esc(tr('home_cta_btn')) + '</a></section>';
-      await refreshWishlistCache();
+      refreshWishlistCache().catch(function () {});
       var hg = document.getElementById('homeGrid');
       bindProductCardActions(hg);
       bindCardPrefetch(hg);
@@ -3557,6 +3860,7 @@
       if (fMin) fMin.value = state.filters.preco_min || '';
       if (fMax) fMax.value = state.filters.preco_max || '';
 
+      var reloadTimer;
       async function reload() {
         var cg = document.getElementById('catGrid');
         if (cg) cg.classList.add('is-loading');
@@ -3594,9 +3898,11 @@
         } else {
           cg.innerHTML = state.products.map(productCard).join('');
           lm.style.display = state.productsHasMore ? 'inline-flex' : 'none';
-          await refreshWishlistCache();
           bindProductCardActions(cg);
           bindCardPrefetch(cg);
+          refreshWishlistCache().then(function () {
+            bindProductCardActions(cg);
+          }).catch(function () {});
         }
         bindSearchInput(document.getElementById('catalogMobileSearch'));
         var cms2 = document.getElementById('catalogMobileSearch');
@@ -3608,11 +3914,15 @@
         if (hs) hs.value = state.filters.search || '';
       }
 
-      sel.onchange = function () { state.filters.categoria = sel.value; reload(); };
-      document.getElementById('fSort').onchange = function () { state.filters.sort = this.value; reload(); };
-      document.getElementById('fStock').onchange = function () { state.filters.in_stock = this.checked; reload(); };
-      if (fMin) fMin.onchange = function () { state.filters.preco_min = fMin.value; reload(); };
-      if (fMax) fMax.onchange = function () { state.filters.preco_max = fMax.value; reload(); };
+      function reloadDebounced() {
+        clearTimeout(reloadTimer);
+        reloadTimer = setTimeout(reload, 300);
+      }
+      sel.onchange = function () { state.filters.categoria = sel.value; reloadDebounced(); };
+      document.getElementById('fSort').onchange = function () { state.filters.sort = this.value; reloadDebounced(); };
+      document.getElementById('fStock').onchange = function () { state.filters.in_stock = this.checked; reloadDebounced(); };
+      if (fMin) fMin.onchange = function () { state.filters.preco_min = fMin.value; reloadDebounced(); };
+      if (fMax) fMax.onchange = function () { state.filters.preco_max = fMax.value; reloadDebounced(); };
       document.getElementById('loadMore').onclick = async function () {
         state.page++;
         var res = await api('getProducts', {
@@ -3708,8 +4018,15 @@
           '</div></div>';
         return;
       }
+      var pdpSelSize = '';
+      var pdpSelColor = '';
       function renderPdp(selV) {
         if (!isRouteActive(routeToken)) return;
+        if (selV) {
+          pdpSelSize = variantAxisValue(selV.tamanho);
+          pdpSelColor = variantAxisValue(selV.cor);
+        }
+        selV = pickVariantForAxes(p, vars, pdpSelSize, pdpSelColor) || selV;
         var rawImgPdp = pickVariantImageRaw(p, selV);
         if (rawImgPdp) preloadImageUrl(rawImgPdp, false);
         var pdpImgHtml = rawImgPdp
@@ -3719,13 +4036,7 @@
         var avg = parseFloat(revsVisible.length ? (revsVisible.reduce(function (s, r) { return s + parseInt(r.nota || 0, 10); }, 0) / revsVisible.length) : 0);
         if (avg > 0) stars = '<span class="stars">' + '★'.repeat(Math.round(avg)) + '</span> <span class="sku-note">(' + revsVisible.length + ')</span>';
 
-        var chips = '';
-        vars.forEach(function (v) {
-          var ok = variantInStock(p, v);
-          var cls = selV && normalizeVariantId(v.variante_id) === normalizeVariantId(selV.variante_id) ? 'chip selected' : 'chip';
-          chips += '<button type="button" class="' + cls + '" data-vid="' + esc(v.variante_id) + '"' + (!ok ? ' disabled' : '') + '>' +
-            esc((v.tamanho || '') + (v.cor ? ' / ' + v.cor : '')) + '</button>';
-        });
+        var picker = buildVariantPickerHtml(p, vars, pdpSelSize, pdpSelColor, selV);
         var maxStPdp = null;
         if (p.stock_management && selV) {
           var vsP = parseInt(String(selV.stock != null ? selV.stock : ''), 10);
@@ -3740,7 +4051,7 @@
           '<h1>' + esc(p.nome) + '</h1>' + stars +
           '<div style="margin:12px 0;">' + priceMarkup(p) + '</div>' +
           '<p style="line-height:1.6;color:var(--text-muted);">' + esc(p.descricao || '').replace(/\n/g, '<br>') + '</p>' +
-          (vars.length ? '<p style="margin-top:16px;font-weight:600;">' + esc(tr('variant_label')) + '</p><div class="variant-grid" id="vChips">' + chips + '</div>' : '') +
+          (vars.length ? picker.html : '') +
           '<div class="qty-row"><label>' + esc(tr('qty_label')) + '</label>' +
           '<div class="cart-qty" style="display:inline-flex;vertical-align:middle;margin-left:8px;">' +
           '<button type="button" class="cq-dec" id="pdpQtyDec" aria-label="' + esc(tr('qty_decrease')) + '">−</button>' +
@@ -3765,9 +4076,28 @@
               '<button type="button" class="btn btn-primary" id="rvLogin">' + esc(tr('review_login_btn')) + '</button></div>') +
           '</div></div></div>';
 
+        var sizeRoot = document.getElementById('vSizeChips');
+        if (sizeRoot) sizeRoot.querySelectorAll('.chip').forEach(function (b) {
+          b.onclick = function () {
+            if (b.disabled) return;
+            pdpSelSize = b.getAttribute('data-size') || '';
+            var nv = pickVariantForAxes(p, vars, pdpSelSize, pdpSelColor);
+            if (nv) renderPdp(nv);
+          };
+        });
+        var colorRoot = document.getElementById('vColorChips');
+        if (colorRoot) colorRoot.querySelectorAll('.chip').forEach(function (b) {
+          b.onclick = function () {
+            if (b.disabled) return;
+            pdpSelColor = b.getAttribute('data-color') || '';
+            var nv = pickVariantForAxes(p, vars, pdpSelSize, pdpSelColor);
+            if (nv) renderPdp(nv);
+          };
+        });
         var chipRoot = document.getElementById('vChips');
         if (chipRoot) chipRoot.querySelectorAll('.chip').forEach(function (b) {
           b.onclick = function () {
+            if (b.disabled) return;
             var vid = b.getAttribute('data-vid');
             var nv = vars.find(function (x) { return normalizeVariantId(x.variante_id) === normalizeVariantId(vid); });
             if (nv) renderPdp(nv);
@@ -3838,7 +4168,13 @@
         if (rvLogin) rvLogin.onclick = function () { requireAuthModal('login'); };
       }
 
-      var selected = vars.find(function (v) { return variantInStock(p, v); }) || vars[0] || null;
+      var axesInit = analyzeVariantAxes(vars);
+      if (axesInit.mode === 'both') {
+        pdpSelSize = axesInit.sizes[0] || '';
+        pdpSelColor = axesInit.colors[0] || '';
+      }
+      var selected = pickVariantForAxes(p, vars, pdpSelSize, pdpSelColor) ||
+        vars.find(function (v) { return variantInStock(p, v); }) || vars[0] || null;
       renderPdp(selected);
       if (cached) {
         api('getProduct', { id: sid }).then(function (fresh) {
@@ -4875,7 +5211,8 @@
       if (!window.confirm(tr('cart_clear_confirm'))) return;
       var cr = await api('clearCart', { cartId: state.cartId });
       if (!cr.success) { toast(cr.error || '—'); return; }
-      await refreshCartCount();
+      invalidateApiCache(['getCart']);
+      await refreshCartCount(true);
       renderCartDrawer();
       toast(tr('cart_cleared'));
     };

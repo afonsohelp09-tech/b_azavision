@@ -17,20 +17,18 @@
     /* ============================================================
        AZAVISION — 01-boutique-client/index.html (vitrine client, paquet canonique)
 
-       1) URL de l’API Web App (Google Apps Script) — la MÊME que pour l’admin :
-          • Bloc JavaScript : ERP_API_URL_DEFAULT + ligne « COLAR » (var API_URL) — une seule URL se terminant par /exec.
-          • Remplacez le segment AKfycby_INSEREZ_VOTRE_ID_WEB_APP par l’ID de votre déploiement ; ne versionnez pas une URL /exec appartenant à un autre projet.
-          • Tant que INSEREZ_VOTRE reste présent, l’URL est rejetée et la boutique affiche un message invitant à configurer le fichier.
+       1) URL de l’API Web App — strictement la même que dans AZAVISION/02-admin-erp/index.html :
+          • Copier-coller la même valeur dans ERP_API_URL_DEFAULT et dans la ligne COLAR (var API_URL) des deux fichiers (boutique et admin).
+          • Après correction dans l’admin, la clé localStorage « erp_api_url » peut être réutilisée ; priorité finale : fichier COLAR → sinon erp_api_url (comportement identique à la fin du HTML admin).
 
-       2) Exemple de forme d’URL valide :
-          https://script.google.com/macros/s/VOTRE_ID_DE_DEPLOIEMENT/exec
+       2) window.ERP_BOUTIQUE_URL (optionnel) : URL HTTPS absolue de cette vitrine ; même variable que dans l’admin pour prévisualisation.
 
-       3) Paiement carte (Stripe) : renseigner window.STRIPE_PUBLISHABLE_KEY avec votre clé publique (pk_test… / pk_live…).
-          La clé secrète reste uniquement dans les propriétés du script Apps Script (STRIPE_SECRET_KEY).
+       3) Paiement carte (Stripe) : window.STRIPE_PUBLISHABLE_KEY (pk_test… / pk_live…).
+          La clé secrète reste uniquement dans les propriétés du script Apps Script.
 
        4) Lien panneau admin (optionnel) : window.ERP_ADMIN_URL — URL HTTPS du dépôt admin GitHub Pages.
 
-       5) Déployer la vitrine en HTTPS (GitHub Pages, etc.). Éviter d’ouvrir le fichier en file:// pour les appels vers script.google.com.
+       5) Déployer la vitrine en HTTPS (GitHub Pages, etc.). Éviter file:// pour les appels vers script.google.com.
 
        6) Langues : PT · FR · EN · ES via le sélecteur dans l’en-tête.
        ============================================================ */
@@ -369,6 +367,8 @@
     window.STRIPE_PUBLISHABLE_KEY = '';
     /* URL HTTPS du panneau admin (optionnel — lien en pied de page) */
     window.ERP_ADMIN_URL = '';
+    /* Miroir admin (02-admin-erp) : URL HTTPS de cette vitrine si l’admin doit y pointer ; laisser vide = auto */
+    window.ERP_BOUTIQUE_URL = '';
     /* Suffixe optionnel après le nom du magasin dans <title> */
     window.BOUTIQUE_TITLE_SUFFIX = '';
   </script>
@@ -442,17 +442,19 @@
     })();
   </script>
   <script>
-    /* Identique au flux admin après COLAR : embedded / défaut puis secours localStorage erp_api_url */
+    /* Même résolution que l’écran login admin : initLoginUi (embedded → ERP_API_URL_DEFAULT → erp_api_url) */
     (function () {
       var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
-      var savedRaw = localStorage.getItem('erp_api_url');
-      var savedUrl = savedRaw ? String(savedRaw).trim() : '';
+      var savedUrl = '';
+      try {
+        savedUrl = String(localStorage.getItem('erp_api_url') || '').trim();
+      } catch (eLs) { savedUrl = ''; }
       var embedded = (typeof API_URL !== 'undefined' && API_URL) ? String(API_URL).trim() : '';
       var defUrl = (typeof window.ERP_API_URL_DEFAULT === 'string') ? String(window.ERP_API_URL_DEFAULT).trim() : '';
       var resolved = parse(embedded) || parse(defUrl) || parse(savedUrl) || '';
       if (resolved) {
         API_URL = resolved;
-        try { localStorage.setItem('erp_api_url', resolved); } catch (e) {}
+        try { localStorage.setItem('erp_api_url', resolved); } catch (e) { }
       } else {
         API_URL = '';
       }
@@ -932,17 +934,28 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   }
 
   async function api(action, data, token) {
-    if (!API_URL || API_URL.indexOf('INSEREZ_VOTRE') !== -1) {
+    /* Aligné 02-admin-erp : même contrôle URL ; pas de Content-Type: application/json (préflight OPTIONS non géré par les Web Apps). */
+    if (!API_URL || API_URL.includes('INSEREZ_VOTRE')) {
       return { success: false, error: tr('api_missing') };
     }
     var body = { action: action, data: data || {}, token: token || '' };
-    var r = await fetch(API_URL, {
-      method: 'POST',
-      mode: 'cors',
-      body: JSON.stringify(body)
-    });
-    var text = await r.text();
-    try { return JSON.parse(text); } catch (e) { return { success: false, error: text || 'Parse error' }; }
+    try {
+      var r = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+      var text = await r.text();
+      try {
+        return JSON.parse(text);
+      } catch (eParse) {
+        return { success: false, error: text || 'Parse error' };
+      }
+    } catch (e) {
+      var hint = (typeof location !== 'undefined' && location.protocol === 'file:')
+        ? ' — ouvrez la page en HTTPS (file:// bloque souvent script.google.com).'
+        : '';
+      return { success: false, error: (e && e.message ? e.message : String(e)) + hint };
+    }
   }
 
   var state = {
@@ -2406,14 +2419,16 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 })();
   </script>
 
-  <!-- Reprise finale de API_URL — même script que la fin de 02-admin-erp/index.html -->
+  <!-- Reprise finale API_URL — copie conforme de la fin de 02-admin-erp/index.html (priorité fichier COLAR/défaut, puis localStorage). -->
   <script>
     (function () {
       var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
       var cur = (typeof API_URL !== 'undefined' && API_URL) ? API_URL : '';
       var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? window.ERP_API_URL_DEFAULT : '';
       var fromFile = parse(cur) || parse(def);
-      var fromLs = parse(localStorage.getItem('erp_api_url') || '');
+      var lsRaw = '';
+      try { lsRaw = localStorage.getItem('erp_api_url') || ''; } catch (e) { lsRaw = ''; }
+      var fromLs = parse(lsRaw);
       if (fromFile) API_URL = fromFile;
       else if (fromLs) API_URL = fromLs;
     })();

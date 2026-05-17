@@ -3109,12 +3109,43 @@
     <script>
       /* ═══ BOUTIQUE / BOUTIQUE_CLIENT — déploiement 01-boutique-client (GitHub Pages) ═══
         Source canonique : VENTE EN LIGNE TPE/boutique_client.html. Recopier puis ajuster ici si besoin.
-        ERP_BOUTIQUE_URL = index.html (racine). URL API Web App (/exec) = même déploiement Apps Script que le fichier GAS. */
-      window.ERP_API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwUEYjnXoEPzFpZKPN0NQ3HilMYQy4PEpslHyLpSVavcixzlf55Piv8nrAT_NsI441s/exec';
+        ERP_BOUTIQUE_URL = index.html (racine). URL /exec identique au bloc COLAR/DEFAULT de DEPLOIEMENT-GITHUB/02-admin-erp. */
+      window.ERP_API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby_4CEQn_4i7uOFWbBib4GethqkgxzjABbOEqblteZMnBoz8z3CnoLD54MYDwBq2oxH/exec';
       window.ERP_BOUTIQUE_URL = 'index.html';
       /** URL absolue HTTPS du logo (optionnel). Laisser vide pour n’utiliser que CONFIG/EMPRESA. Ne pas mettre de chemin relatif sans fichier publié (ex. logo/…). */
       window.ERP_STOREFRONT_LOGO_STATIC = '';
       window.ERP_STOREFRONT_BRAND_DEFAULT = 'Aza Vision';
+    </script>
+    <script>
+      (function () {
+        function normalizeGsWebAppUrl(u) {
+          if (u == null || u === '') return '';
+          u = String(u).trim().replace(/^[\s\uFEFF'"]+|[\s'"]+$/g, '');
+          if (!u) return '';
+          if (u.indexOf('http://script.google.com') === 0) u = 'https://' + u.slice(7);
+          if (/\/exe(\?|#|$)/i.test(u) && !/\/exec(\?|#|$)/i.test(u)) u = u.replace(/\/exe(\?|#|$)/i, '/exec$1');
+          return u;
+        }
+        function parseGsWebAppUrl(u) {
+          var n = normalizeGsWebAppUrl(u);
+          if (!n || n.indexOf('INSEREZ_VOTRE') !== -1) return null;
+          if (n.indexOf('https://script.google.com/') !== 0) return null;
+          if (n.indexOf('/macros/') === -1) return null;
+          if (n.indexOf('/exec') === -1 && !/\/dev(\?|#|$)/i.test(n)) {
+            var qi = n.indexOf('?');
+            var hi = n.indexOf('#');
+            var cut = qi === -1 ? hi : hi === -1 ? qi : Math.min(qi, hi);
+            var pathOnly = cut === -1 ? n : n.slice(0, cut);
+            var tail = cut === -1 ? '' : n.slice(cut);
+            pathOnly = pathOnly.replace(/\/$/, '');
+            if (/\/macros\/s\/[^/]+$/i.test(pathOnly)) n = pathOnly + '/exec' + tail;
+          }
+          if (n.indexOf('/exec') === -1 && !/\/dev(\?|#|$)/i.test(n)) return null;
+          return n;
+        }
+        window._erpNormalizeGsUrl = normalizeGsWebAppUrl;
+        window._erpParseGsUrl = parseGsWebAppUrl;
+      })();
     </script>
     <!--
   ╔══════════════════════════════════════════════════════════════════╗
@@ -3134,24 +3165,34 @@
   -->
     <script>
       // ▼▼▼ COLAR / COLLER LE URL ICI — APENAS NESTA LINHA ▼▼▼
-      var API_URL = 'https://script.google.com/macros/s/AKfycbwUEYjnXoEPzFpZKPN0NQ3HilMYQy4PEpslHyLpSVavcixzlf55Piv8nrAT_NsI441s/exec';
+      var API_URL = 'https://script.google.com/macros/s/AKfycby_4CEQn_4i7uOFWbBib4GethqkgxzjABbOEqblteZMnBoz8z3CnoLD54MYDwBq2oxH/exec';
       // ▲▲▲ NÃO ALTERAR MAIS NADA AQUI / NE RIEN CHANGER D’AUTRE ICI ▲▲▲
     </script>
     <script>
       (function () {
-        var inline = (typeof API_URL !== 'undefined' && API_URL) ? String(API_URL).trim() : '';
-        var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? String(window.ERP_API_URL_DEFAULT).trim() : '';
-        if (!inline || inline.indexOf('INSEREZ_VOTRE') !== -1) {
+        var norm = (typeof window._erpNormalizeGsUrl === 'function') ? window._erpNormalizeGsUrl : function (x) { return String(x == null ? '' : x).trim(); };
+        var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
+        var inline = (typeof API_URL !== 'undefined' && API_URL) ? norm(API_URL) : '';
+        var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? norm(window.ERP_API_URL_DEFAULT) : '';
+        var chosen = parse(inline) || parse(def);
+        if (chosen) {
+          API_URL = chosen;
+        } else if (!inline || inline.indexOf('INSEREZ_VOTRE') !== -1) {
           API_URL = def || '';
         } else {
           API_URL = inline;
         }
-        try {
-          var lsRaw = typeof localStorage !== 'undefined' ? localStorage.getItem('erp_api_url') : '';
-          var ls = lsRaw ? String(lsRaw).trim() : '';
-          if (ls && ls.indexOf('https://script.google.com/macros') === 0 && ls.indexOf('/exec') !== -1)
-            API_URL = ls;
-        } catch (eLs) { }
+      })();
+    </script>
+    <script>
+      (function () {
+        var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
+        var cur = (typeof API_URL !== 'undefined' && API_URL) ? API_URL : '';
+        var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? window.ERP_API_URL_DEFAULT : '';
+        var fromFile = parse(cur) || parse(def);
+        var fromLs = parse(typeof localStorage !== 'undefined' ? (localStorage.getItem('erp_api_url') || '') : '');
+        if (fromFile) API_URL = fromFile;
+        else if (fromLs) API_URL = fromLs;
       })();
     </script>
     <script>
@@ -3209,19 +3250,38 @@
         return Object.keys(byId).map(function (k) { return byId[k]; });
       }
 
+      function extractProductsArrayFromApi_(res) {
+        if (res == null) return null;
+        if (Array.isArray(res)) return res;
+        if (typeof res !== 'object') return null;
+        if (Array.isArray(res.products)) return res.products;
+        if (Array.isArray(res.items)) return res.items;
+        if (Array.isArray(res.result)) return res.result;
+        var d = res.data;
+        if (Array.isArray(d)) return d;
+        if (d && typeof d === 'object' && Array.isArray(d.products)) return d.products;
+        return null;
+      }
+
       function normalizeProductsResponse(res) {
         if (!res) return { success: false, products: [], total: 0, page: 1, hasMore: false };
-        var plist = Array.isArray(res.products) ? res.products : (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : null));
+        var plist = extractProductsArrayFromApi_(res);
         if (plist) {
-          var sok = res.success;
+          var meta = res && typeof res === 'object' ? res : {};
+          var inner = meta.data && typeof meta.data === 'object' && !Array.isArray(meta.data) ? meta.data : {};
+          var sok = meta.success != null ? meta.success : inner.success;
           var ok = sok !== false && sok !== 'false' && sok !== 0;
+          var total = meta.total != null ? meta.total : (inner.total != null ? inner.total : plist.length);
+          var page = meta.page != null ? meta.page : (inner.page != null ? inner.page : 1);
+          var pageSize = meta.pageSize != null ? meta.pageSize : (inner.pageSize != null ? inner.pageSize : plist.length);
+          var hasMore = meta.hasMore != null ? !!meta.hasMore : (inner.hasMore != null ? !!inner.hasMore : false);
           return {
             success: ok,
             products: plist,
-            total: res.total != null ? res.total : plist.length,
-            page: res.page != null ? res.page : 1,
-            pageSize: res.pageSize != null ? res.pageSize : plist.length,
-            hasMore: !!res.hasMore
+            total: total,
+            page: page,
+            pageSize: pageSize,
+            hasMore: hasMore
           };
         }
         return { success: false, products: [], total: 0, page: 1, hasMore: false };
@@ -4195,15 +4255,18 @@
 
       function getWishlistIds() {
         try {
-          var raw = localStorage.getItem('boutique_wishlist');
-          if (!raw) return [];
-          var a = JSON.parse(raw);
-          return Array.isArray(a) ? a : [];
+          var a = JSON.parse(localStorage.getItem('boutique_wishlist') || '[]');
+          if (Array.isArray(a) && a.length) return a;
+          var b = JSON.parse(localStorage.getItem('nhalabene_wishlist') || '[]');
+          return Array.isArray(b) ? b : [];
         } catch (e) { return []; }
       }
 
       function saveWishlistIds(ids) {
-        try { localStorage.setItem('boutique_wishlist', JSON.stringify(ids)); } catch (e) { }
+        try {
+          localStorage.setItem('boutique_wishlist', JSON.stringify(ids));
+          localStorage.setItem('nhalabene_wishlist', JSON.stringify(ids));
+        } catch (e) { }
       }
 
       function wishlistHas(pid) {
@@ -4671,6 +4734,7 @@
       function renderProductGrid(products, containerId, origin) {
         origin = origin || 'catalog';
         const el = document.getElementById(containerId);
+        if (!el) return;
         if (!products?.length) {
           el.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="emoji">🔍</div><p>${t('noProducts')}</p></div>`;
           return;
@@ -4705,16 +4769,12 @@
         }).join('');
       }
 
-      function getWishlistIds() {
-        try { return JSON.parse(localStorage.getItem('nhalabene_wishlist') || '[]'); } catch (e) { return []; }
-      }
-
       function toggleWishlistCard(prodId, btn) {
         let ids = getWishlistIds();
         const idx = ids.indexOf(prodId);
         if (idx >= 0) { ids.splice(idx, 1); if (btn) btn.textContent = '🤍'; }
         else { ids.push(prodId); if (btn) btn.textContent = '❤️'; }
-        localStorage.setItem('nhalabene_wishlist', JSON.stringify(ids));
+        saveWishlistIds(ids);
         if (clientToken && clientId) {
           if (idx >= 0) apiCall('removeFromWishlist', { clientId, produtoId: prodId });
           else apiCall('addToWishlist', { clientId, produtoId: prodId });

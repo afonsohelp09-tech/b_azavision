@@ -12,7 +12,11 @@
   <meta name="theme-color" content="#0a3349">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="dns-prefetch" href="https://drive.google.com">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"></noscript>
   <style>
     /* ============================================================
        AZAVISION — 01-boutique-client/index.html (vitrine client, paquet canonique)
@@ -31,7 +35,15 @@
        5) Déployer la vitrine en HTTPS (GitHub Pages, etc.). Éviter file:// pour les appels vers script.google.com.
 
        6) Langues : PT · FR · EN · ES via le sélecteur dans l’en-tête.
+
+       STRUCTURE DE LA FEUILLE DE STYLES (repères)
+       §1 Reset & boutons · §2 Header / nav / recherche · §3 Hero & main · §4 Cartes & PDP
+       §5 Drawer panier · §6 Footer · §7 Toast / modale / cookie · §8 Checkout · §9 Menu mobile & utilitaires
+
+       PERFORMANCE : polices chargées en non-bloquant (preload + media=print/onload) ;
+       preconnect script.google.com & dns-prefetch drive pour API et vignettes.
        ============================================================ */
+    /* §1 Reset & base */
     :root {
       --brand: #0a3349;
       --brand-mid: #0f5278;
@@ -64,6 +76,7 @@
     a { color: var(--brand-mid); }
     img { max-width: 100%; height: auto; display: block; }
     button, input, select, textarea { font: inherit; }
+    /* §2 Boutons */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       padding: 12px 22px; border-radius: 10px; border: none; cursor: pointer;
@@ -75,6 +88,7 @@
     .btn-accent { background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: #1a1408; }
     .btn-ghost { background: transparent; color: var(--brand); border: 2px solid var(--border); }
     .btn-sm { padding: 8px 14px; font-size: 14px; }
+    /* §2bis Header fixe, navigation desktop, recherche, langues */
     .site-header {
       position: fixed; top: var(--announce-h); left: 0; right: 0; z-index: 100;
       height: var(--header-h); background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
@@ -82,9 +96,11 @@
       justify-content: space-between; gap: 12px; padding: 0 16px; max-width: 1400px; margin: 0 auto;
     }
     .site-nav {
-      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      align-items: center; gap: 12px; flex-shrink: 0;
       font-size: 13px; font-weight: 600;
     }
+    .site-nav.site-nav-desktop { display: none; }
+    @media (min-width: 900px) { .site-nav.site-nav-desktop { display: flex; } }
     .site-nav a { color: var(--brand); text-decoration: none; white-space: nowrap; }
     .site-nav a:hover { color: var(--brand-mid); text-decoration: underline; }
     .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--brand); }
@@ -112,6 +128,7 @@
       padding: 6px 8px; border: none; background: transparent; cursor: pointer; opacity: .6; border-radius: 6px;
     }
     .lang-switch button.active { opacity: 1; background: rgba(15,82,120,.12); font-weight: 600; }
+    /* Bandeau d’annonce (CONFIG boutique) */
     .announce-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 101;
       background: linear-gradient(90deg, var(--brand-deep, #061a27), var(--brand-mid));
@@ -119,6 +136,7 @@
       display: none;
     }
     .announce-bar.show { display: block; }
+    /* §3 Hero accueil, conteneur #main, grille catalogue, fiche produit (PDP) */
     .hero {
       background: linear-gradient(135deg, var(--brand) 0%, var(--brand-mid) 55%, #164e72 100%);
       color: #fff; padding: 48px 20px 56px; margin: -20px -20px 32px -20px;
@@ -174,6 +192,7 @@
     .chip:disabled { opacity: .4; cursor: not-allowed; }
     .qty-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
     .qty-row input[type="number"] { width: 72px; padding: 10px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
+    /* §5 Panier (drawer latéral) */
     .drawer-overlay {
       position: fixed; inset: 0; background: rgba(11,18,32,.45); z-index: 200;
       opacity: 0; pointer-events: none; transition: opacity .25s;
@@ -192,6 +211,7 @@
       border-bottom: 1px solid var(--border); align-items: start;
     }
     .cart-line img { width: 72px; height: 90px; object-fit: cover; border-radius: 8px; background: #e8eef6; }
+    /* §6 Footer */
     footer {
       margin-top: auto; background: var(--brand); color: rgba(255,255,255,.88); padding: 48px 20px 28px;
     }
@@ -202,6 +222,7 @@
     .newsletter-box input {
       width: 100%; padding: 12px 14px; border-radius: 10px; border: none; margin-bottom: 10px;
     }
+    /* §7 Notifications, modale connexion/inscription, bannière cookies */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px);
       background: var(--brand); color: #fff; padding: 14px 22px; border-radius: 12px; z-index: 400;
@@ -231,6 +252,7 @@
       display: none; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
     }
     .cookie-banner.show { display: flex; }
+    /* §8 Checkout (grille formulaire + récap), panneaux .panel, options paiement */
     .checkout-grid { display: grid; gap: 24px; }
     @media (min-width: 960px) { .checkout-grid { grid-template-columns: 1fr 380px; } }
     .panel { background: #fff; border-radius: var(--radius); padding: 22px; border: 1px solid var(--border); box-shadow: var(--shadow); }
@@ -240,7 +262,45 @@
     }
     .payment-options label:has(input:checked) { border-color: var(--brand-mid); background: rgba(15,82,120,.06); }
     .payment-options input { width: auto; }
+    /* §9 États vides (.empty-state), menu mobile (.nav-drawer), cartes wishlist, intros catalogue */
     .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+    .menu-toggle { flex-shrink: 0; }
+    @media (min-width: 900px) { .menu-toggle { display: none !important; } }
+    .nav-drawer-overlay {
+      position: fixed; inset: 0; background: rgba(11,18,32,.45); z-index: 190;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .nav-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .nav-drawer {
+      position: fixed; top: 0; left: 0; bottom: 0; width: min(340px, 90vw);
+      background: #fff; z-index: 191; transform: translateX(-100%);
+      transition: transform .28s ease; box-shadow: 8px 0 40px rgba(10,51,73,.18);
+      display: flex; flex-direction: column;
+    }
+    .nav-drawer.open { transform: translateX(0); }
+    .nav-drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border);
+    }
+    .nav-drawer-links { display: flex; flex-direction: column; padding: 8px 0 24px; overflow-y: auto; }
+    .nav-drawer-links a {
+      padding: 14px 22px; font-weight: 600; color: var(--brand); text-decoration: none;
+      border-bottom: 1px solid rgba(201,214,228,.5);
+    }
+    .nav-drawer-links a:hover { background: rgba(15,82,120,.06); color: var(--brand-mid); }
+    .wishlist-card-wrap { position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    .wishlist-card-wrap > .card { flex: 1; height: auto; }
+    .wishlist-remove-btn {
+      position: absolute; top: 10px; right: 10px; z-index: 4;
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,.96); box-shadow: 0 4px 14px rgba(10,51,73,.14);
+      cursor: pointer; font-size: 20px; line-height: 1; color: var(--brand); font-weight: 700;
+    }
+    .wishlist-remove-btn:hover { background: #fff; color: var(--accent); }
+    .page-intro { margin-bottom: 22px; max-width: 720px; }
+    .page-intro h1 { margin: 0 0 8px; font-family: var(--display); font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 600; color: var(--text); }
+    .page-intro p { margin: 0; line-height: 1.55; }
+    .icon-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
     .spinner {
       width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--brand-mid);
       border-radius: 50%; animation: spin .8s linear infinite; margin: 24px auto;
@@ -265,13 +325,17 @@
   </style>
 </head>
 <body>
+  <!-- Bandeau promo → header → tiroir nav mobile → #main (SPA) → footer → panier / auth / légal / toast -->
   <div class="announce-bar" id="announceBar" aria-live="polite"></div>
   <header class="site-header">
+    <button type="button" class="icon-btn menu-toggle" id="btnNavMenu" aria-expanded="false" aria-controls="navDrawer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
     <a href="#/" class="logo-link" id="headerLogoLink">
       <img id="headerLogo" alt="" style="display:none;">
       <span class="logo-text" id="headerStoreName">Boutique</span>
     </a>
-    <nav class="site-nav" aria-label="Navigation">
+    <nav class="site-nav site-nav-desktop" aria-label="Navigation">
       <a href="#/" data-i18n="nav_home">Accueil</a>
       <a href="#/catalog" data-i18n="catalogue">Catalogue</a>
       <a href="#/wishlist" data-i18n="nav_wishlist">Souhaits</a>
@@ -281,13 +345,35 @@
     </div>
     <div class="header-actions">
       <div class="lang-switch" id="langSwitch"></div>
-      <button type="button" class="icon-btn" id="btnAccount" title="">👤</button>
+      <button type="button" class="icon-btn" id="btnAccount" title="">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
       <button type="button" class="icon-btn" id="btnCart" title="">
-        🛒
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6 5 3H2"/></svg>
         <span class="badge" id="cartBadge" style="display:none;">0</span>
       </button>
     </div>
   </header>
+
+  <div class="nav-drawer-overlay" id="navDrawerOverlay" aria-hidden="true"></div>
+  <aside class="nav-drawer" id="navDrawer" aria-hidden="true" aria-labelledby="navDrawerTitle">
+    <div class="nav-drawer-head">
+      <span class="logo-text" id="navDrawerTitle" data-i18n="nav_menu_title">Menu</span>
+      <button type="button" class="icon-btn" id="navDrawerClose" aria-label="">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div style="padding:12px 18px;border-bottom:1px solid var(--border);">
+      <input type="search" id="drawerMobileSearch" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);font:inherit;">
+    </div>
+    <nav class="nav-drawer-links" aria-label="Mobile">
+      <a href="#/" data-i18n="nav_home">Accueil</a>
+      <a href="#/catalog" data-i18n="catalogue">Catalogue</a>
+      <a href="#/wishlist" data-i18n="nav_wishlist">Souhaits</a>
+      <a href="#/contact" data-i18n="nav_contact">Contact</a>
+      <a href="#/account" data-i18n="nav_account">Compte</a>
+    </nav>
+  </aside>
 
   <main id="main"><div id="erpBootSplash" style="padding:48px 24px;text-align:center;color:var(--text-muted);max-width:560px;margin:0 auto;line-height:1.6;"><div class="spinner" style="margin:0 auto 16px;"></div><p style="margin:0;font-weight:600;color:var(--text);">Carregamento… · Chargement… · Loading…</p><p style="margin:12px 0 0;font-size:14px;">Se esta zona ficar vazia durante muito tempo, verifique a consola do navegador (F12) e a URL da API (/exec).</p></div></main>
 
@@ -487,6 +573,22 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 (function () {
   'use strict';
 
+  /**
+   * Boutique client — SPA par hash (#/catalog, #/product/…).
+   *
+   * Flux typique :
+   *   erpSyncApiUrlNow → router → loadBootstrap (brand/config/catégories)
+   *   → ensureClientSession si besoin → refreshCartCount (non bloquant sauf routes compte)
+   *   → renderHome | renderCatalog | … dans #main.
+   *
+   * API : fonction api(action, data?, token?) — POST JSON vers API_URL (Web App Apps Script),
+   * sans en-tête Content-Type application/json (évite préflight OPTIONS non géré).
+   *
+   * Perf. panier : refreshCartCount remplit state._cartSnap ; renderCartDrawer le réutilise ~15s.
+   */
+
+  // --- URL Web App — synchro comme l’admin ERP (fichier COLAR / défaut / localStorage) ---
+
   /** Même priorité que le script fin de page admin : URL fichier (COLAR + défaut) puis localStorage — avant tout fetch. */
   function erpSyncApiUrlNow() {
     try {
@@ -519,7 +621,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   erpSyncApiUrlNow();
 
-  /** Images Drive dans <img> : vignette légère + repli uc?export=view (comme le backend ERP). */
+  /** Fallback global pour les balises img générées (Drive : vignette puis vue export). */
   window._erpImgFallback = function (el) {
     try {
       el.onerror = null;
@@ -531,6 +633,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     } catch (e1) { }
     el.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="520"><rect fill="%23e8eef6" width="100%" height="100%"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14">IMG</text></svg>');
   };
+
+  // --- Internationalisation : tables T[locale], devise, puis tr() / esc() ---
 
   var LANG = localStorage.getItem('boutique_lang') || 'pt';
   var CURRENCY_SYM = '\u20AC';
@@ -598,6 +702,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       legal_fallback_privacy: 'Política de privacidade completa: utilize o URL configurado ou contacte-nos.',
       legal_fallback_returns: 'Política de devoluções: utilize o URL configurado ou contacte-nos. Prazo indicativo nas CONFIG.',
       nav_unsubscribe: 'Cancelar newsletter',
+      nav_menu_title: 'Menu',
+      aria_account: 'Conta',
+      aria_cart: 'Carrinho',
+      aria_menu_open: 'Abrir menu',
+      aria_menu_close: 'Fechar menu',
+      catalog_intro: 'Filtros, pesquisa e novidades da sua loja.',
+      catalog_empty_title: 'Sem resultados',
+      catalog_empty_hint: 'Experimente limpar filtros ou alterar os termos de pesquisa.',
+      catalog_clear_filters: 'Limpar filtros',
+      home_featured_empty: 'Ainda não há produtos em destaque. Explore o catálogo.',
+      review_rating_label: 'Classificação (1–5)',
+      pay_submit_card: 'Pagar com cartão',
+      reg_newsletter_optin: 'Quero receber novidades e ofertas por email.',
+      addr_book_empty: 'Nenhuma morada guardada.',
+      contact_intro: 'Escrevemos-lhe por email o mais rápido possível.',
       no_variants_html: 'Este produto não tem variantes configuradas — não pode ser encomendado online. Contacte-nos.',
       loyalty_pts: 'Pontos',
       loyalty_info_hint: 'Os pontos são geridos pela loja; o resgate segue as regras da marca (loja ou contacto).',
@@ -674,6 +793,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       legal_fallback_privacy: 'Politique de confidentialité complète : URL configurée ou contact.',
       legal_fallback_returns: 'Politique de retours : URL configurée ou contact.',
       nav_unsubscribe: 'Newsletter · désabo.',
+      nav_menu_title: 'Menu',
+      aria_account: 'Mon compte',
+      aria_cart: 'Panier',
+      aria_menu_open: 'Ouvrir le menu',
+      aria_menu_close: 'Fermer le menu',
+      catalog_intro: 'Filtres, recherche et nouveautés de la boutique.',
+      catalog_empty_title: 'Aucun résultat',
+      catalog_empty_hint: 'Essayez de réinitialiser les filtres ou modifier la recherche.',
+      catalog_clear_filters: 'Réinitialiser les filtres',
+      home_featured_empty: 'Pas encore de produits à la une. Parcourez le catalogue.',
+      review_rating_label: 'Note (1–5)',
+      pay_submit_card: 'Payer par carte',
+      reg_newsletter_optin: 'Je souhaite recevoir les nouveautés et offres par email.',
+      addr_book_empty: 'Aucune adresse enregistrée.',
+      contact_intro: 'Nous vous répondons par email dès que possible.',
       no_variants_html: 'Produit sans variantes configurées — vente en ligne indisponible. Contactez-nous.',
       loyalty_pts: 'Points',
       loyalty_info_hint: 'Les points sont gérés par la boutique ; le règlement suit les règles de la marque (magasin ou contact).',
@@ -750,6 +884,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       legal_fallback_privacy: 'Full privacy policy: configured URL or contact us.',
       legal_fallback_returns: 'Returns policy: configured URL or contact us.',
       nav_unsubscribe: 'Unsubscribe newsletter',
+      nav_menu_title: 'Menu',
+      aria_account: 'Account',
+      aria_cart: 'Shopping cart',
+      aria_menu_open: 'Open menu',
+      aria_menu_close: 'Close menu',
+      catalog_intro: 'Filters, search and what’s new in the store.',
+      catalog_empty_title: 'No results',
+      catalog_empty_hint: 'Try clearing filters or changing your search.',
+      catalog_clear_filters: 'Clear filters',
+      home_featured_empty: 'No featured products yet. Browse the catalog.',
+      review_rating_label: 'Rating (1–5)',
+      pay_submit_card: 'Pay with card',
+      reg_newsletter_optin: 'I want news and offers by email.',
+      addr_book_empty: 'No saved addresses yet.',
+      contact_intro: 'We reply by email as soon as we can.',
       no_variants_html: 'This product has no variants configured — not available for online checkout. Contact us.',
       loyalty_pts: 'Points',
       loyalty_info_hint: 'Points are managed by the store; redemption follows the brand rules (in-store or contact).',
@@ -826,6 +975,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       legal_fallback_privacy: 'Privacidad completa: URL configurada o contacto.',
       legal_fallback_returns: 'Devoluciones: URL configurada o contacto.',
       nav_unsubscribe: 'Cancelar newsletter',
+      nav_menu_title: 'Menú',
+      aria_account: 'Cuenta',
+      aria_cart: 'Carrito',
+      aria_menu_open: 'Abrir menú',
+      aria_menu_close: 'Cerrar menú',
+      catalog_intro: 'Filtros, búsqueda y novedades de la tienda.',
+      catalog_empty_title: 'Sin resultados',
+      catalog_empty_hint: 'Pruebe a limpiar filtros o cambiar la búsqueda.',
+      catalog_clear_filters: 'Limpiar filtros',
+      home_featured_empty: 'Aún no hay productos destacados. Ver el catálogo.',
+      review_rating_label: 'Valoración (1–5)',
+      pay_submit_card: 'Pagar con tarjeta',
+      reg_newsletter_optin: 'Deseo recibir novedades y ofertas por email.',
+      addr_book_empty: 'Sin direcciones guardadas.',
+      contact_intro: 'Le responderemos por email lo antes posible.',
       no_variants_html: 'Producto sin variantes configuradas — no disponible online. Contáctenos.',
       loyalty_pts: 'Puntos',
       loyalty_info_hint: 'Los puntos los gestiona la tienda; el canje sigue las reglas de la marca (tienda o contacto).',
@@ -865,6 +1029,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     w.focus();
     w.print();
   }
+
+  // --- Images Google Drive (miniatures / fallback), prix affichés, moradas ---
 
   function extractDriveFileId(url) {
     if (!url || typeof url !== 'string') return '';
@@ -945,6 +1111,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     return [row.morada, row.cidade, row.codigo_postal, row.pais].filter(function (x) { return x && String(x).trim(); }).join(', ');
   }
 
+  // --- Liste de souhaits invité (localStorage), fusion après connexion ---
+
   var GUEST_WL_KEY = 'boutique_guest_wishlist_ids';
 
   function parseGuestWishlistIds() {
@@ -983,9 +1151,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   async function mergeGuestWishlistIntoAccount() {
     var ids = parseGuestWishlistIds();
     if (!ids.length || !state.clientToken || !state.clientId) return;
-    for (var i = 0; i < ids.length; i++) {
-      await api('addToWishlist', { clientId: state.clientId, produtoId: ids[i] }, state.clientToken);
-    }
+    await Promise.all(ids.map(function (pid) {
+      return api('addToWishlist', { clientId: state.clientId, produtoId: pid }, state.clientToken);
+    }));
     localStorage.removeItem(GUEST_WL_KEY);
   }
 
@@ -996,6 +1164,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     if (hs) hs.value = state.filters.search;
     location.hash = '#/catalog';
   }
+
+  // --- Retour paiement Stripe (query string) puis toast ---
 
   /** Après retour Stripe : le paramètre utile est payment_intent (stripe_return=1 est seulement un marqueur dans return_url). */
   function getStripePaymentIntentFromLocation() {
@@ -1020,6 +1190,13 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     window._toastT = setTimeout(function () { el.classList.remove('show'); }, 3800);
   }
 
+  /**
+   * Appelle la Web App Apps Script (corps JSON aligné sur `02-admin-erp`).
+   * @param {string} action Nom d’action serveur (ex. getCart, placeOrder).
+   * @param {Record<string, unknown>} [data] Charge utile métier.
+   * @param {string} [token] Jeton session client pour les routes protégées.
+   * @returns {Promise<Record<string, unknown>>} Objet parsé ou `{ success:false, error }`.
+   */
   async function api(action, data, token) {
     /* Aligné 02-admin-erp : même contrôle URL ; pas de Content-Type: application/json (préflight OPTIONS non géré par les Web Apps). */
     if (!API_URL || String(API_URL).indexOf('INSEREZ_VOTRE') !== -1) {
@@ -1045,6 +1222,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     }
   }
 
+  // --- État SPA : catalogue paginé/filtré, panier, session, caches perf. ---
+
   var state = {
     brand: null,
     empresa: null,
@@ -1066,8 +1245,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     selectedPayment: 'transfer',
     _bootDone: false,
     _maintenance: false,
-    _sessionValidated: false
+    _sessionValidated: false,
+    /** Dernier getCart (évite un 2ᵉ appel réseau à l’ouverture du panier). */
+    _cartSnap: null
   };
+
+  // --- Panier : cartId session, lignes, badge, tiroir latéral ---
 
   function saveCartId(id) {
     state.cartId = id || '';
@@ -1084,8 +1267,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     if (nome) localStorage.setItem('erp_client_nome', nome); else localStorage.removeItem('erp_client_nome');
   }
 
+  /**
+   * Recharge les lignes panier depuis l’API, met à jour le badge et `state._cartSnap`.
+   */
   async function refreshCartCount() {
     if (!state.cartId) {
+      state._cartSnap = null;
       document.getElementById('cartBadge').style.display = 'none';
       state.cartLines = [];
       return;
@@ -1093,7 +1280,14 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var res = await api('getCart', { cartId: state.cartId });
     if (!res.success) return;
     state.cartLines = res.items || [];
-    var n = res.count || 0;
+    var n = res.count != null ? res.count : state.cartLines.length;
+    state._cartSnap = {
+      cartId: state.cartId,
+      items: state.cartLines,
+      total: res.total,
+      count: n,
+      ts: Date.now()
+    };
     var b = document.getElementById('cartBadge');
     if (n > 0) { b.style.display = 'flex'; b.textContent = String(n); }
     else b.style.display = 'none';
@@ -1143,6 +1337,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     document.getElementById('cartDrawer').classList.remove('open');
   }
 
+  /**
+   * Rend le tiroir panier ; réutilise `state._cartSnap` s’il date de moins de ~15 s (évite un second getCart).
+   */
   async function renderCartDrawer() {
     var box = document.getElementById('cartBody');
     var clr = document.getElementById('clearCartBtn');
@@ -1152,8 +1349,28 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       if (clr) clr.style.display = 'none';
       return;
     }
-    var res = await api('getCart', { cartId: state.cartId });
+    var snap = state._cartSnap;
+    var useSnap = snap && snap.cartId === state.cartId && (Date.now() - snap.ts) < 15000;
+    var res;
+    if (useSnap) {
+      res = { success: true, items: snap.items || [], total: snap.total };
+    } else {
+      res = await api('getCart', { cartId: state.cartId });
+      if (res.success) {
+        var it = res.items || [];
+        var cn = res.count != null ? res.count : it.length;
+        state._cartSnap = {
+          cartId: state.cartId,
+          items: it,
+          total: res.total,
+          count: cn,
+          ts: Date.now()
+        };
+        state.cartLines = it;
+      }
+    }
     if (!res.success) {
+      state._cartSnap = null;
       box.innerHTML = '<div class="empty-state">' + esc(res.error || '') + '</div>';
       if (clr) clr.style.display = 'none';
       return;
@@ -1249,12 +1466,18 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     });
   }
 
+  // --- Parsing du hash (#/) ; bootstrap déjà défini ci‑dessus ---
+
   function parseRoute() {
     var h = (location.hash || '#/').replace(/^#/, '') || '/';
     var parts = h.split('/').filter(Boolean);
     return { parts: parts };
   }
 
+  /**
+   * Charge brand, config, catégories ; gère maintenance et écran d’erreur avec nouvel essai.
+   * @returns {Promise<boolean>} `true` si la boutique peut afficher les pages catalogue/commande.
+   */
   async function loadBootstrap() {
     erpSyncApiUrlNow();
     if (state._bootDone) return !state._maintenance;
@@ -1305,6 +1528,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       return false;
     }
 
+    // --- Identité boutique : titre, logos, métadonnées, textes footer/legal ---
+
     if (pb && pb.success && pb.brand) state.brand = pb.brand;
     if (cf && cf.success && cf.config) state.config = cf.config;
     if (emp && emp.success && emp.empresa) state.empresa = emp.empresa;
@@ -1330,6 +1555,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     state._bootDone = true;
     return true;
   }
+
+  // --- Marque : header/footer, SEO, cookies, i18n sur placeholders ---
 
   function applyBrandUi() {
     var b = state.brand || {};
@@ -1447,6 +1674,80 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     if (hs) hs.placeholder = tr('search_ph');
     var fe = document.getElementById('footerNewsEmail');
     if (fe) fe.placeholder = tr('newsletter_ph');
+    var dms = document.getElementById('drawerMobileSearch');
+    if (dms) dms.placeholder = tr('search_ph');
+    var cms = document.getElementById('catalogMobileSearch');
+    if (cms) cms.placeholder = tr('search_ph');
+    var ba = document.getElementById('btnAccount');
+    if (ba) ba.setAttribute('aria-label', tr('aria_account'));
+    var bc = document.getElementById('btnCart');
+    if (bc) bc.setAttribute('aria-label', tr('aria_cart'));
+    var bm = document.getElementById('btnNavMenu');
+    if (bm) bm.setAttribute('aria-label', tr('aria_menu_open'));
+    var nc = document.getElementById('navDrawerClose');
+    if (nc) nc.setAttribute('aria-label', tr('aria_menu_close'));
+  }
+
+  function bindSearchInput(el, onAfter) {
+    if (!el || el.getAttribute('data-search-bound')) return;
+    el.setAttribute('data-search-bound', '1');
+    function go() {
+      applySearchAndGoCatalog(el.value);
+      if (typeof onAfter === 'function') onAfter();
+    }
+    el.addEventListener('change', go);
+    el.addEventListener('search', go);
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        go();
+      }
+    });
+  }
+
+  // --- Navigation mobile (drawer), recherche champ catalogue ---
+
+  function setupMobileNav() {
+    if (setupMobileNav._done) return;
+    setupMobileNav._done = true;
+    var btn = document.getElementById('btnNavMenu');
+    var drawer = document.getElementById('navDrawer');
+    var overlay = document.getElementById('navDrawerOverlay');
+    var closeBtn = document.getElementById('navDrawerClose');
+    if (!btn || !drawer || !overlay || !closeBtn) return;
+    function openNav() {
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      overlay.setAttribute('aria-hidden', 'false');
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeNav() {
+      drawer.classList.remove('open');
+      overlay.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('aria-hidden', 'true');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    btn.onclick = openNav;
+    overlay.onclick = closeNav;
+    closeBtn.onclick = closeNav;
+    drawer.querySelectorAll('.nav-drawer-links a').forEach(function (a) {
+      a.addEventListener('click', closeNav);
+    });
+    bindSearchInput(document.getElementById('drawerMobileSearch'), closeNav);
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && drawer.classList.contains('open')) closeNav();
+    });
+  }
+
+  function wishlistWrapCard(cardHtml, produtoId, guest) {
+    var attr = guest ? 'data-wl-guest-remove' : 'data-wl-remove';
+    return '<div class="wishlist-card-wrap">' + cardHtml +
+      '<button type="button" class="wishlist-remove-btn" ' + attr + '="' + esc(String(produtoId)) +
+      '" aria-label="' + esc(tr('fav_remove')) + '">×</button></div>';
   }
 
   function renderLangSwitcher() {
@@ -1488,6 +1789,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     );
   }
 
+  // --- Données catalogue (pagination / filtres dans state.filters) ---
+
   async function fetchProducts(resetPage, fetchOpts) {
     fetchOpts = fetchOpts || {};
     if (resetPage) state.page = 1;
@@ -1509,6 +1812,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     return list;
   }
 
+  // --- Vues (#main) : accueil, catalogue, fiche, checkout, compte… ---
+
   async function renderHome() {
     var main = document.getElementById('main');
     main.innerHTML =
@@ -1520,20 +1825,15 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '<input type="search" class="mobile-search" id="mobileSearch" placeholder="' + esc(tr('search_ph')) + '">' +
       '<div id="homeFeatured"></div>';
 
-    (function bindMs(el) {
-      if (!el) return;
-      el.addEventListener('change', function () { applySearchAndGoCatalog(el.value); });
-      el.addEventListener('search', function () { applySearchAndGoCatalog(el.value); });
-      el.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          applySearchAndGoCatalog(el.value);
-        }
-      });
-    })(document.getElementById('mobileSearch'));
+    bindSearchInput(document.getElementById('mobileSearch'));
 
     await fetchProducts(true, { pageSize: 8 });
     var feat = document.getElementById('homeFeatured');
+    if (!state.products.length) {
+      feat.innerHTML = '<div class="empty-state panel" style="border-radius:var(--radius);"><p style="margin:0;line-height:1.6;">' + esc(tr('home_featured_empty')) + '</p>' +
+        '<p style="margin:16px 0 0;"><a href="#/catalog" class="btn btn-accent">' + esc(tr('catalogue')) + '</a></p></div>';
+      return;
+    }
     feat.innerHTML = '<h2 style="margin:8px 0 20px;font-family:var(--display);font-size:1.75rem;">' + esc(tr('catalogue')) + '</h2>' +
       '<div class="grid-products">' + state.products.slice(0, 8).map(productCard).join('') + '</div>' +
       '<div style="text-align:center;margin-top:28px;"><a href="#/catalog" class="btn btn-ghost">' + esc(tr('catalogue')) + '</a></div>';
@@ -1542,6 +1842,10 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   async function renderCatalog() {
     var main = document.getElementById('main');
     main.innerHTML =
+      '<div class="page-intro">' +
+      '<h1>' + esc(tr('catalogue')) + '</h1>' +
+      '<p class="sku-note">' + esc(tr('catalog_intro')) + '</p></div>' +
+      '<input type="search" class="mobile-search" id="catalogMobileSearch" autocomplete="off">' +
       '<div class="toolbar">' +
       '<select id="fCat"><option value="">' + esc(tr('all_cats')) + '</option></select>' +
       '<select id="fSort">' +
@@ -1570,8 +1874,42 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     async function reload() {
       document.getElementById('catGrid').innerHTML = '<div class="spinner"></div>';
       await fetchProducts(true);
-      document.getElementById('catGrid').innerHTML = state.products.map(productCard).join('');
-      document.getElementById('loadMore').style.display = state.productsHasMore ? 'inline-flex' : 'none';
+      var cg = document.getElementById('catGrid');
+      var lm = document.getElementById('loadMore');
+      if (!state.products.length) {
+        cg.innerHTML =
+          '<div class="empty-state panel" style="border-radius:var(--radius);max-width:560px;margin:0 auto;">' +
+          '<p style="font-size:1.12rem;color:var(--text);margin:0 0 10px;font-weight:600;">' + esc(tr('catalog_empty_title')) + '</p>' +
+          '<p style="margin:0 0 20px;line-height:1.55;">' + esc(tr('catalog_empty_hint')) + '</p>' +
+          '<button type="button" class="btn btn-primary" id="catResetFilters">' + esc(tr('catalog_clear_filters')) + '</button></div>';
+        lm.style.display = 'none';
+        document.getElementById('catResetFilters').onclick = function () {
+          state.filters.search = '';
+          state.filters.categoria = '';
+          state.filters.sort = 'date_desc';
+          state.filters.in_stock = false;
+          sel.value = '';
+          document.getElementById('fSort').value = state.filters.sort;
+          document.getElementById('fStock').checked = false;
+          var cms = document.getElementById('catalogMobileSearch');
+          if (cms) cms.value = '';
+          var hsel = document.getElementById('headerSearch');
+          if (hsel) hsel.value = '';
+          location.hash = '#/catalog';
+          reload();
+        };
+      } else {
+        cg.innerHTML = state.products.map(productCard).join('');
+        lm.style.display = state.productsHasMore ? 'inline-flex' : 'none';
+      }
+      bindSearchInput(document.getElementById('catalogMobileSearch'));
+      var cms2 = document.getElementById('catalogMobileSearch');
+      if (cms2) {
+        cms2.value = state.filters.search || '';
+        cms2.placeholder = tr('search_ph');
+      }
+      var hs = document.getElementById('headerSearch');
+      if (hs) hs.value = state.filters.search || '';
     }
 
     sel.onchange = function () { state.filters.categoria = sel.value; reload(); };
@@ -1686,7 +2024,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         (state.clientId ? '<div class="panel" style="margin-top:16px;"><h4>' + esc(tr('write_review')) + '</h4>' +
           '<p class="sku-note" style="margin-top:0;line-height:1.5;">' + esc(tr('review_moderation_hint')) + '</p>' +
           '<div class="field"><textarea id="rvText" rows="3"></textarea></div>' +
-          '<div class="field"><label>1–5</label><input type="number" id="rvStars" min="1" max="5" value="5"></div>' +
+          '<div class="field"><label>' + esc(tr('review_rating_label')) + '</label><input type="number" id="rvStars" min="1" max="5" value="5"></div>' +
           '<button type="button" class="btn btn-primary" id="rvSend">' + esc(tr('submit_review')) + '</button></div>' : '') +
         '</div></div></div>';
 
@@ -1941,7 +2279,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         cartId: state.cartId,
         coupon_code: state.couponCode || undefined,
         total: total.toFixed(2),
-        awaitOnlinePayment: awaitPay
+        awaitOnlinePayment: awaitPay,
+        payment_method: payM
       };
 
       var ord = await api('createOrder', payload, state.clientToken);
@@ -1966,7 +2305,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
           var elements = stripe.elements({ clientSecret: pi.clientSecret });
           var pay = elements.create('payment');
           pay.mount('#payment-element');
-          document.getElementById('coSubmit').textContent = 'Payer';
+          document.getElementById('coSubmit').textContent = tr('pay_submit_card');
           document.getElementById('coSubmit').onclick = async function () {
             var base = location.href.split('#')[0].split('?')[0];
             var r2 = await stripe.confirmPayment({
@@ -2084,16 +2423,26 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         return;
       }
       document.getElementById('wlGuestMount').innerHTML = '<div class="spinner"></div>';
+      var results = await Promise.all(gid.map(function (id) { return api('getProduct', { id: id }); }));
       var prods = [];
-      for (var g = 0; g < gid.length; g++) {
-        var pr = await api('getProduct', { id: gid[g] });
+      for (var gx = 0; gx < results.length; gx++) {
+        var pr = results[gx];
         if (pr.success && pr.product) prods.push(pr.product);
       }
       if (!prods.length) {
         document.getElementById('wlGuestMount').innerHTML = '<div class="empty-state">' + esc(tr('wishlist_guest_empty')) + '</div>';
         return;
       }
-      document.getElementById('wlGuestMount').innerHTML = '<div class="grid-products">' + prods.map(productCard).join('') + '</div>';
+      document.getElementById('wlGuestMount').innerHTML = '<div class="grid-products" id="wlGuestGrid">' + prods.map(function (pr) {
+        return wishlistWrapCard(productCard(pr), pr.produto_id, true);
+      }).join('') + '</div>';
+      document.getElementById('wlGuestGrid').addEventListener('click', function (ev) {
+        var btn = ev.target.closest('[data-wl-guest-remove]');
+        if (!btn) return;
+        ev.preventDefault();
+        toggleGuestWishlist(btn.getAttribute('data-wl-guest-remove'));
+        renderWishlist();
+      });
       return;
     }
     main.innerHTML = '<div class="spinner"></div>';
@@ -2103,10 +2452,22 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       main.innerHTML += '<div class="empty-state">' + esc(tr('wishlist_empty')) + '</div>';
       return;
     }
-    main.innerHTML += '<div class="grid-products">' + wr.wishlist.map(function (w) {
+    main.innerHTML += '<div class="grid-products" id="wlAuthGrid">' + wr.wishlist.map(function (w) {
       var pr = w.produto || {};
-      return productCard(pr);
+      var pid = w.produto_id || pr.produto_id || '';
+      return wishlistWrapCard(productCard(pr), pid, false);
     }).join('') + '</div>';
+    document.getElementById('wlAuthGrid').addEventListener('click', async function (ev) {
+      var btn = ev.target.closest('[data-wl-remove]');
+      if (!btn) return;
+      ev.preventDefault();
+      var pid = btn.getAttribute('data-wl-remove');
+      var rm = await api('removeFromWishlist', { clientId: state.clientId, produtoId: pid }, state.clientToken);
+      if (rm.success) {
+        toast(tr('fav_remove'));
+        renderWishlist();
+      } else toast(rm.error || '—');
+    });
   }
 
   async function renderOrderDetail(orderId) {
@@ -2202,7 +2563,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   async function renderContact() {
     document.getElementById('main').innerHTML =
-      '<h1 style="font-family:var(--display);">' + esc(tr('contact_title')) + '</h1>' +
+      '<div class="page-intro">' +
+      '<h1>' + esc(tr('contact_title')) + '</h1>' +
+      '<p class="sku-note">' + esc(tr('contact_intro')) + '</p></div>' +
       '<div class="panel" style="max-width:560px">' +
       '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="ctName"></div>' +
       '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="ctEmail" type="email"></div>' +
@@ -2294,6 +2657,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         '<button type="button" class="btn btn-primary" style="width:100%" id="rgSendOtp">' + esc(tr('otp_sent')) + '</button>' +
         '<div class="field" style="margin-top:16px;"><label>' + esc(tr('otp_placeholder')) + '</label><input id="rgOtp"></div>' +
         '<button type="button" class="btn btn-accent" style="width:100%" id="rgVerify">' + esc(tr('verify')) + '</button>' +
+        '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;line-height:1.45;cursor:pointer;">' +
+        '<input type="checkbox" id="rgNews" style="margin-top:3px;width:auto;">' +
+        '<span>' + esc(tr('reg_newsletter_optin')) + '</span></label>' +
         '<p style="margin-top:14px;"><a href="#" id="swLogin">' + esc(tr('login')) + '</a></p>';
       document.getElementById('rgSendOtp').onclick = async function () {
         var r = await api('sendRegistrationOTP', { target: document.getElementById('rgEmail').value.trim() });
@@ -2305,7 +2671,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
           nome: document.getElementById('rgName').value,
           email: document.getElementById('rgEmail').value.trim().toLowerCase(),
           password: document.getElementById('rgPass').value,
-          newsletter: false
+          newsletter: !!(document.getElementById('rgNews') && document.getElementById('rgNews').checked)
         };
         var r = await api('verifyRegistrationOTP', {
           target: document.getElementById('rgEmail').value.trim(),
@@ -2384,7 +2750,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       var ar = await api('getClientAddresses', { clientId: state.clientId }, state.clientToken);
       var rows = (ar.success && ar.addresses) ? ar.addresses : [];
       if (!rows.length) {
-        box.innerHTML = '<p class="sku-note">—</p>';
+        box.innerHTML = '<p class="sku-note">' + esc(tr('addr_book_empty')) + '</p>';
         return;
       }
       box.innerHTML = rows.map(function (a) {
@@ -2469,33 +2835,36 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     } catch (e) { toast(String(e.message || e)); }
   }
 
+  /**
+   * Lit `location.hash`, assure le bootstrap, la session sur routes sensibles, le badge panier, puis dispatch vers les render*.
+   */
   async function router() {
     if (!await loadBootstrap()) return;
-    await ensureClientSession();
     var r = parseRoute();
     var p = r.parts[0] || '';
-    await Promise.all([
-      refreshCartCount(),
-      (async function () {
-        if (p === '' || p === 'home') { await renderHome(); return; }
-        if (p === 'catalog') {
-          if (r.parts[1]) state.filters.categoria = decodeURIComponent(r.parts[1]);
-          else state.filters.categoria = '';
-          await renderCatalog();
-          return;
-        }
-        if (p === 'product' && r.parts[1]) { await renderProduct(decodeURIComponent(r.parts[1])); return; }
-        if (p === 'checkout') { await renderCheckout(); return; }
-        if (p === 'contact') { await renderContact(); return; }
-        if (p === 'legal' && r.parts[1]) { renderLegalPage(r.parts[1]); return; }
-        if (p === 'newsletter' && r.parts[1] === 'unsubscribe') { renderNewsletterUnsub(); return; }
-        if (p === 'wishlist') { await renderWishlist(); return; }
-        if (p === 'order' && r.parts[1]) { await renderOrderDetail(decodeURIComponent(r.parts[1])); return; }
-        if (p === 'account') { await renderAccount(); return; }
-        await renderHome();
-      })()
-    ]);
+    var awaitSession = (p === 'account' || p === 'order');
+    if (awaitSession) await ensureClientSession();
+    else ensureClientSession().catch(function () {});
+    refreshCartCount().catch(function () {});
+    if (p === '' || p === 'home') { await renderHome(); return; }
+    if (p === 'catalog') {
+      if (r.parts[1]) state.filters.categoria = decodeURIComponent(r.parts[1]);
+      else state.filters.categoria = '';
+      await renderCatalog();
+      return;
+    }
+    if (p === 'product' && r.parts[1]) { await renderProduct(decodeURIComponent(r.parts[1])); return; }
+    if (p === 'checkout') { await renderCheckout(); return; }
+    if (p === 'contact') { await renderContact(); return; }
+    if (p === 'legal' && r.parts[1]) { renderLegalPage(r.parts[1]); return; }
+    if (p === 'newsletter' && r.parts[1] === 'unsubscribe') { renderNewsletterUnsub(); return; }
+    if (p === 'wishlist') { await renderWishlist(); return; }
+    if (p === 'order' && r.parts[1]) { await renderOrderDetail(decodeURIComponent(r.parts[1])); return; }
+    if (p === 'account') { await renderAccount(); return; }
+    await renderHome();
   }
+
+  // --- Écouteurs fixes sur header / footer / modales / cookie ---
 
   document.getElementById('btnCart').onclick = openCart;
   document.getElementById('cartOverlay').onclick = closeCart;
@@ -2540,6 +2909,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   };
 
   window.addEventListener('hashchange', router);
+
+  setupMobileNav();
 
   (async function () {
     try {

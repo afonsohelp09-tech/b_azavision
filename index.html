@@ -301,8 +301,28 @@
       .hero:not(.hero--editorial) h1 { font-family: var(--display); font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 600; margin: 0 0 12px; line-height: 1.15; }
       .hero:not(.hero--editorial) p { opacity: .92; max-width: 520px; margin: 0 auto 24px; font-size: 1.05rem; }
       main { flex: 1; width: 100%; max-width: 1320px; margin: 0 auto; padding: 20px; }
-      .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 24px; }
-      .toolbar select { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+      .toolbar select { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); min-width: 140px; }
+      .catalog-cat-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+      .catalog-cat-pill {
+        padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
+        background: var(--bg-card); color: var(--text); font-size: 14px; font-weight: 600;
+        cursor: pointer; text-decoration: none; transition: background .15s, border-color .15s;
+      }
+      .catalog-cat-pill:hover { border-color: var(--brand-mid); }
+      .catalog-cat-pill.is-active { background: var(--brand); color: #fff; border-color: var(--brand); }
+      .catalog-active-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; min-height: 0; }
+      .catalog-active-filters:empty { display: none; }
+      .catalog-filter-chip {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+        border-radius: 999px; background: rgba(15,82,120,.08); border: 1px solid var(--border);
+        font-size: 13px; font-weight: 500;
+      }
+      .catalog-filter-chip button {
+        border: none; background: transparent; cursor: pointer; font-size: 16px; line-height: 1;
+        padding: 0 2px; color: inherit;
+      }
+      .catalog-result-count { margin: 0 0 16px; font-size: 14px; color: var(--text-muted); }
       .grid-products {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -1251,6 +1271,9 @@
         promo_empty_hint: 'Não há produtos em promoção de momento. Volte em breve ou explore o catálogo completo.',
         catalog_empty_title: 'Sem resultados',
         catalog_empty_hint: 'Experimente limpar filtros ou alterar os termos de pesquisa.',
+        catalog_results_count: '{{n}} produto(s)',
+        catalog_results_filtered: '{{n}} produto(s) — {{filters}}',
+        catalog_filter_clear_all: 'Limpar filtros',
         catalog_clear_filters: 'Limpar filtros',
         home_featured_empty: 'Ainda não há produtos em destaque. Explore o catálogo.',
         review_rating_label: 'Classificação (1–5)',
@@ -1373,6 +1396,9 @@
         promo_empty_hint: 'Aucune promotion pour le moment. Revenez bientôt ou parcourez tout le catalogue.',
         catalog_empty_title: 'Aucun résultat',
         catalog_empty_hint: 'Essayez de réinitialiser les filtres ou modifier la recherche.',
+        catalog_results_count: '{{n}} produit(s)',
+        catalog_results_filtered: '{{n}} produit(s) — {{filters}}',
+        catalog_filter_clear_all: 'Effacer les filtres',
         catalog_clear_filters: 'Réinitialiser les filtres',
         home_featured_empty: 'Pas encore de produits à la une. Parcourez le catalogue.',
         review_rating_label: 'Note (1–5)',
@@ -1495,6 +1521,9 @@
         promo_empty_hint: 'No promotions right now. Check back soon or browse the full catalog.',
         catalog_empty_title: 'No results',
         catalog_empty_hint: 'Try clearing filters or changing your search.',
+        catalog_results_count: '{{n}} product(s)',
+        catalog_results_filtered: '{{n}} product(s) — {{filters}}',
+        catalog_filter_clear_all: 'Clear filters',
         catalog_clear_filters: 'Clear filters',
         home_featured_empty: 'No featured products yet. Browse the catalog.',
         review_rating_label: 'Rating (1–5)',
@@ -1617,6 +1646,9 @@
         promo_empty_hint: 'No hay promociones por ahora. Vuelva pronto o explore el catálogo completo.',
         catalog_empty_title: 'Sin resultados',
         catalog_empty_hint: 'Pruebe a limpiar filtros o cambiar la búsqueda.',
+        catalog_results_count: '{{n}} producto(s)',
+        catalog_results_filtered: '{{n}} producto(s) — {{filters}}',
+        catalog_filter_clear_all: 'Borrar filtros',
         catalog_clear_filters: 'Limpiar filtros',
         home_featured_empty: 'Aún no hay productos destacados. Ver el catálogo.',
         review_rating_label: 'Valoración (1–5)',
@@ -2318,20 +2350,123 @@
       localStorage.removeItem(GUEST_WL_KEY);
     }
 
+    function normalizeCategoryKey(v) {
+      if (v == null || v === '') return '';
+      var s = String(v).replace(/^\uFEFF?/, '').replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+      try { if (typeof s.normalize === 'function') s = s.normalize('NFKC'); } catch (e) { }
+      return s.toLowerCase();
+    }
+
+    function resolveCategoryCanonical(input) {
+      var raw = String(input == null ? '' : input).trim();
+      if (!raw) return '';
+      var key = normalizeCategoryKey(raw);
+      var cats = state.categories || [];
+      for (var i = 0; i < cats.length; i++) {
+        var nome = String(cats[i].nome || cats[i].name || '').trim();
+        if (nome && normalizeCategoryKey(nome) === key) return nome;
+      }
+      return raw;
+    }
+
+    function buildCatalogHashFromFilters() {
+      if (state.filters.promo_only) return '#/catalog/promo';
+      if (state.filters.categoria) return '#/catalog/' + encodeURIComponent(state.filters.categoria);
+      return '#/catalog';
+    }
+
+    function navigateCatalogFromFilters() {
+      invalidateApiCache(['getProducts']);
+      var nextHash = buildCatalogHashFromFilters();
+      var cur = String(location.hash || '').split('?')[0].replace(/\/$/, '') || '#/';
+      if (cur === nextHash.replace(/\/$/, '')) {
+        if (typeof window.__catalogReloadFn === 'function') window.__catalogReloadFn();
+        return;
+      }
+      location.hash = nextHash;
+    }
+
+    function catalogActiveFilterLabels() {
+      var bits = [];
+      if (state.filters.promo_only) bits.push(tr('nav_promo'));
+      if (state.filters.categoria) bits.push(state.filters.categoria);
+      if (state.filters.search) bits.push('« ' + state.filters.search + ' »');
+      if (state.filters.in_stock) bits.push(tr('filter_stock'));
+      if (state.filters.preco_min) bits.push(tr('filter_price_min') + ' ' + state.filters.preco_min);
+      if (state.filters.preco_max) bits.push(tr('filter_price_max') + ' ' + state.filters.preco_max);
+      if (state.filters.sort === 'price_asc') bits.push(tr('sort_price_lo'));
+      if (state.filters.sort === 'price_desc') bits.push(tr('sort_price_hi'));
+      return bits;
+    }
+
+    function catalogResultsCountHtml() {
+      var n = state.productsTotal != null ? state.productsTotal : (state.products || []).length;
+      var filters = catalogActiveFilterLabels().join(' · ');
+      var tpl = filters ? tr('catalog_results_filtered') : tr('catalog_results_count');
+      return esc(tpl.replace('{{n}}', String(n)).replace('{{filters}}', filters));
+    }
+
+    function renderCatalogActiveFilters(bindRoot) {
+      var root = bindRoot || document.getElementById('catalogActiveFilters');
+      if (!root) return;
+      var chips = [];
+      if (state.filters.categoria) {
+        chips.push({ key: 'categoria', label: tr('filter_cat') + ': ' + state.filters.categoria });
+      }
+      if (state.filters.search) {
+        chips.push({ key: 'search', label: tr('search_ph') + ': ' + state.filters.search });
+      }
+      if (state.filters.in_stock) chips.push({ key: 'in_stock', label: tr('filter_stock') });
+      if (state.filters.preco_min) chips.push({ key: 'preco_min', label: tr('filter_price_min') + ' ' + state.filters.preco_min });
+      if (state.filters.preco_max) chips.push({ key: 'preco_max', label: tr('filter_price_max') + ' ' + state.filters.preco_max });
+      if (state.filters.promo_only) chips.push({ key: 'promo', label: tr('nav_promo') });
+      if (!chips.length) {
+        root.innerHTML = '';
+        return;
+      }
+      root.innerHTML = chips.map(function (c) {
+        return '<span class="catalog-filter-chip">' + esc(c.label) +
+          '<button type="button" data-clear-filter="' + esc(c.key) + '" aria-label="' + esc(tr('remove')) + '">×</button></span>';
+      }).join('') +
+        '<button type="button" class="btn btn-ghost btn-sm" id="catalogClearAllFilters">' + esc(tr('catalog_filter_clear_all')) + '</button>';
+      root.querySelectorAll('[data-clear-filter]').forEach(function (btn) {
+        btn.onclick = function () {
+          var k = btn.getAttribute('data-clear-filter');
+          if (k === 'categoria') state.filters.categoria = '';
+          else if (k === 'search') state.filters.search = '';
+          else if (k === 'in_stock') state.filters.in_stock = false;
+          else if (k === 'preco_min') state.filters.preco_min = '';
+          else if (k === 'preco_max') state.filters.preco_max = '';
+          else if (k === 'promo') state.filters.promo_only = false;
+          navigateCatalogFromFilters();
+        };
+      });
+      var clrAll = document.getElementById('catalogClearAllFilters');
+      if (clrAll) clrAll.onclick = function () {
+        var keepPromo = false;
+        state.filters.search = '';
+        state.filters.categoria = '';
+        state.filters.sort = 'date_desc';
+        state.filters.in_stock = false;
+        state.filters.preco_min = '';
+        state.filters.preco_max = '';
+        state.filters.promo_only = keepPromo;
+        navigateCatalogFromFilters();
+      };
+    }
+
     /** Synchronise la recherche (état + champ header) et ouvre le catalogue. */
     function applySearchAndGoCatalog(q) {
       state.filters.search = (q == null ? '' : String(q)).trim();
       var hs = document.getElementById('headerSearch');
       if (hs) hs.value = state.filters.search;
-      var onPromo = /^#\/catalog\/promo\/?$/i.test(location.hash || '');
-      var nextHash = onPromo || state.filters.promo_only ? '#/catalog/promo' : '#/catalog';
-      var cur = String(location.hash || '').split('?')[0].replace(/\/$/, '') || '#/';
-      var normNext = nextHash.replace(/\/$/, '');
-      if (cur === normNext && typeof window.__catalogReloadFn === 'function') {
-        window.__catalogReloadFn();
-        return;
+      if (!state.filters.categoria) {
+        var hm = String(location.hash || '').match(/^#\/catalog\/([^/?#]+)/i);
+        if (hm && hm[1] && hm[1].toLowerCase() !== 'promo') {
+          state.filters.categoria = resolveCategoryCanonical(decodeURIComponent(hm[1]));
+        }
       }
-      location.hash = nextHash;
+      navigateCatalogFromFilters();
     }
 
     // --- Retour paiement Stripe (query string) puis toast ---
@@ -3712,7 +3847,9 @@
     async function fetchProducts(resetPage, fetchOpts) {
       fetchOpts = fetchOpts || {};
       if (resetPage) state.page = 1;
+      if (state.filters.categoria) state.filters.categoria = resolveCategoryCanonical(state.filters.categoria);
       var ps = fetchOpts.pageSize != null ? fetchOpts.pageSize : state.pageSize;
+      if (state.filters.categoria && !fetchOpts.pageSize) ps = Math.max(ps, 32);
       var payload = {
         search: state.filters.search || undefined,
         categoria: state.filters.categoria || undefined,
@@ -3822,15 +3959,31 @@
     async function renderCatalog() {
       var main = document.getElementById('main');
       var promoMode = !!state.filters.promo_only;
+      state.filters.categoria = resolveCategoryCanonical(state.filters.categoria);
+      var catPillsHtml = '';
+      if (!promoMode && (state.categories || []).length) {
+        catPillsHtml = '<div class="catalog-cat-pills" id="catalogCatPills">' +
+          '<button type="button" class="catalog-cat-pill' + (!state.filters.categoria ? ' is-active' : '') + '" data-cat="">' + esc(tr('all_cats')) + '</button>' +
+          state.categories.map(function (c) {
+            var nome = String(c.nome || c.name || '').trim();
+            if (!nome) return '';
+            var active = state.filters.categoria && normalizeCategoryKey(state.filters.categoria) === normalizeCategoryKey(nome);
+            return '<button type="button" class="catalog-cat-pill' + (active ? ' is-active' : '') + '" data-cat="' + esc(nome) + '">' + esc(nome) + '</button>';
+          }).join('') + '</div>';
+      }
       main.innerHTML =
         '<div class="page-intro">' +
-        '<h1>' + esc(promoMode ? tr('nav_promo') : tr('catalogue')) + '</h1>' +
+        '<h1>' + esc(promoMode ? tr('nav_promo') : (state.filters.categoria || tr('catalogue'))) + '</h1>' +
         '<p class="sku-note">' + esc(promoMode ? tr('promo_intro') : tr('catalog_intro')) + '</p></div>' +
         (promoMode ? promoCatalogBannerHtml() : '') +
         (promoMode ? promoCodePanelHtml() : '') +
+        catPillsHtml +
         '<input type="search" class="mobile-search" id="catalogMobileSearch" autocomplete="off">' +
+        '<div class="catalog-active-filters" id="catalogActiveFilters"></div>' +
+        '<p class="catalog-result-count" id="catResultCount"></p>' +
         '<div class="toolbar">' +
-        '<select id="fCat"><option value="">' + esc(tr('all_cats')) + '</option></select>' +
+        '<label class="sku-note" style="margin:0;">' + esc(tr('filter_cat')) + '</label>' +
+        '<select id="fCat" aria-label="' + esc(tr('filter_cat')) + '"><option value="">' + esc(tr('all_cats')) + '</option></select>' +
         '<select id="fSort">' +
         '<option value="date_desc">' + esc(tr('sort_new')) + '</option>' +
         '<option value="price_asc">' + esc(tr('sort_price_lo')) + '</option>' +
@@ -3852,7 +4005,7 @@
         o.textContent = nome;
         sel.appendChild(o);
       });
-      sel.value = state.filters.categoria;
+      sel.value = state.filters.categoria || '';
       document.getElementById('fSort').value = state.filters.sort;
       document.getElementById('fStock').checked = !!state.filters.in_stock;
       var fMin = document.getElementById('fPriceMin');
@@ -3866,6 +4019,9 @@
         if (cg) cg.classList.add('is-loading');
         await fetchProducts(true);
         if (cg) cg.classList.remove('is-loading');
+        var rc = document.getElementById('catResultCount');
+        if (rc) rc.innerHTML = catalogResultsCountHtml();
+        renderCatalogActiveFilters();
         var lm = document.getElementById('loadMore');
         if (!state.products.length) {
           cg.innerHTML =
@@ -3892,8 +4048,7 @@
             if (cms) cms.value = '';
             var hsel = document.getElementById('headerSearch');
             if (hsel) hsel.value = '';
-            location.hash = keepPromo ? '#/catalog/promo' : '#/catalog';
-            reload();
+            navigateCatalogFromFilters();
           };
         } else {
           cg.innerHTML = state.products.map(productCard).join('');
@@ -3918,11 +4073,37 @@
         clearTimeout(reloadTimer);
         reloadTimer = setTimeout(reload, 300);
       }
-      sel.onchange = function () { state.filters.categoria = sel.value; reloadDebounced(); };
-      document.getElementById('fSort').onchange = function () { state.filters.sort = this.value; reloadDebounced(); };
-      document.getElementById('fStock').onchange = function () { state.filters.in_stock = this.checked; reloadDebounced(); };
-      if (fMin) fMin.onchange = function () { state.filters.preco_min = fMin.value; reloadDebounced(); };
-      if (fMax) fMax.onchange = function () { state.filters.preco_max = fMax.value; reloadDebounced(); };
+      sel.onchange = function () {
+        state.filters.categoria = resolveCategoryCanonical(sel.value);
+        navigateCatalogFromFilters();
+      };
+      document.getElementById('fSort').onchange = function () {
+        state.filters.sort = this.value;
+        invalidateApiCache(['getProducts']);
+        reloadDebounced();
+      };
+      document.getElementById('fStock').onchange = function () {
+        state.filters.in_stock = this.checked;
+        invalidateApiCache(['getProducts']);
+        reloadDebounced();
+      };
+      if (fMin) fMin.onchange = function () {
+        state.filters.preco_min = fMin.value;
+        invalidateApiCache(['getProducts']);
+        reloadDebounced();
+      };
+      if (fMax) fMax.onchange = function () {
+        state.filters.preco_max = fMax.value;
+        invalidateApiCache(['getProducts']);
+        reloadDebounced();
+      };
+      var pills = document.getElementById('catalogCatPills');
+      if (pills) pills.querySelectorAll('.catalog-cat-pill').forEach(function (btn) {
+        btn.onclick = function () {
+          state.filters.categoria = resolveCategoryCanonical(btn.getAttribute('data-cat') || '');
+          navigateCatalogFromFilters();
+        };
+      });
       document.getElementById('loadMore').onclick = async function () {
         state.page++;
         var res = await api('getProducts', {
@@ -5173,7 +5354,7 @@
           state.filters.categoria = '';
           if (state.filters.sort === 'date_desc') state.filters.sort = 'price_asc';
         } else if (r.parts[1]) {
-          state.filters.categoria = decodeURIComponent(r.parts[1]);
+          state.filters.categoria = resolveCategoryCanonical(decodeURIComponent(r.parts[1]));
           state.filters.promo_only = false;
         } else {
           state.filters.categoria = '';

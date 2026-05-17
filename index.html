@@ -288,7 +288,7 @@
     </div>
   </header>
 
-  <main id="main"></main>
+  <main id="main"><div id="erpBootSplash" style="padding:48px 24px;text-align:center;color:var(--text-muted);max-width:560px;margin:0 auto;line-height:1.6;"><div class="spinner" style="margin:0 auto 16px;"></div><p style="margin:0;font-weight:600;color:var(--text);">Carregamento… · Chargement… · Loading…</p><p style="margin:12px 0 0;font-size:14px;">Se esta zona ficar vazia durante muito tempo, verifique a consola do navegador (F12) e a URL da API (/exec).</p></div></main>
 
   <footer>
     <div class="footer-inner">
@@ -467,10 +467,56 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 ================================================================================
 -->
 
-  <script src="https://js.stripe.com/v3/"></script>
+  <!-- Résolution API_URL avant le bundle : les microtâches du démarrage async sinon peuvent fetch avant un script placé en bas de page. -->
+  <script>
+    (function () {
+      var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
+      var cur = (typeof API_URL !== 'undefined' && API_URL) ? API_URL : '';
+      var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? window.ERP_API_URL_DEFAULT : '';
+      var fromFile = parse(cur) || parse(def);
+      var lsRaw = '';
+      try { lsRaw = localStorage.getItem('erp_api_url') || ''; } catch (e) { lsRaw = ''; }
+      var fromLs = parse(lsRaw);
+      if (fromFile) API_URL = fromFile;
+      else if (fromLs) API_URL = fromLs;
+    })();
+  </script>
+
   <script>
 (function () {
   'use strict';
+
+  /** Même priorité que le script fin de page admin : URL fichier (COLAR + défaut) puis localStorage — avant tout fetch. */
+  function erpSyncApiUrlNow() {
+    try {
+      var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
+      var cur = (typeof API_URL !== 'undefined' && API_URL) ? String(API_URL).trim() : '';
+      var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? String(window.ERP_API_URL_DEFAULT).trim() : '';
+      var ls = '';
+      try {
+        ls = String(localStorage.getItem('erp_api_url') || '').trim();
+      } catch (e0) {
+        ls = '';
+      }
+      var fromFile = parse(cur) || parse(def);
+      var fromLs = parse(ls);
+      var resolved = fromFile || fromLs || '';
+      if (resolved) {
+        API_URL = resolved;
+        try {
+          localStorage.setItem('erp_api_url', resolved);
+        } catch (e1) { }
+      } else {
+        API_URL = '';
+      }
+    } catch (e) {
+      try {
+        API_URL = '';
+      } catch (e2) { }
+    }
+  }
+
+  erpSyncApiUrlNow();
 
   /** Images Drive dans <img> : vignette légère + repli uc?export=view (comme le backend ERP). */
   window._erpImgFallback = function (el) {
@@ -512,6 +558,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       contact_send: 'Enviar mensagem', contact_msg: 'Mensagem', newsletter_ph: 'O seu email',
       newsletter_footer_title: 'Newsletter', newsletter_btn: 'Subscrever', subscribed: 'Obrigado pela subscrição!',
       maintenance: 'Manutenção em curso.', api_missing: 'Configure o URL da API Web App neste ficheiro HTML.',
+      boot_fail_title: 'Loja indisponível',
+      boot_fail_intro: 'Não foi possível carregar dados do servidor. Use o mesmo URL /exec que no painel admin (ERP_API_URL_DEFAULT e linha COLAR) e publique em HTTPS.',
+      boot_api_error: 'Resposta:',
+      boot_retry: 'Tentar novamente',
+      stripe_js_wait: 'O módulo de pagamento seguro (Stripe) ainda está a carregar. Aguarde alguns segundos e tente novamente.',
+      boot_file_protocol: 'Evite file:/// — publique em HTTPS (ex.: GitHub Pages); senão o navegador pode bloquear script.google.com.',
       order_ok: 'Encomenda registada!', order_id: 'N.º', payment_stripe_hint: 'Pagamento seguro com cartão.',
       account_orders_empty: 'Ainda não tem encomendas.',
       load_more: 'Carregar mais', qty_label: 'Quantidade', variant_label: 'Tamanho / cor',
@@ -578,6 +630,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       contact_send: 'Envoyer', contact_msg: 'Message', newsletter_ph: 'Votre email',
       newsletter_footer_title: 'Newsletter', newsletter_btn: 'Newsletter', subscribed: 'Merci pour votre inscription !',
       maintenance: 'Maintenance en cours.', api_missing: 'Configurez l’URL de l’API Web App dans ce fichier HTML.',
+      boot_fail_title: 'Boutique indisponible',
+      boot_fail_intro: 'Connexion au serveur impossible. Utilisez le même URL /exec que l’admin (ERP_API_URL_DEFAULT et ligne COLAR) et hébergez la page en HTTPS.',
+      boot_api_error: 'Détail :',
+      boot_retry: 'Réessayer',
+      stripe_js_wait: 'Le module de paiement sécurisé (Stripe) charge encore. Patientez quelques secondes puis réessayez.',
+      boot_file_protocol: 'N’ouvrez pas la page en file:// — publiez en HTTPS (ex. GitHub Pages) sinon le navigateur bloque script.google.com.',
       order_ok: 'Commande enregistrée !', order_id: 'N°', payment_stripe_hint: 'Paiement carte sécurisé.',
       account_orders_empty: 'Aucune commande pour le moment.',
       load_more: 'Charger plus', qty_label: 'Quantité', variant_label: 'Taille / couleur',
@@ -644,6 +702,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       contact_send: 'Send message', contact_msg: 'Message', newsletter_ph: 'Your email',
       newsletter_footer_title: 'Newsletter', newsletter_btn: 'Subscribe', subscribed: 'Thanks for subscribing!',
       maintenance: 'Under maintenance.', api_missing: 'Set the Web App API URL in this HTML file.',
+      boot_fail_title: 'Store unavailable',
+      boot_fail_intro: 'Could not load data from the server. Use the same /exec URL as the admin panel (ERP_API_URL_DEFAULT and COLAR line) and host this page on HTTPS.',
+      boot_api_error: 'Response:',
+      boot_retry: 'Try again',
+      stripe_js_wait: 'The secure payment module (Stripe) is still loading. Wait a few seconds and try again.',
+      boot_file_protocol: 'Do not open as file:// — use HTTPS (e.g. GitHub Pages) or the browser may block script.google.com.',
       order_ok: 'Order placed!', order_id: 'No.', payment_stripe_hint: 'Secure card payment.',
       account_orders_empty: 'No orders yet.',
       load_more: 'Load more', qty_label: 'Quantity', variant_label: 'Size / color',
@@ -710,6 +774,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       contact_send: 'Enviar', contact_msg: 'Mensaje', newsletter_ph: 'Su email',
       newsletter_footer_title: 'Newsletter', newsletter_btn: 'Newsletter', subscribed: '¡Gracias por suscribirse!',
       maintenance: 'En mantenimiento.', api_missing: 'Configure la URL de la API Web App en este HTML.',
+      boot_fail_title: 'Tienda no disponible',
+      boot_fail_intro: 'No se pudieron cargar los datos del servidor. Use la misma URL /exec que el admin (ERP_API_URL_DEFAULT y línea COLAR) y publique en HTTPS.',
+      boot_api_error: 'Respuesta:',
+      boot_retry: 'Reintentar',
+      stripe_js_wait: 'El módulo de pago seguro (Stripe) aún se está cargando. Espere unos segundos e inténtelo de nuevo.',
+      boot_file_protocol: 'No abra como file:/// — publique en HTTPS (p. ej. GitHub Pages); si no, el navegador puede bloquear script.google.com.',
       order_ok: '¡Pedido registrado!', order_id: 'N.º', payment_stripe_hint: 'Pago con tarjeta seguro.',
       account_orders_empty: 'Sin pedidos todavía.',
       load_more: 'Cargar más', qty_label: 'Cantidad', variant_label: 'Talla / color',
@@ -935,7 +1005,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
   async function api(action, data, token) {
     /* Aligné 02-admin-erp : même contrôle URL ; pas de Content-Type: application/json (préflight OPTIONS non géré par les Web Apps). */
-    if (!API_URL || API_URL.includes('INSEREZ_VOTRE')) {
+    if (!API_URL || String(API_URL).indexOf('INSEREZ_VOTRE') !== -1) {
       return { success: false, error: tr('api_missing') };
     }
     var body = { action: action, data: data || {}, token: token || '' };
@@ -1169,6 +1239,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   }
 
   async function loadBootstrap() {
+    erpSyncApiUrlNow();
     if (state._bootDone) return !state._maintenance;
     var results = await Promise.all([
       api('getPublicBrand', {}),
@@ -1180,6 +1251,43 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var cf = results[1];
     var cats = results[2];
     var emp = results[3];
+
+    var coreOk = !!(pb && pb.success) && !!(cf && cf.success);
+    if (!coreOk) {
+      state._maintenance = false;
+      state._bootDone = false;
+      if (pb && pb.success && pb.brand) state.brand = pb.brand;
+      if (cf && cf.success && cf.config) state.config = cf.config;
+      if (emp && emp.success && emp.empresa) state.empresa = emp.empresa;
+      state.categories = Array.isArray(cats) ? cats : ((cats && cats.categories) ? cats.categories : []);
+      applyBrandUi();
+      renderLangSwitcher();
+      applyI18nDom();
+      var bits = [];
+      if (!pb || !pb.success) bits.push(pb && pb.error ? String(pb.error) : 'getPublicBrand');
+      if (!cf || !cf.success) bits.push(cf && cf.error ? String(cf.error) : 'getConfig');
+      var errTail = bits.filter(Boolean).join(' · ');
+      var apiHint = '';
+      if (!API_URL || String(API_URL).indexOf('INSEREZ_VOTRE') !== -1) {
+        apiHint = '<p class="sku-note" style="margin-top:14px;line-height:1.55;">' + esc(tr('api_missing')) + '</p>';
+      } else {
+        apiHint = '<p class="sku-note" style="margin-top:14px;line-height:1.55;">' + esc(tr('boot_api_error')) + ' ' + esc(errTail || '—') + '</p>';
+      }
+      if (typeof location !== 'undefined' && location.protocol === 'file:') {
+        apiHint += '<p class="sku-note" style="margin-top:10px;line-height:1.55;">' + esc(tr('boot_file_protocol')) + '</p>';
+      }
+      document.getElementById('main').innerHTML =
+        '<div class="hero"><div class="hero-inner"><h1>' + esc(tr('boot_fail_title')) + '</h1>' +
+        '<p style="line-height:1.6;">' + esc(tr('boot_fail_intro')) + '</p>' + apiHint +
+        '<p style="margin-top:22px;"><button type="button" class="btn btn-primary" id="btnBootRetry">' + esc(tr('boot_retry')) + '</button></p></div></div>';
+      document.getElementById('btnBootRetry').onclick = function () {
+        state._bootDone = false;
+        erpSyncApiUrlNow();
+        router();
+      };
+      return false;
+    }
+
     if (pb && pb.success && pb.brand) state.brand = pb.brand;
     if (cf && cf.success && cf.config) state.config = cf.config;
     if (emp && emp.success && emp.empresa) state.empresa = emp.empresa;
@@ -1822,7 +1930,11 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       var ord = await api('createOrder', payload, state.clientToken);
       if (!ord.success) { toast(ord.error || '—'); return; }
 
-      if (awaitPay && window.Stripe && window.STRIPE_PUBLISHABLE_KEY) {
+      if (awaitPay) {
+        if (!window.Stripe) {
+          toast(tr('stripe_js_wait'));
+          return;
+        }
         try {
           sessionStorage.setItem('stripe_pending_order', JSON.stringify({
             orderId: ord.orderId,
@@ -2413,8 +2525,27 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   window.addEventListener('hashchange', router);
 
   (async function () {
-    await maybeStripeReturn();
-    await router();
+    try {
+      await maybeStripeReturn();
+      await router();
+    } catch (err) {
+      try {
+        console.error(err);
+      } catch (eLog) { /* ignore */ }
+      var msg = String(err && err.message ? err.message : err);
+      var mainEl = document.getElementById('main');
+      if (mainEl) {
+        mainEl.innerHTML =
+          '<div class="hero"><div class="hero-inner"><h1>' + esc(tr('boot_fail_title')) + '</h1>' +
+          '<p style="line-height:1.55;">JavaScript : ' + esc(msg) + '</p>' +
+          '<p style="margin-top:18px;"><button type="button" class="btn btn-primary" id="btnFatalRetry">' + esc(tr('boot_retry')) + '</button></p></div></div>';
+        var br = document.getElementById('btnFatalRetry');
+        if (br) br.onclick = function () { location.reload(); };
+      }
+      try {
+        toast(msg);
+      } catch (eToast) { /* ignore */ }
+    }
   })();
 })();
   </script>
@@ -2433,5 +2564,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       else if (fromLs) API_URL = fromLs;
     })();
   </script>
+  <!-- Stripe en async : ne pas bloquer le parsing / le bootstrap si le CDN est lent ou filtré. -->
+  <script src="https://js.stripe.com/v3/" async></script>
 </body>
 </html>

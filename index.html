@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Boutique</title>
   <meta name="description" id="metaDesc" content="">
   <meta property="og:title" id="ogTitle" content="">
@@ -35,6 +35,8 @@
        5) Déployer la vitrine en HTTPS (GitHub Pages, etc.). Éviter file:// pour les appels vers script.google.com.
 
        6) Langues : PT · FR · EN · ES via le sélecteur dans l’en-tête.
+
+       7) Téléphone — même logique que 02-admin-erp : menu ☰ ≤900px ; barre tactile & zones safe-area ≤560px.
 
        STRUCTURE DE LA FEUILLE DE STYLES (repères)
        §1 Reset & boutons · §2 Header / nav / recherche · §3 Hero & main · §4 Cartes & PDP
@@ -72,6 +74,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
     a { color: var(--brand-mid); }
     img { max-width: 100%; height: auto; display: block; }
@@ -317,6 +321,171 @@
     .cart-line-sum { font-weight: 700; color: var(--brand); margin-top: 4px; }
     .pay-hint-box { margin-top: 12px; padding: 14px; background: rgba(15,82,120,.06); border-radius: 10px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
     .invoice-print { margin-top: 16px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+
+    /* ── Mobile (aligné admin ERP : ≤900 tiroir / compact ; ≤560 barres tactiles & safe-area) ── */
+    @media (max-width: 900px) {
+      .site-header {
+        padding-left: max(12px, env(safe-area-inset-left, 0px));
+        padding-right: max(12px, env(safe-area-inset-right, 0px));
+        gap: 8px;
+      }
+      .logo-link {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .logo-text {
+        font-size: clamp(1.05rem, 4vw, 1.3rem);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .header-actions {
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      main {
+        padding: 16px max(14px, env(safe-area-inset-left, 0px)) 20px max(14px, env(safe-area-inset-right, 0px));
+      }
+      .hero {
+        padding: 36px max(18px, env(safe-area-inset-left, 0px)) 44px max(18px, env(safe-area-inset-right, 0px));
+        margin: -16px calc(-1 * max(14px, env(safe-area-inset-right, 0px))) 28px calc(-1 * max(14px, env(safe-area-inset-left, 0px)));
+      }
+      footer {
+        padding-left: max(20px, env(safe-area-inset-left, 0px));
+        padding-right: max(20px, env(safe-area-inset-right, 0px));
+        padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
+      }
+      .toast {
+        bottom: max(20px, env(safe-area-inset-bottom, 0px));
+        left: max(12px, env(safe-area-inset-left, 0px));
+        right: max(12px, env(safe-area-inset-right, 0px));
+        transform: translateY(120px);
+        max-width: none;
+      }
+      .toast.show {
+        transform: translateY(0);
+      }
+      .cookie-banner.show {
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+      }
+      .modal-overlay {
+        padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+      }
+      .modal-box {
+        padding: 22px max(18px, env(safe-area-inset-right, 0px)) 22px max(18px, env(safe-area-inset-left, 0px));
+      }
+      .panel {
+        padding: 18px max(16px, env(safe-area-inset-right, 0px)) 18px max(16px, env(safe-area-inset-left, 0px));
+      }
+      .drawer {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        width: min(440px, 100vw);
+      }
+      .nav-drawer {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        width: min(340px, calc(100vw - env(safe-area-inset-left, 0px)));
+      }
+      .grid-products {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+      }
+      .pdp-info h1 {
+        font-size: clamp(1.35rem, 5vw, 2rem);
+      }
+    }
+
+    @media (max-width: 560px) {
+      :root {
+        --header-h: 128px;
+      }
+      .site-header {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-auto-rows: auto;
+        align-items: center;
+        column-gap: 10px;
+        row-gap: 10px;
+        padding-top: max(10px, env(safe-area-inset-top, 0px));
+        padding-bottom: 12px;
+        height: auto;
+      }
+      .site-header .menu-toggle {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .site-header .logo-link {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .site-header .header-actions {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .site-header .lang-switch {
+        flex-wrap: wrap;
+        margin-right: auto;
+      }
+      .lang-switch button {
+        padding: 8px 10px;
+        min-height: 40px;
+      }
+      main {
+        padding-top: 14px;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar select {
+        width: 100%;
+      }
+      .toolbar label {
+        padding: 8px 0;
+      }
+      .grid-products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .card-body {
+        padding: 12px;
+      }
+      .card-body h3 {
+        font-size: 0.98rem;
+      }
+      .qty-row {
+        flex-wrap: wrap;
+      }
+      .cart-line {
+        grid-template-columns: 56px 1fr;
+        gap: 10px;
+      }
+      .cart-line .cart-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .checkout-grid .panel .btn-primary {
+        width: 100%;
+      }
+    }
+
+    @supports (padding: max(0px, env(safe-area-inset-bottom))) {
+      .nav-drawer-links {
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+      }
+      .drawer-body {
+        padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
+      }
+    }
+
     @media print {
       body * { visibility: hidden; }
       #invoicePrintZone, #invoicePrintZone * { visibility: visible; }

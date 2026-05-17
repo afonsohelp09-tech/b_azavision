@@ -262,6 +262,7 @@
       #invoicePrintZone, #invoicePrintZone * { visibility: visible; }
       #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
     }
+  </style>
 </head>
 <body>
   <div class="announce-bar" id="announceBar" aria-live="polite"></div>
@@ -601,12 +602,16 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       loyalty_pts: 'Pontos',
       loyalty_info_hint: 'Os pontos são geridos pela loja; o resgate segue as regras da marca (loja ou contacto).',
       cart_cleared: 'Carrinho esvaziado.',
+      checkout_email_name_required: 'Email e nome são obrigatórios.',
+      popup_blocked: 'Permita janelas popup para imprimir.',
+      contact_sent_ok: 'Mensagem enviada.',
+      fatal_js_prefix: 'Erro técnico:',
       legal_external_hint: 'Documento oficial disponível neste link:',
       wishlist_guest_hint: 'Lista guardada neste dispositivo. Inicie sessão para sincronizar com a sua conta.',
       wishlist_guest_empty: 'Ainda não tem favoritos guardados neste dispositivo.',
       wishlist_guest_clear: 'Limpar lista local',
       review_moderation_hint: 'Os comentários podem ser revistos antes de serem publicados.',
-      review_pending_toast: 'Obrigado. A sua avaliação será analisada antes de aparecer na página.'
+      review_pending_toast: 'Obrigado. A sua avaliação será analisada antes de aparecer na página.',
     },
     fr: {
       nav_contact: 'Contact', nav_account: 'Mon compte', cart_title: 'Panier', total: 'Total', checkout_btn: 'Commander',
@@ -673,12 +678,16 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       loyalty_pts: 'Points',
       loyalty_info_hint: 'Les points sont gérés par la boutique ; le règlement suit les règles de la marque (magasin ou contact).',
       cart_cleared: 'Panier vidé.',
+      checkout_email_name_required: 'E-mail et nom obligatoires.',
+      popup_blocked: 'Autorisez les fenêtres popup pour imprimer.',
+      contact_sent_ok: 'Message envoyé.',
+      fatal_js_prefix: 'Erreur technique :',
       legal_external_hint: 'Document officiel disponible via ce lien :',
       wishlist_guest_hint: 'Liste enregistrée sur cet appareil. Connectez-vous pour la synchroniser avec votre compte.',
       wishlist_guest_empty: 'Pas encore de favoris enregistrés sur cet appareil.',
       wishlist_guest_clear: 'Effacer la liste locale',
       review_moderation_hint: 'Les avis peuvent être modérés avant publication.',
-      review_pending_toast: 'Merci. Votre avis sera vérifié avant d\'apparaître sur la page.'
+      review_pending_toast: 'Merci. Votre avis sera vérifié avant d\'apparaître sur la page.',
     },
     en: {
       nav_contact: 'Contact', nav_account: 'Account', cart_title: 'Cart', total: 'Total', checkout_btn: 'Checkout',
@@ -745,12 +754,16 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       loyalty_pts: 'Points',
       loyalty_info_hint: 'Points are managed by the store; redemption follows the brand rules (in-store or contact).',
       cart_cleared: 'Cart emptied.',
+      checkout_email_name_required: 'Email and full name are required.',
+      popup_blocked: 'Allow pop-ups to print.',
+      contact_sent_ok: 'Message sent.',
+      fatal_js_prefix: 'Technical error:',
       legal_external_hint: 'Full document at the official link:',
       wishlist_guest_hint: 'List saved on this device. Sign in to sync with your account.',
       wishlist_guest_empty: 'No favourites saved on this device yet.',
       wishlist_guest_clear: 'Clear local list',
       review_moderation_hint: 'Reviews may be moderated before they appear.',
-      review_pending_toast: 'Thanks. Your review will be checked before it is published.'
+      review_pending_toast: 'Thanks. Your review will be checked before it is published.',
     },
     es: {
       nav_contact: 'Contacto', nav_account: 'Cuenta', cart_title: 'Carrito', total: 'Total', checkout_btn: 'Tramitar pedido',
@@ -817,13 +830,17 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       loyalty_pts: 'Puntos',
       loyalty_info_hint: 'Los puntos los gestiona la tienda; el canje sigue las reglas de la marca (tienda o contacto).',
       cart_cleared: 'Carrito vaciado.',
+      checkout_email_name_required: 'Correo y nombre obligatorios.',
+      popup_blocked: 'Permita ventanas emergentes para imprimir.',
+      contact_sent_ok: 'Mensaje enviado.',
+      fatal_js_prefix: 'Error técnico:',
       legal_external_hint: 'Documento completo en este enlace:',
       wishlist_guest_hint: 'Lista guardada en este dispositivo. Inicie sesión para sincronizarla con su cuenta.',
       wishlist_guest_empty: 'Aún no tiene favoritos guardados en este dispositivo.',
       wishlist_guest_clear: 'Borrar lista local',
       review_moderation_hint: 'Los comentarios pueden moderarse antes de publicarse.',
-      review_pending_toast: 'Gracias. Su valoración se revisará antes de mostrarse en la página.'
-    }
+      review_pending_toast: 'Gracias. Su valoración se revisará antes de mostrarse en la página.',
+    },
   };
 
   function tr(key) {
@@ -840,7 +857,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   function printHtmlFragment(title, html) {
     var w = window.open('', '_blank');
     if (!w) {
-      toast('Popup');
+      toast(tr('popup_blocked'));
       return;
     }
     w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + esc(title) + '</title></head><body style="font-family:system-ui,sans-serif;padding:20px;">' + html + '</body></html>');
@@ -1897,7 +1914,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       var ph = document.getElementById('coPhone').value.trim();
       var ad = document.getElementById('coAddr').value.trim();
       var termsOk = document.getElementById('coTerms').checked || String(state.config.checkout_require_terms) === '0';
-      if (!em || !nm) { toast('Email / nome'); return; }
+      if (!em || !nm) { toast(tr('checkout_email_name_required')); return; }
       if (!termsOk) { toast(tr('terms_chk')); return; }
       var saveChkEl = document.getElementById('coSaveAddr');
       if (state.clientToken && saveChkEl && saveChkEl.checked && ad) {
@@ -2198,7 +2215,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         email: document.getElementById('ctEmail').value,
         message: document.getElementById('ctMsg').value
       });
-      if (r.success) toast('OK');
+      if (r.success) toast(tr('contact_sent_ok'));
       else toast(r.error || '—');
     };
   }
@@ -2537,7 +2554,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       if (mainEl) {
         mainEl.innerHTML =
           '<div class="hero"><div class="hero-inner"><h1>' + esc(tr('boot_fail_title')) + '</h1>' +
-          '<p style="line-height:1.55;">JavaScript : ' + esc(msg) + '</p>' +
+          '<p style="line-height:1.55;">' + esc(tr('fatal_js_prefix')) + ' ' + esc(msg) + '</p>' +
           '<p style="margin-top:18px;"><button type="button" class="btn btn-primary" id="btnFatalRetry">' + esc(tr('boot_retry')) + '</button></p></div></div>';
         var br = document.getElementById('btnFatalRetry');
         if (br) br.onclick = function () { location.reload(); };

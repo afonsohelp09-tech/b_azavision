@@ -3107,12 +3107,13 @@
     </div>
 
     <script>
-      /* ═══ BOUTIQUE / BOUTIQUE_CLIENT — déploiement 01-boutique-client (GitHub Pages) ═══
-        Source canonique : VENTE EN LIGNE TPE/boutique_client.html. Recopier puis ajuster ici si besoin.
-        ERP_BOUTIQUE_URL = index.html (racine). URL /exec identique au bloc COLAR/DEFAULT de DEPLOIEMENT-GITHUB/02-admin-erp. */
+      /* ═══ BOUTIQUE — DEPLOIEMENT-GITHUB/01-boutique-client (GitHub Pages : ce fichier = index.html) ═══
+         Source canonique : VENTE EN LIGNE TPE/boutique_client.html — copier depuis là pour régénérer ce fichier.
+         Même URL Web App (/exec) que 02-admin-erp/index.html ; COLAR + ERP_API_URL_DEFAULT avant localStorage. */
       window.ERP_API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby_4CEQn_4i7uOFWbBib4GethqkgxzjABbOEqblteZMnBoz8z3CnoLD54MYDwBq2oxH/exec';
       window.ERP_BOUTIQUE_URL = 'index.html';
-      /** URL absolue HTTPS du logo (optionnel). Laisser vide pour n’utiliser que CONFIG/EMPRESA. Ne pas mettre de chemin relatif sans fichier publié (ex. logo/…). */
+      window.ERP_ADMIN_URL = '../02-admin-erp/index.html';
+      /** HTTPS absolu uniquement si fichier publié ; vide = logo depuis CONFIG / EMPRESA */
       window.ERP_STOREFRONT_LOGO_STATIC = '';
       window.ERP_STOREFRONT_BRAND_DEFAULT = 'Aza Vision';
     </script>

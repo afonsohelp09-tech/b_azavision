@@ -2243,7 +2243,7 @@
 
           <div class="section-title" id="featuredSectionTitle">🔥 Mais Vendidos</div>
           <p class="section-sub" id="featuredSub">Os favoritos dos nossos clientes</p>
-          <div class="products-grid" id="featuredGrid">
+          <div class="products-grid" id="featuredGrid" data-load-state="pending">
             <div class="product-card" style="pointer-events:none;">
               <div class="product-img">⏳</div>
               <div class="product-info">
@@ -4034,10 +4034,23 @@
 
       // --- API ---
       async function apiCall(action, data = {}, token = null) {
-        var url = (typeof API_URL !== 'undefined' && API_URL) ? String(API_URL).trim() : '';
+        var normFn = (typeof window._erpNormalizeGsUrl === 'function') ? window._erpNormalizeGsUrl : function (x) { return String(x == null ? '' : x).trim(); };
+        var parseFn = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
+        var url = (typeof API_URL !== 'undefined' && API_URL) ? normFn(API_URL) : '';
         if (!url || url.indexOf('INSEREZ_VOTRE') !== -1) {
-          alert('⚠️ ' + t('apiAlertNoUrl'));
-          return { success: false, error: t('apiErrNoUrl'), code: 'NO_API_URL' };
+          var defRaw = (typeof window.ERP_API_URL_DEFAULT === 'string') ? window.ERP_API_URL_DEFAULT : '';
+          var rebound = parseFn(normFn(defRaw)) || parseFn(normFn(url));
+          if (rebound) {
+            try { API_URL = rebound; } catch (eApiUrl) { }
+            url = rebound;
+          }
+        }
+        url = url ? String(url).trim() : '';
+        if (!url || url.indexOf('INSEREZ_VOTRE') !== -1) {
+          var msgMissing = typeof t === 'function' ? t('apiAlertNoUrl') : 'Configure API URL';
+          console.warn(msgMissing);
+          if (typeof toast === 'function') toast('⚠️ ' + msgMissing, 'info');
+          return { success: false, error: typeof t === 'function' ? t('apiErrNoUrl') : msgMissing, code: 'NO_API_URL' };
         }
         if (typeof location !== 'undefined' && location.protocol === 'file:') {
           return { success: false, error: t('apiErrFileProtocol'), code: 'FILE_PROTOCOL' };
@@ -4390,47 +4403,55 @@
 
       // --- PRODUCTS ---
       async function loadFeatured() {
-        var raw, catApi;
+        var raw = { success: false };
+        var catApi = null;
         try {
-          var pair = await Promise.all([
-            apiCall('getProducts', { page: 1, pageSize: 100, sort: 'date_desc' }),
-            apiCall('getCategories', {}).catch(function () { return null; })
-          ]);
-          raw = pair[0];
-          catApi = pair[1];
-          if (catApi != null && !Array.isArray(catApi)) {
-            if (Array.isArray(catApi.categories)) catApi = catApi.categories;
-            else if (catApi.success && Array.isArray(catApi.data)) catApi = catApi.data;
-            else catApi = null;
+          try {
+            var pair = await Promise.all([
+              apiCall('getProducts', { page: 1, pageSize: 100, sort: 'date_desc' }),
+              apiCall('getCategories', {}).catch(function () { return null; })
+            ]);
+            raw = pair[0];
+            catApi = pair[1];
+            if (catApi != null && !Array.isArray(catApi)) {
+              if (Array.isArray(catApi.categories)) catApi = catApi.categories;
+              else if (catApi.success && Array.isArray(catApi.data)) catApi = catApi.data;
+              else catApi = null;
+            }
+          } catch (eFeat) {
+            console.error(eFeat);
+            raw = { success: false };
+            catApi = null;
           }
-        } catch (eFeat) {
-          console.error(eFeat);
-          raw = { success: false };
-          catApi = null;
-        }
-        const norm = normalizeProductsResponse(raw);
-        const products = norm.products || [];
-        if (!products.length) {
-          renderProductGrid([], 'featuredGrid', 'home');
-          var na = document.getElementById('newArrivalsGrid');
-          if (na) na.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="emoji">📭</div><p>' + t('noProducts') + '</p></div>';
-          var hg = document.getElementById('homeCategoryGrid');
-          if (hg) hg.innerHTML = '';
-          if (!(raw && raw.success) && typeof toast === 'function' && !window._boutiqueHomeApiToastShown) {
-            window._boutiqueHomeApiToastShown = true;
-            var code = raw && raw.code;
-            var hint = t('nlConnError');
-            if (code === 'FILE_PROTOCOL') hint = t('apiErrFileProtocol');
-            else if (code === 'NO_API_URL' || code === 'BAD_RESPONSE') hint = (raw && raw.error) ? String(raw.error) : hint;
-            else if (code === 'TIMEOUT') hint = t('nlConnError');
-            toast('⚠️ ' + hint, 'info');
+          const norm = normalizeProductsResponse(raw);
+          const products = norm.products || [];
+          if (!products.length) {
+            renderProductGrid([], 'featuredGrid', 'home');
+            var na = document.getElementById('newArrivalsGrid');
+            if (na) na.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="emoji">📭</div><p>' + t('noProducts') + '</p></div>';
+            var hg = document.getElementById('homeCategoryGrid');
+            if (hg) hg.innerHTML = '';
+            if (!(raw && raw.success) && typeof toast === 'function' && !window._boutiqueHomeApiToastShown) {
+              window._boutiqueHomeApiToastShown = true;
+              var code = raw && raw.code;
+              var hint = t('nlConnError');
+              if (code === 'FILE_PROTOCOL') hint = t('apiErrFileProtocol');
+              else if (code === 'NO_API_URL' || code === 'BAD_RESPONSE') hint = (raw && raw.error) ? String(raw.error) : hint;
+              else if (code === 'TIMEOUT') hint = t('nlConnError');
+              toast('⚠️ ' + hint, 'info');
+            }
+            return;
           }
-          return;
+          homeSpotlightProducts = products;
+          renderProductGrid(products.slice(0, 8), 'featuredGrid', 'home');
+          loadHomeCategoryGrid(Array.isArray(catApi) && catApi.length ? catApi : null);
+          loadHomeNewArrivals();
+        } finally {
+          var fgPending = document.getElementById('featuredGrid');
+          if (fgPending && fgPending.getAttribute('data-load-state') === 'pending') {
+            renderProductGrid([], 'featuredGrid', 'home');
+          }
         }
-        homeSpotlightProducts = products;
-        renderProductGrid(products.slice(0, 8), 'featuredGrid', 'home');
-        loadHomeCategoryGrid(Array.isArray(catApi) && catApi.length ? catApi : null);
-        loadHomeNewArrivals();
       }
 
       function loadHomeCategoryGrid(optionalCatApi) {
@@ -4735,6 +4756,7 @@
         origin = origin || 'catalog';
         const el = document.getElementById(containerId);
         if (!el) return;
+        el.removeAttribute('data-load-state');
         if (!products?.length) {
           el.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="emoji">🔍</div><p>${t('noProducts')}</p></div>`;
           return;

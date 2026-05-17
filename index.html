@@ -216,6 +216,25 @@
     }
     .announce-bar--marquee .announce-marquee-track:hover { animation-play-state: paused; }
     .announcement-marquee-seg { padding-right: 3rem; display: inline-block; }
+    .announce-bar-inner--link { cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .announce-bar-inner--link:hover { text-decoration: underline; }
+    .promo-catalog-banner {
+      max-width: 960px; margin: 0 auto 24px; padding: 20px 24px; border-radius: var(--radius);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 18%, var(--bg-card)), var(--bg-card));
+      border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border));
+    }
+    .promo-catalog-banner h2 { margin: 0 0 8px; font-family: var(--display); font-size: 1.35rem; }
+    .promo-catalog-banner p { margin: 0; line-height: 1.55; color: var(--text-muted); }
+    .promo-code-panel {
+      max-width: 560px; margin: 0 0 24px; padding: 16px 18px; border-radius: var(--radius);
+      border: 1px dashed color-mix(in srgb, var(--gold) 50%, var(--border));
+      background: color-mix(in srgb, var(--gold) 8%, var(--bg-card));
+    }
+    .promo-code-panel strong { font-family: var(--mono); font-size: 1.15rem; letter-spacing: .06em; }
+    .promo-code-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .cart-coupon-applied { color: var(--brand); font-weight: 600; }
+    .checkout-discount-row { display: flex; justify-content: space-between; margin: 8px 0; color: var(--brand); font-size: 14px; }
+    .site-nav a.is-active, .nav-drawer-links a.is-active { color: var(--brand); font-weight: 600; }
     @keyframes announcementMarquee {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
@@ -224,10 +243,39 @@
       .announce-marquee-track { animation: none; }
     }
     .announce-bar--marquee {
-      padding-top: 7px;
-      padding-bottom: 7px;
-      font-size: 11px;
-      letter-spacing: 0.06em;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .announce-bar--marquee .announcement-marquee-seg {
+      padding-right: 4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .promo-banner-marquee-wrap {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--gold) 12%, transparent);
+    }
+    .promo-banner-marquee-track {
+      display: inline-flex;
+      white-space: nowrap;
+      animation: announcementMarquee 28s linear infinite;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+      padding: 8px 0;
+    }
+    .promo-banner-marquee-wrap:hover .promo-banner-marquee-track { animation-play-state: paused; }
+    @media (prefers-reduced-motion: reduce) {
+      .promo-banner-marquee-track { animation: none; white-space: normal; display: block; text-align: center; }
     }
     .announce-close {
       position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
@@ -409,6 +457,26 @@
     .page-intro h1 { margin: 0 0 8px; font-family: var(--display); font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 600; color: var(--text); }
     .page-intro p { margin: 0; line-height: 1.55; }
     .icon-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    #catGrid.is-loading { opacity: 0.45; pointer-events: none; transition: opacity 0.15s ease; }
+    .pdp-skeleton {
+      padding: 24px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 768px) { .pdp-skeleton { grid-template-columns: 1fr; } }
+    .pdp-skeleton .sk {
+      background: linear-gradient(90deg, var(--border) 0%, color-mix(in srgb, var(--border) 40%, var(--bg-card)) 50%, var(--border) 100%);
+      background-size: 200% 100%;
+      animation: skShimmer 1s ease-in-out infinite;
+      border-radius: 12px;
+    }
+    @keyframes skShimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
     .spinner {
       width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--brand-mid);
       border-radius: 50%; animation: spin .8s linear infinite; margin: 24px auto;
@@ -805,6 +873,7 @@
       <div class="cart-coupon-row" id="cartCouponRow" style="display:none;">
         <input type="text" id="cartCouponInput" autocomplete="off" placeholder="">
         <button type="button" class="btn btn-ghost btn-sm" id="cartCouponBtn" data-i18n="coupon_apply">Aplicar</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="cartCouponRemove" data-i18n="coupon_remove" style="display:none;">Remover</button>
       </div>
       <p id="cartCouponMsg" class="sku-note" style="display:none;margin:0 0 10px;"></p>
       <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:18px;font-weight:700;">
@@ -1076,6 +1145,11 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     } catch (e) { return 'eur'; }
   })();
   var COMPARE_STORE_KEY = 'boutique_compare_v1';
+  var COUPON_STORE_KEY = 'boutique_coupon_code';
+  var productCache = Object.create(null);
+  var productFetchInflight = Object.create(null);
+  var _routeGeneration = 0;
+  var _imgPreloaded = Object.create(null);
   var COMPARE_MAX = 3;
   var NEW_PRODUCT_DAYS = 30;
 
@@ -1092,6 +1166,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       theme_use_dark: 'Modo escuro',
       skip_main: 'Ir para o conteúdo principal',
       announce_close: 'Fechar anúncio',
+      announce_legend_free_ship: 'Envio grátis a partir de {{amount}}',
       btn_add_cart: 'Adicionar ao carrinho', btn_buy: 'Comprar agora', unavailable: 'Indisponível',
       catalogue: 'Catálogo', sort_label: 'Ordenar', sort_new: 'Mais recentes', sort_price_lo: 'Preço ↑', sort_price_hi: 'Preço ↓',
       filter_cat: 'Categoria', filter_stock: 'Só em stock', all_cats: 'Todas',
@@ -1153,6 +1228,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       aria_menu_open: 'Abrir menu',
       aria_menu_close: 'Fechar menu',
       catalog_intro: 'Filtros, pesquisa e novidades da sua loja.',
+      promo_intro: 'Preços especiais e artigos com desconto na sua loja.',
+      promo_empty_hint: 'Não há produtos em promoção de momento. Volte em breve ou explore o catálogo completo.',
       catalog_empty_title: 'Sem resultados',
       catalog_empty_hint: 'Experimente limpar filtros ou alterar os termos de pesquisa.',
       catalog_clear_filters: 'Limpar filtros',
@@ -1169,6 +1246,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       checkout_email_name_required: 'Email e nome são obrigatórios.',
       popup_blocked: 'Permita janelas popup para imprimir.',
       contact_sent_ok: 'Mensagem enviada.',
+      contact_info_title: 'Contactos diretos', contact_phone: 'Telefone', contact_email_label: 'Email',
+      contact_form_title: 'Enviar mensagem', contact_required: 'Preencha nome, email e mensagem.',
+      contact_invalid_email: 'Email inválido.', contact_wa_chat: 'WhatsApp',
       fatal_js_prefix: 'Erro técnico:',
       legal_external_hint: 'Documento oficial disponível neste link:',
       wishlist_guest_hint: 'Lista guardada neste dispositivo. Inicie sessão para sincronizar com a sua conta.',
@@ -1186,6 +1266,14 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       nl_popup_no: 'Agora não', tracking_title: 'Seguir encomenda', tracking_hint: 'N.º de encomenda e email usados na compra.',
       tracking_order_id: 'N.º encomenda', tracking_lookup: 'Consultar', tracking_mismatch: 'Encomenda não encontrada ou email incorreto.',
       filter_price_min: 'Preço mín.', filter_price_max: 'Preço máx.', cart_coupon_ok: 'Código guardado para o checkout.',
+      coupon_required: 'Indique um código.', coupon_applied_line: 'Código {{code}} (−{{discount}})',
+      coupon_copy_ok: 'Código copiado.', coupon_copy_btn: 'Copiar', coupon_use_btn: 'Usar código', promo_code_public_hint: 'Aplique no carrinho ou no checkout.',
+      coupon_remove: 'Remover', checkout_discount: 'Desconto',
+      reg_send_code: 'Enviar código por email', reg_create_btn: 'Criar conta', reg_create_direct: 'Criar conta (sem código)',
+      review_login_hint: 'Inicie sessão para deixar um comentário.', review_login_btn: 'Entrar / criar conta',
+      add_cart_select_variant: 'Escolha uma variante (tamanho/cor).', add_cart_ok: 'Adicionado ao carrinho',
+      qty_decrease: 'Menos', qty_increase: 'Mais', tracking_products: 'Artigos comprados',
+      tracking_order_label: 'Encomenda', order_status_shipped: 'Enviada', order_status_pending: 'Em preparação',
     },
     fr: {
       nav_contact: 'Contact', nav_account: 'Mon compte', cart_title: 'Panier', total: 'Total', checkout_btn: 'Commander',
@@ -1199,6 +1287,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       theme_use_dark: 'Mode sombre',
       skip_main: 'Aller au contenu principal',
       announce_close: 'Fermer l’annonce',
+      announce_legend_free_ship: 'Livraison gratuite à partir de {{amount}}',
       btn_add_cart: 'Ajouter au panier', btn_buy: 'Acheter', unavailable: 'Indisponible',
       catalogue: 'Catalogue', sort_label: 'Trier', sort_new: 'Plus récents', sort_price_lo: 'Prix ↑', sort_price_hi: 'Prix ↓',
       filter_cat: 'Catégorie', filter_stock: 'En stock seulement', all_cats: 'Toutes',
@@ -1260,6 +1349,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       aria_menu_open: 'Ouvrir le menu',
       aria_menu_close: 'Fermer le menu',
       catalog_intro: 'Filtres, recherche et nouveautés de la boutique.',
+      promo_intro: 'Prix spéciaux et articles en promotion dans la boutique.',
+      promo_empty_hint: 'Aucune promotion pour le moment. Revenez bientôt ou parcourez tout le catalogue.',
       catalog_empty_title: 'Aucun résultat',
       catalog_empty_hint: 'Essayez de réinitialiser les filtres ou modifier la recherche.',
       catalog_clear_filters: 'Réinitialiser les filtres',
@@ -1276,6 +1367,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       checkout_email_name_required: 'E-mail et nom obligatoires.',
       popup_blocked: 'Autorisez les fenêtres popup pour imprimer.',
       contact_sent_ok: 'Message envoyé.',
+      contact_info_title: 'Contacts directs', contact_phone: 'Téléphone', contact_email_label: 'E-mail',
+      contact_form_title: 'Envoyer un message', contact_required: 'Renseignez nom, e-mail et message.',
+      contact_invalid_email: 'E-mail invalide.', contact_wa_chat: 'WhatsApp',
       fatal_js_prefix: 'Erreur technique :',
       legal_external_hint: 'Document officiel disponible via ce lien :',
       wishlist_guest_hint: 'Liste enregistrée sur cet appareil. Connectez-vous pour la synchroniser avec votre compte.',
@@ -1293,6 +1387,14 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       nl_popup_no: 'Plus tard', tracking_title: 'Suivre ma commande', tracking_hint: 'N° de commande et e-mail utilisés à l\'achat.',
       tracking_order_id: 'N° commande', tracking_lookup: 'Rechercher', tracking_mismatch: 'Commande introuvable ou e-mail incorrect.',
       filter_price_min: 'Prix min.', filter_price_max: 'Prix max.', cart_coupon_ok: 'Code enregistré pour le paiement.',
+      coupon_required: 'Indiquez un code.', coupon_applied_line: 'Code {{code}} (−{{discount}})',
+      coupon_copy_ok: 'Code copié.', coupon_copy_btn: 'Copier', coupon_use_btn: 'Utiliser le code', promo_code_public_hint: 'À appliquer au panier ou au paiement.',
+      coupon_remove: 'Retirer', checkout_discount: 'Remise',
+      reg_send_code: 'Envoyer le code par email', reg_create_btn: 'Créer le compte', reg_create_direct: 'Créer sans code (direct)',
+      review_login_hint: 'Connectez-vous pour laisser un avis.', review_login_btn: 'Connexion / inscription',
+      add_cart_select_variant: 'Choisissez une variante (taille/couleur).', add_cart_ok: 'Ajouté au panier',
+      qty_decrease: 'Moins', qty_increase: 'Plus', tracking_products: 'Articles achetés',
+      tracking_order_label: 'Commande', order_status_shipped: 'Expédiée', order_status_pending: 'En préparation',
     },
     en: {
       nav_contact: 'Contact', nav_account: 'Account', cart_title: 'Cart', total: 'Total', checkout_btn: 'Checkout',
@@ -1306,6 +1408,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       theme_use_dark: 'Dark mode',
       skip_main: 'Skip to main content',
       announce_close: 'Close announcement',
+      announce_legend_free_ship: 'Free shipping from {{amount}}',
       btn_add_cart: 'Add to cart', btn_buy: 'Buy now', unavailable: 'Unavailable',
       catalogue: 'Catalog', sort_label: 'Sort', sort_new: 'Newest', sort_price_lo: 'Price ↑', sort_price_hi: 'Price ↓',
       filter_cat: 'Category', filter_stock: 'In stock only', all_cats: 'All',
@@ -1367,6 +1470,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       aria_menu_open: 'Open menu',
       aria_menu_close: 'Close menu',
       catalog_intro: 'Filters, search and what’s new in the store.',
+      promo_intro: 'Special prices and discounted items in the store.',
+      promo_empty_hint: 'No promotions right now. Check back soon or browse the full catalog.',
       catalog_empty_title: 'No results',
       catalog_empty_hint: 'Try clearing filters or changing your search.',
       catalog_clear_filters: 'Clear filters',
@@ -1383,6 +1488,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       checkout_email_name_required: 'Email and full name are required.',
       popup_blocked: 'Allow pop-ups to print.',
       contact_sent_ok: 'Message sent.',
+      contact_info_title: 'Direct contact', contact_phone: 'Phone', contact_email_label: 'Email',
+      contact_form_title: 'Send a message', contact_required: 'Please fill in name, email and message.',
+      contact_invalid_email: 'Invalid email.', contact_wa_chat: 'WhatsApp',
       fatal_js_prefix: 'Technical error:',
       legal_external_hint: 'Full document at the official link:',
       wishlist_guest_hint: 'List saved on this device. Sign in to sync with your account.',
@@ -1400,6 +1508,14 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       nl_popup_no: 'Not now', tracking_title: 'Track order', tracking_hint: 'Order number and email used at checkout.',
       tracking_order_id: 'Order no.', tracking_lookup: 'Look up', tracking_mismatch: 'Order not found or email mismatch.',
       filter_price_min: 'Min price', filter_price_max: 'Max price', cart_coupon_ok: 'Code saved for checkout.',
+      coupon_required: 'Enter a code.', coupon_applied_line: 'Code {{code}} (−{{discount}})',
+      coupon_copy_ok: 'Code copied.', coupon_copy_btn: 'Copy', coupon_use_btn: 'Use code', promo_code_public_hint: 'Apply in cart or at checkout.',
+      coupon_remove: 'Remove', checkout_discount: 'Discount',
+      reg_send_code: 'Send code by email', reg_create_btn: 'Create account', reg_create_direct: 'Create account (no code)',
+      review_login_hint: 'Sign in to leave a review.', review_login_btn: 'Sign in / register',
+      add_cart_select_variant: 'Choose a variant (size/color).', add_cart_ok: 'Added to cart',
+      qty_decrease: 'Less', qty_increase: 'More', tracking_products: 'Items purchased',
+      tracking_order_label: 'Order', order_status_shipped: 'Shipped', order_status_pending: 'Processing',
     },
     es: {
       nav_contact: 'Contacto', nav_account: 'Cuenta', cart_title: 'Carrito', total: 'Total', checkout_btn: 'Tramitar pedido',
@@ -1413,6 +1529,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       theme_use_dark: 'Modo oscuro',
       skip_main: 'Ir al contenido principal',
       announce_close: 'Cerrar anuncio',
+      announce_legend_free_ship: 'Envío gratis a partir de {{amount}}',
       btn_add_cart: 'Añadir al carrito', btn_buy: 'Comprar', unavailable: 'No disponible',
       catalogue: 'Catálogo', sort_label: 'Orden', sort_new: 'Más nuevos', sort_price_lo: 'Precio ↑', sort_price_hi: 'Precio ↓',
       filter_cat: 'Categoría', filter_stock: 'Solo en stock', all_cats: 'Todas',
@@ -1474,6 +1591,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       aria_menu_open: 'Abrir menú',
       aria_menu_close: 'Cerrar menú',
       catalog_intro: 'Filtros, búsqueda y novedades de la tienda.',
+      promo_intro: 'Precios especiales y artículos con descuento en la tienda.',
+      promo_empty_hint: 'No hay promociones por ahora. Vuelva pronto o explore el catálogo completo.',
       catalog_empty_title: 'Sin resultados',
       catalog_empty_hint: 'Pruebe a limpiar filtros o cambiar la búsqueda.',
       catalog_clear_filters: 'Limpiar filtros',
@@ -1490,6 +1609,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       checkout_email_name_required: 'Correo y nombre obligatorios.',
       popup_blocked: 'Permita ventanas emergentes para imprimir.',
       contact_sent_ok: 'Mensaje enviado.',
+      contact_info_title: 'Contacto directo', contact_phone: 'Teléfono', contact_email_label: 'Correo',
+      contact_form_title: 'Enviar mensaje', contact_required: 'Complete nombre, email y mensaje.',
+      contact_invalid_email: 'Email no válido.', contact_wa_chat: 'WhatsApp',
       fatal_js_prefix: 'Error técnico:',
       legal_external_hint: 'Documento completo en este enlace:',
       wishlist_guest_hint: 'Lista guardada en este dispositivo. Inicie sesión para sincronizarla con su cuenta.',
@@ -1507,6 +1629,14 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       nl_popup_no: 'Ahora no', tracking_title: 'Seguir pedido', tracking_hint: 'N.º de pedido y email usados en la compra.',
       tracking_order_id: 'N.º pedido', tracking_lookup: 'Consultar', tracking_mismatch: 'Pedido no encontrado o email incorrecto.',
       filter_price_min: 'Precio mín.', filter_price_max: 'Precio máx.', cart_coupon_ok: 'Código guardado para el pago.',
+      coupon_required: 'Indique un código.', coupon_applied_line: 'Código {{code}} (−{{discount}})',
+      coupon_copy_ok: 'Código copiado.', coupon_copy_btn: 'Copiar', coupon_use_btn: 'Usar código', promo_code_public_hint: 'Aplíquelo en el carrito o en el pago.',
+      coupon_remove: 'Quitar', checkout_discount: 'Descuento',
+      reg_send_code: 'Enviar código por email', reg_create_btn: 'Crear cuenta', reg_create_direct: 'Crear cuenta (sin código)',
+      review_login_hint: 'Inicie sesión para dejar un comentario.', review_login_btn: 'Entrar / registrarse',
+      add_cart_select_variant: 'Elija una variante (talla/color).', add_cart_ok: 'Añadido al carrito',
+      qty_decrease: 'Menos', qty_increase: 'Más', tracking_products: 'Artículos comprados',
+      tracking_order_label: 'Pedido', order_status_shipped: 'Enviado', order_status_pending: 'En preparación',
     },
   };
 
@@ -1578,12 +1708,83 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     return '';
   }
 
-  function driveImgMarkup(rawUrl, isGrid) {
+  function isRouteActive(routeToken) {
+    return routeToken === _routeGeneration;
+  }
+
+  function cacheProductsIntoStore(list) {
+    (list || []).forEach(function (p) {
+      if (p && p.produto_id != null) productCache[String(p.produto_id)] = p;
+    });
+  }
+
+  function getCachedProduct(id) {
+    return productCache[String(id)] || null;
+  }
+
+  function preloadImageUrl(rawUrl, isGrid) {
+    var url = erpImgUrlForDisplay(rawUrl, { grid: !!isGrid });
+    if (!url || _imgPreloaded[url]) return;
+    _imgPreloaded[url] = 1;
+    var img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+  }
+
+  function preloadVisibleProductImages(list) {
+    var run = function () {
+      (list || []).slice(0, 32).forEach(function (p) {
+        preloadImageUrl(productPrimaryImageRaw(p), true);
+      });
+    };
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 400 });
+    else setTimeout(run, 40);
+  }
+
+  function prefetchProductDetail(id) {
+    var sid = String(id);
+    var cached = getCachedProduct(sid);
+    if (cached) {
+      preloadImageUrl(productPrimaryImageRaw(cached), false);
+      return Promise.resolve({ success: true, product: cached });
+    }
+    if (productFetchInflight[sid]) return productFetchInflight[sid];
+    productFetchInflight[sid] = api('getProduct', { id: sid }).then(function (res) {
+      delete productFetchInflight[sid];
+      if (res.success && res.product) {
+        productCache[sid] = res.product;
+        preloadImageUrl(productPrimaryImageRaw(res.product), false);
+      }
+      return res;
+    });
+    return productFetchInflight[sid];
+  }
+
+  function bindCardPrefetch(root) {
+    if (!root) return;
+    root.querySelectorAll('a.card[href*="#/product/"]').forEach(function (a) {
+      if (a.getAttribute('data-prefetch-bound')) return;
+      a.setAttribute('data-prefetch-bound', '1');
+      var go = function () {
+        var href = a.getAttribute('href') || '';
+        var m = href.match(/#\/product\/([^?#]+)/);
+        if (m) prefetchProductDetail(decodeURIComponent(m[1]));
+      };
+      a.addEventListener('pointerdown', go, { passive: true });
+      a.addEventListener('mouseenter', go, { passive: true });
+      a.addEventListener('focus', go);
+      a.addEventListener('touchstart', go, { passive: true });
+    });
+  }
+
+  function driveImgMarkup(rawUrl, isGrid, eager) {
     if (!rawUrl || !String(rawUrl).trim()) return '';
     var raw = String(rawUrl).trim();
     var thumb = erpImgUrlForDisplay(raw, { grid: !!isGrid });
     var fb = erpImgFallbackUrl(raw);
-    var attrs = ' alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"';
+    var loadAttr = eager ? 'eager' : 'lazy';
+    var prio = eager ? 'high' : 'auto';
+    var attrs = ' alt="" loading="' + loadAttr + '" decoding="async" fetchpriority="' + prio + '" referrerpolicy="no-referrer"';
     if (fb)
       attrs += ' data-img-fallback="' + esc(fb) + '" onerror="if(window._erpImgFallback)window._erpImgFallback(this)"';
     else
@@ -1637,10 +1838,36 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     sel.onchange = function () { setDisplayCurrency(sel.value); };
   }
 
+  function getProductListPrice(p) {
+    if (!p) return NaN;
+    var po = parseFloat(p.preco);
+    if (!isNaN(po) && po > 0) return po;
+    var ht = parseFloat(p.preco_ht);
+    var tva = parseFloat(p.tva);
+    if (!isNaN(ht) && ht > 0) {
+      var rate = !isNaN(tva) ? tva : 23;
+      return ht * (1 + rate / 100);
+    }
+    var vars = p.variantes || [];
+    var best = NaN;
+    for (var i = 0; i < vars.length; i++) {
+      var vp = parseFloat(vars[i].preco);
+      if (!isNaN(vp) && vp > 0) best = isNaN(best) ? vp : Math.max(best, vp);
+    }
+    return best;
+  }
+
   function isProductPromo(p) {
     var pf = parseFloat(p.preco_final);
-    var po = parseFloat(p.preco);
-    return !isNaN(po) && !isNaN(pf) && po > pf + 0.009;
+    if (isNaN(pf)) return false;
+    var list = getProductListPrice(p);
+    if (!isNaN(list) && list > pf + 0.009) return true;
+    var vars = p.variantes || [];
+    for (var j = 0; j < vars.length; j++) {
+      var vp2 = parseFloat(vars[j].preco);
+      if (!isNaN(vp2) && vp2 > 0 && vp2 < pf - 0.009) return true;
+    }
+    return false;
   }
 
   function isProductNew(p) {
@@ -1737,6 +1964,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   function bindProductCardActions(root) {
     if (!root) return;
     root.querySelectorAll('[data-card-wl]').forEach(function (btn) {
+      if (btn.getAttribute('data-wl-bound')) return;
+      btn.setAttribute('data-wl-bound', '1');
       btn.onclick = async function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
@@ -1758,6 +1987,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       };
     });
     root.querySelectorAll('[data-card-cmp]').forEach(function (btn) {
+      if (btn.getAttribute('data-cmp-bound')) return;
+      btn.setAttribute('data-cmp-bound', '1');
       btn.onclick = function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
@@ -1768,6 +1999,52 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         updateCompareBar();
       };
     });
+  }
+
+  function setupProductCardDelegation() {
+    if (setupProductCardDelegation._done) return;
+    setupProductCardDelegation._done = true;
+    document.addEventListener('click', async function (ev) {
+      var wlBtn = ev.target.closest('[data-card-wl]');
+      if (wlBtn && !wlBtn.getAttribute('data-wl-bound')) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var pid = wlBtn.getAttribute('data-card-wl');
+        if (state.clientId && state.clientToken) {
+          var on = wlBtn.classList.contains('is-on');
+          var r = on
+            ? await api('removeFromWishlist', { clientId: state.clientId, produtoId: pid }, state.clientToken)
+            : await api('addToWishlist', { clientId: state.clientId, produtoId: pid }, state.clientToken);
+          if (r.success) {
+            wlBtn.classList.toggle('is-on', !on);
+            document.querySelectorAll('[data-card-wl="' + pid + '"]').forEach(function (b) {
+              b.classList.toggle('is-on', !on);
+            });
+            toast(on ? tr('fav_remove') : tr('fav_add'));
+          } else toast(r.error || '—');
+        } else {
+          toggleGuestWishlist(pid);
+          var onG = guestWishlistHas(pid);
+          document.querySelectorAll('[data-card-wl="' + pid + '"]').forEach(function (b) {
+            b.classList.toggle('is-on', onG);
+          });
+          toast(onG ? tr('fav_add') : tr('fav_remove'));
+        }
+        return;
+      }
+      var cmpBtn = ev.target.closest('[data-card-cmp]');
+      if (cmpBtn && !cmpBtn.getAttribute('data-cmp-bound')) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var pid2 = cmpBtn.getAttribute('data-card-cmp');
+        var pr2 = (state.products || []).find(function (x) { return String(x.produto_id) === String(pid2); });
+        if (pr2) toggleCompareProduct(pr2);
+        document.querySelectorAll('[data-card-cmp="' + pid2 + '"]').forEach(function (b) {
+          b.classList.toggle('active', compareHas(pid2));
+        });
+        updateCompareBar();
+      }
+    }, true);
   }
 
   async function refreshWishlistCache() {
@@ -1790,7 +2067,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var root = document.getElementById('contactWidgetRoot');
     if (!root) return;
     var wa = String(state.config.whatsapp_number || '').replace(/\D/g, '');
-    var mail = String((state.empresa && state.empresa.email) || state.config.contact_email || '').trim();
+    var mail = String((state.empresa && state.empresa.email) || state.config.contact_email || state.config.store_email || '').trim();
     var waEl = document.getElementById('contactWidgetWa');
     var mailEl = document.getElementById('contactWidgetMail');
     var chatEl = document.getElementById('contactWidgetChat');
@@ -1857,15 +2134,112 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     }
   }
 
-  /** Prix catalogue / PDP : prix barré si promo (preco > preco_final). */
+  /** Prix catalogue / PDP : prix barré si promo (prix catalogue > preco_final). */
   function priceMarkup(p) {
     var pf = parseFloat(p.preco_final);
-    var po = parseFloat(p.preco);
+    var list = getProductListPrice(p);
     if (isNaN(pf)) pf = 0;
-    if (!isNaN(po) && po > pf + 0.009) {
-      return '<span class="price"><span class="old">' + fmtMoney(po) + '</span> ' + fmtMoney(pf) + '</span>';
+    if (!isNaN(list) && list > pf + 0.009) {
+      return '<span class="price"><span class="old">' + fmtMoney(list) + '</span> ' + fmtMoney(pf) + '</span>';
     }
     return '<span class="price">' + fmtMoney(pf) + '</span>';
+  }
+
+  function formatThresholdAmount(val) {
+    var n = parseFloat(val);
+    if (isNaN(n) || n <= 0) return '';
+    return fmtMoney(n);
+  }
+
+  function getAnnouncementDisplayText() {
+    var cfg = state.config || {};
+    var raw = String(cfg.announcement_text || '').trim();
+    if (raw) return expandPromoPlaceholders(raw);
+    var shipFrom = cfg.free_shipping_threshold || cfg.free_ship_from || '';
+    var amt = formatThresholdAmount(shipFrom);
+    if (amt) {
+      return tr('announce_legend_free_ship').replace(/\{\{amount\}\}/g, amt);
+    }
+    return '';
+  }
+
+  function announcementUsesMarquee() {
+    return true;
+  }
+
+  function fillMarqueeTrack(trackEl, txt, durationSec) {
+    if (!trackEl) return;
+    trackEl.innerHTML = '';
+    trackEl.style.animationDuration = (durationSec || 32) + 's';
+    var seg1 = document.createElement('span');
+    seg1.className = 'announcement-marquee-seg';
+    seg1.textContent = txt;
+    var seg2 = document.createElement('span');
+    seg2.className = 'announcement-marquee-seg';
+    seg2.setAttribute('aria-hidden', 'true');
+    seg2.textContent = txt;
+    trackEl.appendChild(seg1);
+    trackEl.appendChild(seg2);
+  }
+
+  function marqueeHtmlLegend(txt, classPrefix) {
+    var t = String(txt || '').trim();
+    if (!t) return '';
+    var seg = '<span class="announcement-marquee-seg">' + esc(t) + '</span>';
+    return '<div class="' + classPrefix + '-marquee-wrap">' +
+      '<div class="' + classPrefix + '-marquee-track">' + seg + seg + '</div></div>';
+  }
+
+  function expandPromoPlaceholders(txt) {
+    var cfg = state.config || {};
+    var cur = DISPLAY_CURRENCY || 'EUR';
+    var shipAmt = formatThresholdAmount(cfg.free_shipping_threshold || cfg.free_ship_from || '');
+    return String(txt || '')
+      .replace(/\{\{pct\}\}/g, cfg.announcement_promo_pct || '')
+      .replace(/\{\{pct2\}\}/g, cfg.announcement_promo_pct_2 || '')
+      .replace(/\{\{code\}\}/g, cfg.announcement_promo_code || '')
+      .replace(/\{\{amount\}\}/g, cfg.announcement_promo_amount_eur || '')
+      .replace(/\{\{min_cart\}\}/g, cfg.announcement_promo_min_cart_eur || '')
+      .replace(/\{\{valid_until\}\}/g, cfg.announcement_promo_valid_until || '')
+      .replace(/\{\{promo_label\}\}/g, cfg.announcement_promo_label || '')
+      .replace(/\{\{currency\}\}/g, cur)
+      .replace(/\{\{free_ship_from\}\}/g, shipAmt || cfg.free_shipping_threshold || cfg.free_ship_from || '');
+  }
+
+  function promoCatalogBannerHtml() {
+    var cfg = state.config || {};
+    if (String(cfg.promo_banner_enabled) !== '1') return '';
+    var title = String(cfg.promo_banner_title || tr('nav_promo')).trim();
+    var body = expandPromoPlaceholders(cfg.promo_banner_text || '');
+    if (!title && !body) return '';
+    var legend = body || (formatThresholdAmount(cfg.free_shipping_threshold || cfg.free_ship_from || '')
+      ? tr('announce_legend_free_ship').replace(/\{\{amount\}\}/g, formatThresholdAmount(cfg.free_shipping_threshold || cfg.free_ship_from || ''))
+      : '');
+    return '<section class="promo-catalog-banner" aria-label="' + esc(tr('nav_promo')) + '">' +
+      (title ? '<h2>' + esc(title) + '</h2>' : '') +
+      (legend ? marqueeHtmlLegend(legend, 'promo-banner') : '') +
+      '</section>';
+  }
+
+  function updateNavActiveState() {
+    var h = (location.hash || '#/').replace(/^#/, '') || '/';
+    var promo = h === '/catalog/promo' || h.indexOf('/catalog/promo/') === 0;
+    var cat = h === '/catalog' || (h.indexOf('/catalog/') === 0 && !promo);
+    var home = h === '/' || h === '/home' || h === '';
+    var wish = h === '/wishlist';
+    var track = h === '/tracking';
+    document.querySelectorAll('.site-nav a[href], .nav-drawer-links a[href]').forEach(function (a) {
+      var href = (a.getAttribute('href') || '').replace(/^#/, '');
+      var on = false;
+      if (href === '#/catalog/promo') on = promo;
+      else if (href === '#/catalog') on = cat;
+      else if (href === '#/') on = home;
+      else if (href === '#/wishlist') on = wish;
+      else if (href === '#/tracking') on = track;
+      a.classList.toggle('is-active', on);
+      if (on) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
   }
 
   /** Morada ERP (feuille ENDERECOS) → une ligne pour formulaires. */
@@ -1925,7 +2299,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     state.filters.search = (q == null ? '' : String(q)).trim();
     var hs = document.getElementById('headerSearch');
     if (hs) hs.value = state.filters.search;
-    location.hash = '#/catalog';
+    var onPromo = /^#\/catalog\/promo\/?$/i.test(location.hash || '');
+    location.hash = onPromo || state.filters.promo_only ? '#/catalog/promo' : '#/catalog';
   }
 
   // --- Retour paiement Stripe (query string) puis toast ---
@@ -1951,6 +2326,75 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     el.classList.add('show');
     clearTimeout(window._toastT);
     window._toastT = setTimeout(function () { el.classList.remove('show'); }, 3800);
+  }
+
+  function normalizeVariantId(id) {
+    return String(id == null ? '' : id).trim();
+  }
+
+  function findVariantInProduct(prod, varianteId) {
+    var vid = normalizeVariantId(varianteId);
+    if (!vid || !prod || !prod.variantes) return null;
+    for (var i = 0; i < prod.variantes.length; i++) {
+      if (normalizeVariantId(prod.variantes[i].variante_id) === vid) return prod.variantes[i];
+    }
+    return null;
+  }
+
+  function variantInStock(prod, variant) {
+    if (!variant) return false;
+    if (prod && prod.disponivel === false) return false;
+    if (prod && !prod.stock_management) return true;
+    var vs = parseInt(String(variant.stock != null ? variant.stock : ''), 10);
+    if (!isNaN(vs) && vs > 0) return true;
+    if (prod && parseInt(String(prod.stock_total || 0), 10) > 0) return true;
+    return false;
+  }
+
+  function clampQty(q, maxStock) {
+    var n = parseInt(String(q), 10);
+    if (isNaN(n) || n < 1) n = 1;
+    if (n > 99) n = 99;
+    if (maxStock != null && maxStock > 0 && n > maxStock) n = maxStock;
+    return n;
+  }
+
+  function readPdpQty(maxStock) {
+    var el = document.getElementById('pdpQty');
+    if (!el) return 1;
+    return clampQty(el.value, maxStock);
+  }
+
+  function bindPdpQtyControls(maxStock) {
+    var dec = document.getElementById('pdpQtyDec');
+    var inc = document.getElementById('pdpQtyInc');
+    var inp = document.getElementById('pdpQty');
+    if (!inp) return;
+    function sync() { inp.value = String(readPdpQty(maxStock)); }
+    if (dec) {
+      dec.onclick = function () {
+        inp.value = String(clampQty((parseInt(inp.value, 10) || 1) - 1, maxStock));
+      };
+    }
+    if (inc) {
+      inc.onclick = function () {
+        inp.value = String(clampQty((parseInt(inp.value, 10) || 1) + 1, maxStock));
+      };
+    }
+    inp.onchange = sync;
+    inp.onblur = sync;
+  }
+
+  function formatOrderStatusLabel(st) {
+    var s = String(st || '').toLowerCase();
+    if (s.indexOf('envi') >= 0 || s.indexOf('ship') >= 0 || s.indexOf('transit') >= 0) return tr('order_status_shipped');
+    if (s.indexOf('prep') >= 0 || s.indexOf('pend') >= 0 || s.indexOf('aguard') >= 0) return tr('order_status_pending');
+    return st || '—';
+  }
+
+  function requireAuthModal(mode) {
+    openAuth(mode || 'login');
+    toast(tr('review_login_hint'));
   }
 
   /**
@@ -2004,7 +2448,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     clientNome: localStorage.getItem('erp_client_nome') || '',
     cartLines: [],
     couponValid: null,
-    couponCode: '',
+    couponCode: (function () { try { return localStorage.getItem('boutique_coupon_code') || ''; } catch (e) { return ''; } })(),
     selectedPayment: 'transfer',
     _bootDone: false,
     _maintenance: false,
@@ -2018,6 +2462,168 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   function saveCartId(id) {
     state.cartId = id || '';
     if (id) localStorage.setItem('erp_cart_id', id); else localStorage.removeItem('erp_cart_id');
+  }
+
+  function getCartSubtotal() {
+    if (state._cartSnap && state._cartSnap.total != null) return parseFloat(state._cartSnap.total) || 0;
+    return 0;
+  }
+
+  function persistCouponCode(code) {
+    state.couponCode = String(code || '').trim();
+    try {
+      if (state.couponCode) localStorage.setItem(COUPON_STORE_KEY, state.couponCode);
+      else localStorage.removeItem(COUPON_STORE_KEY);
+    } catch (e) {}
+  }
+
+  function clearCouponState() {
+    state.couponValid = null;
+    persistCouponCode('');
+    var msg = document.getElementById('cartCouponMsg');
+    if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+    var rem = document.getElementById('cartCouponRemove');
+    if (rem) rem.style.display = 'none';
+  }
+
+  function getCouponDiscountAmount() {
+    if (!state.couponValid || !state.couponValid.valid) return 0;
+    return parseFloat(state.couponValid.discount) || 0;
+  }
+
+  function totalsWithCoupon(subtotal) {
+    var sub = parseFloat(subtotal) || 0;
+    var disc = getCouponDiscountAmount();
+    if (disc > sub) disc = sub;
+    return { sub: sub, discount: disc, total: Math.max(0, sub - disc), hasDiscount: disc > 0.009 };
+  }
+
+  async function applyCouponCode(code, subtotal) {
+    var c = String(code || '').trim();
+    if (!c) return { ok: false, error: tr('coupon_required') };
+    persistCouponCode(c);
+    var sub = subtotal != null ? parseFloat(subtotal) : getCartSubtotal();
+    var r = await api('validateCoupon', { code: c, total: String(sub || 0) });
+    state.couponValid = r;
+    if (r.valid) return { ok: true, discount: parseFloat(r.discount) || 0, data: r };
+    return { ok: false, error: r.error || '—' };
+  }
+
+  function updateCartCouponDisplay() {
+    var cartTotalEl = document.getElementById('cartTotal');
+    var msg = document.getElementById('cartCouponMsg');
+    var rem = document.getElementById('cartCouponRemove');
+    var cci = document.getElementById('cartCouponInput');
+    var sub = getCartSubtotal();
+    var t = totalsWithCoupon(sub);
+    if (cartTotalEl) {
+      if (t.hasDiscount) {
+        cartTotalEl.innerHTML = '<span class="old" style="font-size:14px;font-weight:400;margin-right:8px;opacity:.75;">' +
+          fmtMoney(t.sub) + '</span> ' + fmtMoney(t.total);
+      } else {
+        cartTotalEl.textContent = fmtMoney(t.total);
+      }
+    }
+    if (cci && state.couponCode) cci.value = state.couponCode;
+    if (rem) rem.style.display = (state.couponCode && state.couponValid && state.couponValid.valid) ? 'inline-flex' : 'none';
+    if (!msg) return;
+    if (state.couponValid && state.couponValid.valid) {
+      msg.style.display = 'block';
+      msg.style.color = 'var(--text)';
+      msg.className = 'sku-note cart-coupon-applied';
+      msg.textContent = tr('coupon_applied_line').replace(/\{\{code\}\}/g, state.couponCode).replace(/\{\{discount\}\}/g, fmtMoney(t.discount));
+    } else if (state.couponValid && state.couponValid.valid === false && state.couponCode) {
+      msg.style.display = 'block';
+      msg.style.color = '#c41e3a';
+      msg.className = 'sku-note';
+      msg.textContent = state.couponValid.error || '—';
+    } else {
+      msg.style.display = 'none';
+      msg.textContent = '';
+    }
+  }
+
+  function consumeCouponFromUrl() {
+    var found = '';
+    try {
+      var qs = new URLSearchParams(location.search);
+      found = qs.get('coupon') || qs.get('code') || '';
+    } catch (e) {}
+    if (!found) {
+      var h = location.hash || '';
+      var qi = h.indexOf('?');
+      if (qi >= 0) {
+        try {
+          var qs2 = new URLSearchParams(h.slice(qi + 1));
+          found = qs2.get('coupon') || qs2.get('code') || '';
+        } catch (e2) {}
+      }
+    }
+    if (found) persistCouponCode(String(found).trim());
+    return found;
+  }
+
+  function publicPromoCode() {
+    return String((state.config || {}).announcement_promo_code || '').trim();
+  }
+
+  function promoCodePanelHtml(suffix) {
+    var code = publicPromoCode();
+    if (!code) return '';
+    var sfx = suffix ? String(suffix) : '';
+    return '<section class="promo-code-panel" id="promoCodePanel' + sfx + '">' +
+      '<p class="sku-note" style="margin:0 0 8px;">' + esc(tr('promo_code_public_hint')) + '</p>' +
+      '<p style="margin:0;"><strong>' + esc(code) + '</strong></p>' +
+      '<div class="promo-code-actions">' +
+      '<button type="button" class="btn btn-accent btn-sm" data-promo-use="' + esc(sfx) + '">' + esc(tr('coupon_use_btn')) + '</button>' +
+      '<button type="button" class="btn btn-ghost btn-sm" data-promo-copy="' + esc(sfx) + '">' + esc(tr('coupon_copy_btn')) + '</button>' +
+      '</div></section>';
+  }
+
+  function bindPromoCodePanel(suffix) {
+    var sfx = suffix ? String(suffix) : '';
+    var panel = document.getElementById('promoCodePanel' + sfx);
+    if (!panel || panel.getAttribute('data-bound')) return;
+    panel.setAttribute('data-bound', '1');
+    var code = publicPromoCode();
+    var useBtn = panel.querySelector('[data-promo-use]');
+    var copyBtn = panel.querySelector('[data-promo-copy]');
+    if (useBtn) {
+      useBtn.onclick = async function () {
+        persistCouponCode(code);
+        var sub = getCartSubtotal();
+        if (sub > 0) {
+          var res = await applyCouponCode(code, sub);
+          if (res.ok) {
+            toast(tr('cart_coupon_ok'));
+            updateCartCouponDisplay();
+            openCart();
+          } else toast(res.error || '—');
+        } else {
+          toast(tr('cart_coupon_ok'));
+          location.hash = '#/checkout';
+        }
+      };
+    }
+    if (copyBtn) {
+      copyBtn.onclick = function () {
+        var done = false;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(code).then(function () { toast(tr('coupon_copy_ok')); done = true; }).catch(function () {});
+        }
+        if (!done) {
+          try {
+            var ta = document.createElement('textarea');
+            ta.value = code;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            toast(tr('coupon_copy_ok'));
+          } catch (e2) { toast(code); }
+        }
+      };
+    }
   }
 
   function saveSession(tok, cid, nome) {
@@ -2057,6 +2663,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   }
 
   async function addToCartLine(prod, variant, qty) {
+    if (!prod || !prod.produto_id) { toast('—'); return false; }
+    if (!variant || !normalizeVariantId(variant.variante_id)) {
+      toast(tr('add_cart_select_variant'));
+      return false;
+    }
+    if (!variantInStock(prod, variant)) {
+      toast(tr('unavailable'));
+      return false;
+    }
+    var maxSt = null;
+    if (prod.stock_management) {
+      var vs = parseInt(String(variant.stock != null ? variant.stock : ''), 10);
+      if (!isNaN(vs) && vs > 0) maxSt = vs;
+    }
+    var q = clampQty(qty, maxSt);
     var preco = parseFloat(variant.preco != null ? variant.preco : prod.preco_final) || 0;
     var res = await api('addToCart', {
       cartId: state.cartId || undefined,
@@ -2064,15 +2685,16 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       variante_id: variant.variante_id,
       tamanho: variant.tamanho || '',
       cor: variant.cor || '',
-      quantidade: qty,
+      quantidade: q,
       preco: preco,
       clientId: state.clientId || undefined
     });
-    if (!res.success) { toast(res.error || 'Erro'); return; }
+    if (!res.success) { toast(res.error || '—'); return false; }
     if (res.cartId) saveCartId(res.cartId);
     await refreshCartCount();
-    toast(tr('btn_add_cart') + ' ✓');
+    toast(tr('add_cart_ok'));
     openCart();
+    return true;
   }
 
   async function ensureClientSession() {
@@ -2153,6 +2775,11 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     var cci = document.getElementById('cartCouponInput');
     if (ccr) ccr.style.display = 'flex';
     if (cci && state.couponCode) cci.value = state.couponCode;
+    if (state.couponCode) {
+      applyCouponCode(state.couponCode, res.total).then(function () { updateCartCouponDisplay(); });
+    } else {
+      updateCartCouponDisplay();
+    }
     if (clr) clr.style.display = 'inline-flex';
     var pmap = {};
     (state.products || []).forEach(function (p) { pmap[p.produto_id] = p; });
@@ -2434,29 +3061,38 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         return;
       }
     } catch (e) {}
-    if (String(state.config.announcement_enabled) === '1' && state.config.announcement_text) {
-      var txt = state.config.announcement_text;
-      txt = txt.replace(/\{\{pct\}\}/g, state.config.announcement_promo_pct || '').replace(/\{\{code\}\}/g, state.config.announcement_promo_code || '');
-      var useMq = String(state.config.announcement_marquee) === '1';
+    var txt = getAnnouncementDisplayText();
+    if (String(state.config.announcement_enabled) === '1' && txt) {
+      var useMq = announcementUsesMarquee();
+      var mqDur = Math.max(16, Math.min(50, String(txt).length * 0.45));
+      ann.setAttribute('aria-label', txt);
+      var inner = ann.querySelector('.announce-bar-inner');
+      if (inner) {
+        inner.onclick = function () { location.hash = '#/catalog/promo'; };
+        inner.classList.add('announce-bar-inner--link');
+        inner.setAttribute('role', 'link');
+        inner.setAttribute('tabindex', '0');
+        inner.onkeydown = function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            location.hash = '#/catalog/promo';
+          }
+        };
+      }
       if (useMq && mqRoot && mqTrack) {
         ann.classList.add('announce-bar--marquee');
         txtEl.style.display = 'none';
         mqRoot.style.display = 'block';
-        mqTrack.innerHTML = '';
-        var seg1 = document.createElement('span');
-        seg1.className = 'announcement-marquee-seg';
-        seg1.textContent = txt;
-        var seg2 = document.createElement('span');
-        seg2.className = 'announcement-marquee-seg';
-        seg2.setAttribute('aria-hidden', 'true');
-        seg2.textContent = txt;
-        mqTrack.appendChild(seg1);
-        mqTrack.appendChild(seg2);
+        mqRoot.removeAttribute('aria-hidden');
+        fillMarqueeTrack(mqTrack, txt, mqDur);
       } else {
         ann.classList.remove('announce-bar--marquee');
         txtEl.style.display = '';
         txtEl.textContent = txt;
-        if (mqRoot) mqRoot.style.display = 'none';
+        if (mqRoot) {
+          mqRoot.style.display = 'none';
+          mqRoot.setAttribute('aria-hidden', 'true');
+        }
         if (mqTrack) mqTrack.innerHTML = '';
       }
       ann.classList.add('show');
@@ -2766,18 +3402,19 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       page: state.page,
       pageSize: ps,
       in_stock: state.filters.in_stock ? true : undefined,
+      promo_only: state.filters.promo_only ? true : undefined,
       preco_min: state.filters.preco_min || undefined,
       preco_max: state.filters.preco_max || undefined
     };
     var res = await api('getProducts', payload);
     var list = [];
     if (res.products) list = res.products;
-    if (state.filters.promo_only) {
-      list = list.filter(isProductPromo);
-    }
-    state.productsTotal = state.filters.promo_only ? list.length : (res.total != null ? res.total : list.length);
+    if (state.filters.promo_only) list = list.filter(isProductPromo);
+    state.productsTotal = res.total != null ? res.total : list.length;
     state.productsHasMore = !!res.hasMore;
     state.products = list;
+    cacheProductsIntoStore(list);
+    preloadVisibleProductImages(list);
     return list;
   }
 
@@ -2792,6 +3429,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '<p>' + esc(tr('hero_hint')) + '</p>' +
       '<div class="hero-btns">' +
       '<a href="#/catalog" class="btn btn-primary">' + esc(tr('catalogue')) + '</a>' +
+      '<a href="#/catalog/promo" class="btn btn-accent">' + esc(tr('nav_promo')) + '</a>' +
       '<a href="#/catalog" class="btn btn-ghost" id="heroBtnNew">' + esc(tr('hero_btn_new')) + '</a>' +
       '</div></div></div>' +
       '<input type="search" class="mobile-search" id="mobileSearch" placeholder="' + esc(tr('search_ph')) + '">' +
@@ -2808,7 +3446,13 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
     bindSearchInput(document.getElementById('mobileSearch'));
 
-    await fetchProducts(true, { pageSize: 8 });
+    var homeLoads = await Promise.all([
+      fetchProducts(true, { pageSize: 8 }),
+      api('getProducts', { promo_only: true, page: 1, pageSize: 4, sort: 'price_asc' })
+    ]);
+    var promoRes = homeLoads[1];
+    var promoHome = (promoRes.products || []).filter(isProductPromo);
+    cacheProductsIntoStore(promoHome);
     var feat = document.getElementById('homeFeatured');
     if (!state.products.length) {
       feat.innerHTML = '<div class="empty-state panel" style="border-radius:var(--radius);"><p style="margin:0;line-height:1.6;">' + esc(tr('home_featured_empty')) + '</p>' +
@@ -2834,22 +3478,42 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       tests.map(function (t) {
         return '<article class="home-test-card"><p style="margin:0 0 10px;">' + esc(t.q) + '</p><p style="margin:0;font-weight:600;">' + esc(t.n) + '</p><p class="sku-note" style="margin:8px 0 0;">' + esc(t.t) + '</p></article>';
       }).join('') + '</div></section>';
+    var promoBlock = '';
+    if (promoHome.length) {
+      promoBlock =
+        '<h2 class="home-section-title" style="margin-top:32px;">' + esc(tr('nav_promo')) + '</h2>' +
+        '<div class="grid-products" id="homePromoGrid">' + promoHome.map(productCard).join('') + '</div>' +
+        '<div style="text-align:center;margin:20px 0 8px;"><a href="#/catalog/promo" class="btn btn-accent">' + esc(tr('nav_promo')) + '</a></div>';
+    }
     feat.innerHTML = catsHtml +
       '<h2 style="margin:8px 0 20px;font-family:var(--display);font-size:1.75rem;">' + esc(tr('catalogue')) + '</h2>' +
       '<div class="grid-products" id="homeGrid">' + state.products.slice(0, 8).map(productCard).join('') + '</div>' +
       '<div style="text-align:center;margin-top:28px;"><a href="#/catalog" class="btn btn-ghost">' + esc(tr('catalogue')) + '</a></div>' +
+      promoBlock +
       testHtml +
-      '<section class="home-cta"><h2 class="home-section-title">' + esc(tr('home_cta_title')) + '</h2><a href="#/catalog" class="btn btn-primary">' + esc(tr('home_cta_btn')) + '</a></section>';
+      '<section class="home-cta"><h2 class="home-section-title">' + esc(tr('home_cta_title')) + '</h2>' +
+      '<a href="#/catalog/promo" class="btn btn-accent" style="margin-right:10px;">' + esc(tr('nav_promo')) + '</a>' +
+      '<a href="#/catalog" class="btn btn-primary">' + esc(tr('home_cta_btn')) + '</a></section>';
     await refreshWishlistCache();
-    bindProductCardActions(document.getElementById('homeGrid'));
+    var hg = document.getElementById('homeGrid');
+    bindProductCardActions(hg);
+    bindCardPrefetch(hg);
+    if (promoHome.length) {
+      var hpg = document.getElementById('homePromoGrid');
+      bindProductCardActions(hpg);
+      bindCardPrefetch(hpg);
+    }
   }
 
   async function renderCatalog() {
     var main = document.getElementById('main');
+    var promoMode = !!state.filters.promo_only;
     main.innerHTML =
       '<div class="page-intro">' +
-      '<h1>' + esc(state.filters.promo_only ? tr('nav_promo') : tr('catalogue')) + '</h1>' +
-      '<p class="sku-note">' + esc(tr('catalog_intro')) + '</p></div>' +
+      '<h1>' + esc(promoMode ? tr('nav_promo') : tr('catalogue')) + '</h1>' +
+      '<p class="sku-note">' + esc(promoMode ? tr('promo_intro') : tr('catalog_intro')) + '</p></div>' +
+      (promoMode ? promoCatalogBannerHtml() : '') +
+      (promoMode ? promoCodePanelHtml() : '') +
       '<input type="search" class="mobile-search" id="catalogMobileSearch" autocomplete="off">' +
       '<div class="toolbar">' +
       '<select id="fCat"><option value="">' + esc(tr('all_cats')) + '</option></select>' +
@@ -2883,23 +3547,28 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     if (fMax) fMax.value = state.filters.preco_max || '';
 
     async function reload() {
-      document.getElementById('catGrid').innerHTML = '<div class="spinner"></div>';
-      await fetchProducts(true);
       var cg = document.getElementById('catGrid');
+      if (cg) {
+        cg.classList.add('is-loading');
+        if (!cg.children.length) cg.innerHTML = '<div class="spinner"></div>';
+      }
+      await fetchProducts(true);
+      if (cg) cg.classList.remove('is-loading');
       var lm = document.getElementById('loadMore');
       if (!state.products.length) {
         cg.innerHTML =
           '<div class="empty-state panel" style="border-radius:var(--radius);max-width:560px;margin:0 auto;">' +
           '<p style="font-size:1.12rem;color:var(--text);margin:0 0 10px;font-weight:600;">' + esc(tr('catalog_empty_title')) + '</p>' +
-          '<p style="margin:0 0 20px;line-height:1.55;">' + esc(tr('catalog_empty_hint')) + '</p>' +
-          '<button type="button" class="btn btn-primary" id="catResetFilters">' + esc(tr('catalog_clear_filters')) + '</button></div>';
+          '<p style="margin:0 0 20px;line-height:1.55;">' + esc(state.filters.promo_only ? tr('promo_empty_hint') : tr('catalog_empty_hint')) + '</p>' +
+          '<button type="button" class="btn btn-primary" id="catResetFilters">' + esc(tr('catalog_clear_filters')) + '</button>' +
+          (state.filters.promo_only ? '<p style="margin:16px 0 0;"><a href="#/catalog" class="btn btn-ghost">' + esc(tr('catalogue')) + '</a></p>' : '') + '</div>';
         lm.style.display = 'none';
         document.getElementById('catResetFilters').onclick = function () {
+          var keepPromo = state.filters.promo_only;
           state.filters.search = '';
           state.filters.categoria = '';
           state.filters.sort = 'date_desc';
           state.filters.in_stock = false;
-          state.filters.promo_only = false;
           state.filters.preco_min = '';
           state.filters.preco_max = '';
           sel.value = '';
@@ -2911,7 +3580,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
           if (cms) cms.value = '';
           var hsel = document.getElementById('headerSearch');
           if (hsel) hsel.value = '';
-          location.hash = '#/catalog';
+          location.hash = keepPromo ? '#/catalog/promo' : '#/catalog';
           reload();
         };
       } else {
@@ -2919,6 +3588,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         lm.style.display = state.productsHasMore ? 'inline-flex' : 'none';
         await refreshWishlistCache();
         bindProductCardActions(cg);
+        bindCardPrefetch(cg);
       }
       bindSearchInput(document.getElementById('catalogMobileSearch'));
       var cms2 = document.getElementById('catalogMobileSearch');
@@ -2944,6 +3614,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         page: state.page,
         pageSize: state.pageSize,
         in_stock: state.filters.in_stock ? true : undefined,
+        promo_only: state.filters.promo_only ? true : undefined,
         preco_min: state.filters.preco_min || undefined,
         preco_max: state.filters.preco_max || undefined
       });
@@ -2954,10 +3625,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       var cg2 = document.getElementById('catGrid');
       cg2.innerHTML = state.products.map(productCard).join('');
       bindProductCardActions(cg2);
+      bindCardPrefetch(cg2);
       document.getElementById('loadMore').style.display = state.productsHasMore ? 'inline-flex' : 'none';
     };
 
     await reload();
+    bindPromoCodePanel();
     var hs = document.getElementById('headerSearch');
     if (hs) hs.value = state.filters.search || '';
   }
@@ -2967,25 +3640,41 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     return productPrimaryImageRaw(p);
   }
 
-  async function renderProduct(id) {
+  async function renderProduct(id, routeToken) {
+    if (routeToken == null) routeToken = _routeGeneration;
+    var sid = String(id);
     var main = document.getElementById('main');
-    main.innerHTML = '<div class="spinner"></div>';
-    var res = await api('getProduct', { id: id });
+    var cached = getCachedProduct(sid);
+    var res;
+    if (cached) {
+      preloadImageUrl(productPrimaryImageRaw(cached), false);
+      res = { success: true, product: cached };
+    } else {
+      main.innerHTML =
+        '<div class="pdp-skeleton"><div class="sk" style="aspect-ratio:1;min-height:280px;"></div>' +
+        '<div><div class="sk" style="height:36px;margin-bottom:12px;"></div><div class="sk" style="height:24px;width:40%;margin-bottom:16px;"></div>' +
+        '<div class="sk" style="height:120px;"></div></div></div>';
+      res = await prefetchProductDetail(sid);
+    }
+    if (!isRouteActive(routeToken)) return;
     if (!res.success || !res.product) {
       main.innerHTML = '<div class="empty-state">' + esc(res.error || '—') + '</div>';
       return;
     }
     var p = res.product;
+    productCache[sid] = p;
     state.products = [p];
 
-    var pdpWishlisted = false;
+    var pdpWishlisted = p.produto_id ? guestWishlistHas(p.produto_id) : false;
     if (state.clientId && state.clientToken) {
-      var wl = await api('getWishlist', { clientId: state.clientId }, state.clientToken);
-      if (wl.success && wl.wishlist) {
-        pdpWishlisted = wl.wishlist.some(function (w) { return String(w.produto_id) === String(p.produto_id); });
-      }
-    } else if (p.produto_id) {
-      pdpWishlisted = guestWishlistHas(p.produto_id);
+      api('getWishlist', { clientId: state.clientId }, state.clientToken).then(function (wl) {
+        if (!isRouteActive(routeToken)) return;
+        if (wl.success && wl.wishlist) {
+          pdpWishlisted = wl.wishlist.some(function (w) { return String(w.produto_id) === String(p.produto_id); });
+          var btnFav0 = document.getElementById('btnFav');
+          if (btnFav0) btnFav0.textContent = tr(pdpWishlisted ? 'fav_remove' : 'fav_add');
+        }
+      });
     }
 
     var revsVisible = (p.avaliacoes || []).filter(function (r) {
@@ -2995,8 +3684,10 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
 
     var vars = p.variantes || [];
     if (!vars.length) {
+      if (!isRouteActive(routeToken)) return;
       var rawOnly = productPrimaryImageRaw(p);
-      var imgOnly = rawOnly ? driveImgMarkup(rawOnly, false) : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="lazy">';
+      if (rawOnly) preloadImageUrl(rawOnly, false);
+      var imgOnly = rawOnly ? driveImgMarkup(rawOnly, false, true) : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="eager" fetchpriority="high">';
       main.innerHTML =
         '<div class="breadcrumb"><a href="#/catalog">' + esc(tr('catalogue')) + '</a> / ' + esc(p.nome) + '</div>' +
         '<div class="pdp-layout">' +
@@ -3008,24 +3699,29 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         '</div></div>';
       return;
     }
-    var selected = vars[0] || null;
-
     function renderPdp(selV) {
+      if (!isRouteActive(routeToken)) return;
       var rawImgPdp = pickVariantImageRaw(p, selV);
+      if (rawImgPdp) preloadImageUrl(rawImgPdp, false);
       var pdpImgHtml = rawImgPdp
-        ? driveImgMarkup(rawImgPdp, false)
-        : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="lazy">';
+        ? driveImgMarkup(rawImgPdp, false, true)
+        : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect fill=%22%23e8eef6%22 width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E" alt="" loading="eager" fetchpriority="high">';
       var stars = '';
       var avg = parseFloat(revsVisible.length ? (revsVisible.reduce(function (s, r) { return s + parseInt(r.nota || 0, 10); }, 0) / revsVisible.length) : 0);
       if (avg > 0) stars = '<span class="stars">' + '★'.repeat(Math.round(avg)) + '</span> <span class="sku-note">(' + revsVisible.length + ')</span>';
 
       var chips = '';
       vars.forEach(function (v) {
-        var ok = !p.stock_management || (parseInt(v.stock, 10) || 0) > 0 || (p.stock_total > 0 && vars.length === 1);
-        var cls = selV && v.variante_id === selV.variante_id ? 'chip selected' : 'chip';
+        var ok = variantInStock(p, v);
+        var cls = selV && normalizeVariantId(v.variante_id) === normalizeVariantId(selV.variante_id) ? 'chip selected' : 'chip';
         chips += '<button type="button" class="' + cls + '" data-vid="' + esc(v.variante_id) + '"' + (!ok ? ' disabled' : '') + '>' +
           esc((v.tamanho || '') + (v.cor ? ' / ' + v.cor : '')) + '</button>';
       });
+      var maxStPdp = null;
+      if (p.stock_management && selV) {
+        var vsP = parseInt(String(selV.stock != null ? selV.stock : ''), 10);
+        if (!isNaN(vsP) && vsP > 0) maxStPdp = vsP;
+      }
 
       main.innerHTML =
         '<div class="breadcrumb"><a href="#/catalog">' + esc(tr('catalogue')) + '</a> / ' + esc(p.nome) + '</div>' +
@@ -3036,7 +3732,11 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         '<div style="margin:12px 0;">' + priceMarkup(p) + '</div>' +
         '<p style="line-height:1.6;color:var(--text-muted);">' + esc(p.descricao || '').replace(/\n/g, '<br>') + '</p>' +
         (vars.length ? '<p style="margin-top:16px;font-weight:600;">' + esc(tr('variant_label')) + '</p><div class="variant-grid" id="vChips">' + chips + '</div>' : '') +
-        '<div class="qty-row"><label>' + esc(tr('qty_label')) + '</label><input type="number" id="pdpQty" min="1" value="1" max="99"></div>' +
+        '<div class="qty-row"><label>' + esc(tr('qty_label')) + '</label>' +
+        '<div class="cart-qty" style="display:inline-flex;vertical-align:middle;margin-left:8px;">' +
+        '<button type="button" class="cq-dec" id="pdpQtyDec" aria-label="' + esc(tr('qty_decrease')) + '">−</button>' +
+        '<input type="number" id="pdpQty" min="1" value="1" max="99" style="width:56px;text-align:center;border:1px solid var(--border);border-radius:8px;padding:8px;">' +
+        '<button type="button" class="cq-inc" id="pdpQtyInc" aria-label="' + esc(tr('qty_increase')) + '">+</button></div></div>' +
         '<div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;align-items:center;">' +
         '<button type="button" class="btn btn-primary" id="btnAdd">' + esc(tr('btn_add_cart')) + '</button>' +
         '<button type="button" class="btn btn-accent" id="btnBuy">' + esc(tr('btn_buy')) + '</button>' +
@@ -3046,32 +3746,35 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         '<div id="revList">' + revsVisible.map(function (r) {
           return '<div style="border-bottom:1px solid var(--border);padding:12px 0;"><strong>' + esc('★'.repeat(parseInt(r.nota || 0, 10))) + '</strong><p style="margin:8px 0 0;">' + esc(r.comentario || '') + '</p></div>';
         }).join('') + '</div>' +
-        (state.clientId ? '<div class="panel" style="margin-top:16px;"><h4>' + esc(tr('write_review')) + '</h4>' +
-          '<p class="sku-note" style="margin-top:0;line-height:1.5;">' + esc(tr('review_moderation_hint')) + '</p>' +
-          '<div class="field"><textarea id="rvText" rows="3"></textarea></div>' +
-          '<div class="field"><label>' + esc(tr('review_rating_label')) + '</label><input type="number" id="rvStars" min="1" max="5" value="5"></div>' +
-          '<button type="button" class="btn btn-primary" id="rvSend">' + esc(tr('submit_review')) + '</button></div>' : '') +
+        (state.clientToken && state.clientId
+          ? '<div class="panel" style="margin-top:16px;"><h4>' + esc(tr('write_review')) + '</h4>' +
+            '<p class="sku-note" style="margin-top:0;line-height:1.5;">' + esc(tr('review_moderation_hint')) + '</p>' +
+            '<div class="field"><textarea id="rvText" rows="3"></textarea></div>' +
+            '<div class="field"><label>' + esc(tr('review_rating_label')) + '</label><input type="number" id="rvStars" min="1" max="5" value="5"></div>' +
+            '<button type="button" class="btn btn-primary" id="rvSend">' + esc(tr('submit_review')) + '</button></div>'
+          : '<div class="panel" style="margin-top:16px;"><p class="sku-note" style="margin:0 0 12px;">' + esc(tr('review_login_hint')) + '</p>' +
+            '<button type="button" class="btn btn-primary" id="rvLogin">' + esc(tr('review_login_btn')) + '</button></div>') +
         '</div></div></div>';
 
       var chipRoot = document.getElementById('vChips');
       if (chipRoot) chipRoot.querySelectorAll('.chip').forEach(function (b) {
         b.onclick = function () {
           var vid = b.getAttribute('data-vid');
-          var nv = vars.find(function (x) { return x.variante_id === vid; });
+          var nv = vars.find(function (x) { return normalizeVariantId(x.variante_id) === normalizeVariantId(vid); });
           if (nv) renderPdp(nv);
         };
       });
 
-      document.getElementById('btnAdd').onclick = function () {
-        if (!vars.length) { toast('—'); return; }
-        var q = parseInt(document.getElementById('pdpQty').value, 10) || 1;
-        addToCartLine(p, selV, q);
+      bindPdpQtyControls(maxStPdp);
+
+      document.getElementById('btnAdd').onclick = async function () {
+        if (!vars.length || !selV) { toast(tr('add_cart_select_variant')); return; }
+        await addToCartLine(p, selV, readPdpQty(maxStPdp));
       };
-      document.getElementById('btnBuy').onclick = function () {
-        if (!vars.length) return;
-        var q = parseInt(document.getElementById('pdpQty').value, 10) || 1;
-        addToCartLine(p, selV, q);
-        location.hash = '#/checkout';
+      document.getElementById('btnBuy').onclick = async function () {
+        if (!vars.length || !selV) { toast(tr('add_cart_select_variant')); return; }
+        var ok = await addToCartLine(p, selV, readPdpQty(maxStPdp));
+        if (ok) location.hash = '#/checkout';
       };
       var btnFav = document.getElementById('btnFav');
       if (btnFav) btnFav.onclick = async function () {
@@ -3100,15 +3803,52 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       };
       var rvBtn = document.getElementById('rvSend');
       if (rvBtn) rvBtn.onclick = async function () {
-        var txt = document.getElementById('rvText').value;
+        var txt = (document.getElementById('rvText').value || '').trim();
+        if (!txt) { toast(tr('contact_msg')); return; }
         var n = parseInt(document.getElementById('rvStars').value, 10) || 5;
-        var r = await api('createReview', { produtoId: p.produto_id, clientId: state.clientId, nota: n, comentario: txt }, state.clientToken);
-        if (r.success) toast(tr('review_pending_toast'));
-        else toast(r.error || '—');
+        if (n < 1 || n > 5) n = 5;
+        rvBtn.disabled = true;
+        var r = await api('createReview', {
+          produtoId: p.produto_id,
+          clientId: state.clientId || 'anonimo',
+          nota: n,
+          comentario: txt
+        }, state.clientToken);
+        rvBtn.disabled = false;
+        if (r.success) {
+          toast(tr('review_pending_toast'));
+          document.getElementById('rvText').value = '';
+          var again = await api('getProduct', { id: p.produto_id });
+          if (again.success && again.product) {
+            p.avaliacoes = again.product.avaliacoes || [];
+            renderPdp(selV);
+          }
+        } else toast(r.error || '—');
       };
+      var rvLogin = document.getElementById('rvLogin');
+      if (rvLogin) rvLogin.onclick = function () { requireAuthModal('login'); };
     }
 
+    var selected = vars.find(function (v) { return variantInStock(p, v); }) || vars[0] || null;
     renderPdp(selected);
+    if (cached) {
+      api('getProduct', { id: sid }).then(function (fresh) {
+        if (!isRouteActive(routeToken) || !fresh.success || !fresh.product) return;
+        p.avaliacoes = fresh.product.avaliacoes || [];
+        p.variantes = (fresh.product.variantes && fresh.product.variantes.length) ? fresh.product.variantes : p.variantes;
+        productCache[sid] = p;
+        var revListEl = document.getElementById('revList');
+        if (revListEl) {
+          var rvUp = (p.avaliacoes || []).filter(function (r) {
+            var st = String(r.estado || r.status || '').toLowerCase();
+            return st !== 'pendente' && st !== 'pending';
+          });
+          revListEl.innerHTML = rvUp.map(function (r) {
+            return '<div style="border-bottom:1px solid var(--border);padding:12px 0;"><strong>' + esc('★'.repeat(parseInt(r.nota || 0, 10))) + '</strong><p style="margin:8px 0 0;">' + esc(r.comentario || '') + '</p></div>';
+          }).join('');
+        }
+      });
+    }
   }
 
   async function buildOrderItemsFromCart() {
@@ -3147,9 +3887,9 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     }
 
     var sub = items.reduce(function (s, it) { return s + parseFloat(it.preco) * parseInt(it.quantidade, 10); }, 0);
-    var discount = 0;
-    if (state.couponValid && state.couponValid.valid) discount = parseFloat(state.couponValid.discount) || 0;
-    var total = Math.max(0, sub - discount);
+    var totals = totalsWithCoupon(sub);
+    var discount = totals.discount;
+    var total = totals.total;
 
     var payStripe = String(state.config.pay_stripe_enabled) === '1' && String(state.config.pay_show_stripe) === '1' && window.STRIPE_PUBLISHABLE_KEY;
     var payCartaoManual = String(state.config.pay_show_cartao) !== '0' && !payStripe;
@@ -3173,8 +3913,11 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '<div class="field"><label>' + esc(tr('lbl_zip')) + '</label><input id="coZip"></div></div>' +
       '<div class="field"><label>' + esc(tr('lbl_country')) + '</label><input id="coCountry"></div>' +
       '<div class="field" id="coSaveAddrWrap" style="display:none;"><label><input type="checkbox" id="coSaveAddr"> ' + esc(tr('addr_save_chk')) + '</label></div>' +
-      '<div class="field" style="display:flex;gap:8px;">' +
-      '<input id="coCoupon" placeholder="' + esc(tr('lbl_coupon')) + '" style="flex:1"><button type="button" class="btn btn-ghost" id="coCoupBtn">' + esc(tr('coupon_apply')) + '</button></div>' +
+      '<div class="field" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+      '<input id="coCoupon" placeholder="' + esc(tr('lbl_coupon')) + '" style="flex:1;min-width:140px;">' +
+      '<button type="button" class="btn btn-ghost" id="coCoupBtn">' + esc(tr('coupon_apply')) + '</button>' +
+      '<button type="button" class="btn btn-ghost" id="coCoupRemove" style="display:none;">' + esc(tr('coupon_remove')) + '</button></div>' +
+      (publicPromoCode() ? promoCodePanelHtml('Co') : '') +
       '<div class="field"><label class="payment-options"><input type="checkbox" id="coTerms"> ' + esc(tr('terms_chk')) + '</label></div>' +
       '<h3>' + esc(tr('pay_method')) + '</h3><div class="payment-options" id="payOpts"></div>' +
       '<div id="payInstr" class="pay-hint-box" style="display:none;"></div>' +
@@ -3185,6 +3928,8 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       '<strong>' + esc(tr('cart_title')) + '</strong>' +
       '<p style="font-size:14px;color:var(--text-muted);">' + esc(String(items.length)) + ' linhas · ' + fmtMoney(sub) + '</p>' +
       '<hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">' +
+      '<div id="coDiscRow" class="checkout-discount-row" style="display:' + (totals.hasDiscount ? 'flex' : 'none') + ';">' +
+      '<span>' + esc(tr('checkout_discount')) + '</span><span id="coDiscAmt">−' + fmtMoney(discount) + '</span></div>' +
       '<div style="display:flex;justify-content:space-between;"><span>' + esc(tr('total')) + '</span><strong id="coTot">' + fmtMoney(total) + '</strong></div>' +
       '</div></div>';
 
@@ -3257,17 +4002,54 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       }
     }
 
+    function refreshCheckoutTotals() {
+      totals = totalsWithCoupon(sub);
+      discount = totals.discount;
+      total = totals.total;
+      var coTot = document.getElementById('coTot');
+      var coDiscRow = document.getElementById('coDiscRow');
+      var coDiscAmt = document.getElementById('coDiscAmt');
+      var coRem = document.getElementById('coCoupRemove');
+      if (coTot) coTot.textContent = fmtMoney(total);
+      if (coDiscRow) coDiscRow.style.display = totals.hasDiscount ? 'flex' : 'none';
+      if (coDiscAmt) coDiscAmt.textContent = '−' + fmtMoney(discount);
+      if (coRem) coRem.style.display = (state.couponCode && state.couponValid && state.couponValid.valid) ? 'inline-flex' : 'none';
+    }
+
+    var coCouponEl = document.getElementById('coCoupon');
+    if (coCouponEl && state.couponCode) coCouponEl.value = state.couponCode;
+    if (state.couponCode) {
+      applyCouponCode(state.couponCode, sub).then(function (res) {
+        if (res.ok) refreshCheckoutTotals();
+      });
+    } else {
+      refreshCheckoutTotals();
+    }
+    bindPromoCodePanel('Co');
+
     document.getElementById('coCoupBtn').onclick = async function () {
-      state.couponCode = document.getElementById('coCoupon').value.trim();
-      var r = await api('validateCoupon', { code: state.couponCode, total: String(sub) });
-      state.couponValid = r;
-      if (r.valid) {
-        discount = parseFloat(r.discount) || 0;
-        total = Math.max(0, sub - discount);
-        document.getElementById('coTot').textContent = fmtMoney(total);
-        toast(tr('coupon_apply') + ' OK');
-      } else toast(r.error || '—');
+      var res = await applyCouponCode(document.getElementById('coCoupon').value, sub);
+      if (res.ok) {
+        refreshCheckoutTotals();
+        toast(tr('cart_coupon_ok'));
+      } else toast(res.error || '—');
     };
+    var coCoupRemove = document.getElementById('coCoupRemove');
+    if (coCoupRemove) {
+      coCoupRemove.onclick = function () {
+        clearCouponState();
+        if (coCouponEl) coCouponEl.value = '';
+        refreshCheckoutTotals();
+      };
+    }
+    if (coCouponEl) {
+      coCouponEl.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          document.getElementById('coCoupBtn').click();
+        }
+      });
+    }
 
     document.getElementById('coSubmit').onclick = submitCheckout;
 
@@ -3294,6 +4076,16 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       var payM = payEl ? payEl.value : 'transfer';
       var awaitPay = payM === 'stripe' && payStripe;
 
+      if (state.couponCode) {
+        var coupCheck = await applyCouponCode(state.couponCode, sub);
+        if (!coupCheck.ok) {
+          toast(coupCheck.error || '—');
+          refreshCheckoutTotals();
+          return;
+        }
+        refreshCheckoutTotals();
+      }
+
       var payload = {
         items: items,
         email: em,
@@ -3302,7 +4094,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         endereco: ad,
         clientId: state.clientId || '',
         cartId: state.cartId,
-        coupon_code: state.couponCode || undefined,
+        coupon_code: (state.couponValid && state.couponValid.valid) ? state.couponCode : undefined,
         total: total.toFixed(2),
         awaitOnlinePayment: awaitPay,
         payment_method: payM
@@ -3352,6 +4144,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
               if (cf.success) {
                 sessionStorage.removeItem('stripe_pending_order');
                 saveCartId('');
+                clearCouponState();
                 await refreshCartCount();
                 toast(tr('order_ok'));
                 location.hash = '#/account';
@@ -3363,6 +4156,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       }
 
       saveCartId('');
+      clearCouponState();
       await refreshCartCount();
       toast(tr('order_ok') + ' ' + ord.orderId);
       location.hash = '#/account';
@@ -3586,25 +4380,96 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     };
   }
 
+  function isValidEmailSimple(em) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(em || '').trim());
+  }
+
+  async function submitContactForm(payload) {
+    var name = String(payload.name || '').trim();
+    var email = String(payload.email || '').trim();
+    var message = String(payload.message || '').trim();
+    if (!name || !email || !message) return { ok: false, error: tr('contact_required') };
+    if (!isValidEmailSimple(email)) return { ok: false, error: tr('contact_invalid_email') };
+    var r = await api('sendContactMessage', { name: name, email: email, message: message });
+    if (r.success) return { ok: true };
+    return { ok: false, error: r.error || '—' };
+  }
+
   async function renderContact() {
-    document.getElementById('main').innerHTML =
+    var main = document.getElementById('main');
+    var em = state.empresa || {};
+    var cfg = state.config || {};
+    var shopEmail = String(em.email || cfg.contact_email || cfg.store_email || '').trim();
+    var shopPhone = String(em.telefone || cfg.support_phone || '').trim();
+    var waNum = String(cfg.whatsapp_number || '').replace(/\D/g, '');
+    var addrBits = [em.morada, em.cidade, em.codigo_postal, em.pais].filter(function (x) { return x && String(x).trim(); });
+    var addrLine = addrBits.join(', ');
+
+    var infoHtml = '<div class="panel" style="margin-bottom:20px;max-width:560px;">' +
+      '<h3 style="margin:0 0 12px;font-size:1.1rem;">' + esc(tr('contact_info_title')) + '</h3>';
+    if (shopEmail) {
+      infoHtml += '<p style="margin:8px 0 0;"><strong>' + esc(tr('contact_email_label')) + '</strong> ' +
+        '<a href="mailto:' + esc(shopEmail) + '">' + esc(shopEmail) + '</a></p>';
+    }
+    if (shopPhone) {
+      infoHtml += '<p style="margin:8px 0 0;"><strong>' + esc(tr('contact_phone')) + '</strong> ' +
+        '<a href="tel:' + esc(String(shopPhone).replace(/\s/g, '')) + '">' + esc(shopPhone) + '</a></p>';
+    }
+    if (waNum.length >= 8) {
+      infoHtml += '<p style="margin:8px 0 0;"><a class="btn btn-accent btn-sm" href="https://wa.me/' + esc(waNum) + '" target="_blank" rel="noopener noreferrer">' + esc(tr('contact_wa_chat')) + '</a></p>';
+    }
+    if (addrLine) {
+      infoHtml += '<p style="margin:8px 0 0;opacity:.9;line-height:1.55;">' + esc(addrLine) + '</p>';
+    }
+    infoHtml += '</div>';
+
+    main.innerHTML =
       '<div class="page-intro">' +
       '<h1>' + esc(tr('contact_title')) + '</h1>' +
       '<p class="sku-note">' + esc(tr('contact_intro')) + '</p></div>' +
+      infoHtml +
       '<div class="panel" style="max-width:560px">' +
-      '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="ctName"></div>' +
-      '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="ctEmail" type="email"></div>' +
+      '<h3 style="margin:0 0 16px;font-size:1.1rem;">' + esc(tr('contact_form_title')) + '</h3>' +
+      '<div id="ctFeedback" class="sku-note" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:8px;"></div>' +
+      '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="ctName" autocomplete="name"></div>' +
+      '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="ctEmail" type="email" autocomplete="email"></div>' +
       '<div class="field"><label>' + esc(tr('contact_msg')) + '</label><textarea id="ctMsg" rows="5"></textarea></div>' +
       '<button type="button" class="btn btn-primary" id="ctSend">' + esc(tr('contact_send')) + '</button>' +
       '</div>';
-    document.getElementById('ctSend').onclick = async function () {
-      var r = await api('sendContactMessage', {
-        name: document.getElementById('ctName').value,
-        email: document.getElementById('ctEmail').value,
+
+    var ctName = document.getElementById('ctName');
+    var ctEmail = document.getElementById('ctEmail');
+    if (state.clientNome && ctName && !ctName.value) ctName.value = state.clientNome;
+    if (state.clientToken && ctEmail && !ctEmail.value) {
+      var pf = await api('getClientProfile', { clientId: state.clientId }, state.clientToken);
+      if (pf.success && pf.client && pf.client.email) ctEmail.value = pf.client.email;
+    }
+
+    var ctSend = document.getElementById('ctSend');
+    var ctFeedback = document.getElementById('ctFeedback');
+    ctSend.onclick = async function () {
+      ctSend.disabled = true;
+      var res = await submitContactForm({
+        name: ctName.value,
+        email: ctEmail.value,
         message: document.getElementById('ctMsg').value
       });
-      if (r.success) toast(tr('contact_sent_ok'));
-      else toast(r.error || '—');
+      ctSend.disabled = false;
+      if (ctFeedback) {
+        ctFeedback.style.display = 'block';
+        if (res.ok) {
+          ctFeedback.style.background = 'color-mix(in srgb, var(--brand) 12%, var(--bg-card))';
+          ctFeedback.style.color = 'var(--text)';
+          ctFeedback.textContent = tr('contact_sent_ok');
+          document.getElementById('ctMsg').value = '';
+          toast(tr('contact_sent_ok'));
+        } else {
+          ctFeedback.style.background = 'color-mix(in srgb, #c41e3a 10%, var(--bg-card))';
+          ctFeedback.textContent = res.error || '—';
+          toast(res.error || '—');
+        }
+      } else if (res.ok) toast(tr('contact_sent_ok'));
+      else toast(res.error || '—');
     };
   }
 
@@ -3679,17 +4544,41 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         '<div class="field"><label>' + esc(tr('lbl_name')) + '</label><input id="rgName"></div>' +
         '<div class="field"><label>' + esc(tr('lbl_email')) + '</label><input id="rgEmail" type="email"></div>' +
         '<div class="field"><label>' + esc(tr('lbl_pass')) + '</label><input id="rgPass" type="password"></div>' +
-        '<button type="button" class="btn btn-primary" style="width:100%" id="rgSendOtp">' + esc(tr('otp_sent')) + '</button>' +
-        '<div class="field" style="margin-top:16px;"><label>' + esc(tr('otp_placeholder')) + '</label><input id="rgOtp"></div>' +
-        '<button type="button" class="btn btn-accent" style="width:100%" id="rgVerify">' + esc(tr('verify')) + '</button>' +
+        '<button type="button" class="btn btn-ghost" style="width:100%" id="rgSendOtp">' + esc(tr('reg_send_code')) + '</button>' +
+        '<div class="field" style="margin-top:16px;"><label>' + esc(tr('otp_placeholder')) + '</label><input id="rgOtp" inputmode="numeric" autocomplete="one-time-code"></div>' +
+        '<button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" id="rgVerify">' + esc(tr('reg_create_btn')) + '</button>' +
+        '<button type="button" class="btn btn-accent" style="width:100%;margin-top:8px;" id="rgDirect">' + esc(tr('reg_create_direct')) + '</button>' +
         '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;line-height:1.45;cursor:pointer;">' +
         '<input type="checkbox" id="rgNews" style="margin-top:3px;width:auto;">' +
         '<span>' + esc(tr('reg_newsletter_optin')) + '</span></label>' +
         '<p style="margin-top:14px;"><a href="#" id="swLogin">' + esc(tr('login')) + '</a></p>';
       document.getElementById('rgSendOtp').onclick = async function () {
-        var r = await api('sendRegistrationOTP', { target: document.getElementById('rgEmail').value.trim() });
-        if (r.success) toast(tr('otp_sent'));
-        else toast(r.error || '—');
+        var em = document.getElementById('rgEmail').value.trim();
+        if (!em) { toast(tr('lbl_email')); return; }
+        var r = await api('sendRegistrationOTP', { target: em });
+        if (r.success) {
+          toast(tr('otp_sent'));
+          if (r.simulated_code) toast('Code (test): ' + r.simulated_code);
+        } else toast(r.error || '—');
+      };
+      document.getElementById('rgDirect').onclick = async function () {
+        var nome = document.getElementById('rgName').value.trim();
+        var em = document.getElementById('rgEmail').value.trim().toLowerCase();
+        var pw = document.getElementById('rgPass').value;
+        if (!nome || !em || !pw) { toast(tr('checkout_email_name_required')); return; }
+        var r = await api('clientRegister', {
+          nome: nome,
+          email: em,
+          password: pw,
+          newsletter: !!(document.getElementById('rgNews') && document.getElementById('rgNews').checked)
+        });
+        if (r.success && r.token) {
+          saveSession(r.token, r.clientId, r.nome || nome);
+          await mergeGuestWishlistIntoAccount();
+          m.classList.remove('open');
+          toast(tr('register'));
+          router();
+        } else toast(r.error || '—');
       };
       document.getElementById('rgVerify').onclick = async function () {
         var ud = {
@@ -3704,9 +4593,10 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
           userData: ud
         });
         if (r.success && r.token) {
-          saveSession(r.token, r.clientId, r.nome);
+          saveSession(r.token, r.clientId, r.nome || ud.nome);
           await mergeGuestWishlistIntoAccount();
           m.classList.remove('open');
+          toast(tr('register'));
           router();
         } else toast(r.error || '—');
       };
@@ -3718,8 +4608,12 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   async function renderAccount() {
     var main = document.getElementById('main');
     if (!state.clientToken) {
-      main.innerHTML = '<div class="empty-state"><button type="button" class="btn btn-primary" id="goLogin">' + esc(tr('login')) + '</button></div>';
+      main.innerHTML = '<div class="empty-state" style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">' +
+        '<button type="button" class="btn btn-primary" id="goLogin">' + esc(tr('login')) + '</button>' +
+        '<button type="button" class="btn btn-ghost" id="goRegister">' + esc(tr('register')) + '</button>' +
+        '<a href="#/tracking" class="btn btn-ghost btn-sm">' + esc(tr('nav_tracking')) + '</a></div>';
       document.getElementById('goLogin').onclick = function () { openAuth('login'); };
+      document.getElementById('goRegister').onclick = function () { openAuth('reg'); };
       return;
     }
     main.innerHTML =
@@ -3860,14 +4754,29 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         return;
       }
       var ent = res.entrega || null;
+      var det = res.details || [];
+      var rows = det.map(function (d) {
+        return '<tr><td>' + esc(d.nome_produto || d.produto_id || '') + '</td><td style="text-align:center;">' +
+          esc(String(d.quantidade || '')) + '</td><td style="text-align:right;">' + fmtMoney(d.preco) + '</td></tr>';
+      }).join('');
+      var linesTbl = rows
+        ? '<h4 style="margin:16px 0 8px;">' + esc(tr('tracking_products')) + '</h4>' +
+          '<table class="order-lines-table"><thead><tr><th>' + esc(tr('order_col_prod')) + '</th><th>' + esc(tr('qty_label')) + '</th><th>' + esc(tr('order_col_price')) + '</th></tr></thead><tbody>' + rows + '</tbody></table>'
+        : '';
       box.innerHTML =
-        '<p><strong>' + esc(tr('order_status')) + '</strong> ' + esc(o.estado || '—') + '</p>' +
+        '<p><strong>' + esc(tr('tracking_order_label')) + '</strong> ' + esc(o.pedido_id || oid) + '</p>' +
+        '<p><strong>' + esc(tr('order_date')) + '</strong> ' + esc(o.data || '') + '</p>' +
+        '<p><strong>' + esc(tr('order_status')) + '</strong> ' + esc(formatOrderStatusLabel(o.estado)) + ' <span class="sku-note">(' + esc(o.estado || '—') + ')</span></p>' +
         '<p><strong>' + esc(tr('order_pay_status')) + '</strong> ' + esc(o.estado_pagamento || '—') + '</p>' +
+        '<p><strong>' + esc(tr('total')) + '</strong> ' + fmtMoney(o.total) + '</p>' +
+        linesTbl +
         (ent && ent.tracking_number
-          ? '<p><strong>' + esc(tr('tracking_no')) + '</strong> ' + esc(ent.tracking_number) +
+          ? '<p style="margin-top:12px;"><strong>' + esc(tr('tracking_no')) + '</strong> ' + esc(ent.tracking_number) +
             (ent.transportadora ? ' · ' + esc(ent.transportadora) : '') + '</p>'
           : '') +
-        '<p style="margin-top:12px;"><a href="#/order/' + encodeURIComponent(oid) + '" class="btn btn-ghost btn-sm">' + esc(tr('order_detail_title')) + '</a></p>';
+        (state.clientToken
+          ? '<p style="margin-top:12px;"><a href="#/order/' + encodeURIComponent(oid) + '" class="btn btn-ghost btn-sm">' + esc(tr('order_detail_title')) + '</a></p>'
+          : '');
     };
   }
 
@@ -3889,6 +4798,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
       sessionStorage.removeItem('stripe_pending_order');
       if (cf.success) {
         saveCartId('');
+        clearCouponState();
         await refreshCartCount();
         toast(tr('order_ok'));
         history.replaceState(null, '', location.pathname + (location.hash || '#/account'));
@@ -3901,18 +4811,21 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
    * Lit `location.hash`, assure le bootstrap, la session sur routes sensibles, le badge panier, puis dispatch vers les render*.
    */
   async function router() {
+    var myRoute = ++_routeGeneration;
     if (!await loadBootstrap()) return;
+    consumeCouponFromUrl();
     var r = parseRoute();
     var p = r.parts[0] || '';
     var awaitSession = (p === 'account' || p === 'order');
     if (awaitSession) await ensureClientSession();
     else ensureClientSession().catch(function () {});
     refreshCartCount().catch(function () {});
-    if (p === '' || p === 'home') { await renderHome(); return; }
+    if (p === '' || p === 'home') { await renderHome(); updateNavActiveState(); return; }
     if (p === 'catalog') {
       if (r.parts[1] === 'promo') {
         state.filters.promo_only = true;
         state.filters.categoria = '';
+        if (state.filters.sort === 'date_desc') state.filters.sort = 'price_asc';
       } else if (r.parts[1]) {
         state.filters.categoria = decodeURIComponent(r.parts[1]);
         state.filters.promo_only = false;
@@ -3921,18 +4834,20 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
         state.filters.promo_only = false;
       }
       await renderCatalog();
+      updateNavActiveState();
       return;
     }
-    if (p === 'tracking') { await renderTracking(); return; }
-    if (p === 'product' && r.parts[1]) { await renderProduct(decodeURIComponent(r.parts[1])); return; }
-    if (p === 'checkout') { await renderCheckout(); return; }
-    if (p === 'contact') { await renderContact(); return; }
-    if (p === 'legal' && r.parts[1]) { renderLegalPage(r.parts[1]); return; }
-    if (p === 'newsletter' && r.parts[1] === 'unsubscribe') { renderNewsletterUnsub(); return; }
-    if (p === 'wishlist') { await renderWishlist(); return; }
-    if (p === 'order' && r.parts[1]) { await renderOrderDetail(decodeURIComponent(r.parts[1])); return; }
-    if (p === 'account') { await renderAccount(); return; }
+    if (p === 'tracking') { await renderTracking(); updateNavActiveState(); return; }
+    if (p === 'product' && r.parts[1]) { await renderProduct(decodeURIComponent(r.parts[1]), myRoute); updateNavActiveState(); return; }
+    if (p === 'checkout') { await renderCheckout(); updateNavActiveState(); return; }
+    if (p === 'contact') { await renderContact(); updateNavActiveState(); return; }
+    if (p === 'legal' && r.parts[1]) { renderLegalPage(r.parts[1]); updateNavActiveState(); return; }
+    if (p === 'newsletter' && r.parts[1] === 'unsubscribe') { renderNewsletterUnsub(); updateNavActiveState(); return; }
+    if (p === 'wishlist') { await renderWishlist(); updateNavActiveState(); return; }
+    if (p === 'order' && r.parts[1]) { await renderOrderDetail(decodeURIComponent(r.parts[1])); updateNavActiveState(); return; }
+    if (p === 'account') { await renderAccount(); updateNavActiveState(); return; }
     await renderHome();
+    updateNavActiveState();
   }
 
   // --- Écouteurs fixes sur header / footer / modales / cookie ---
@@ -3950,7 +4865,10 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
     renderCartDrawer();
     toast(tr('cart_cleared'));
   };
-  document.getElementById('btnAccount').onclick = function () { location.hash = '#/account'; };
+  document.getElementById('btnAccount').onclick = function () {
+    if (!state.clientToken) openAuth('login');
+    else location.hash = '#/account';
+  };
 
   document.getElementById('headerSearch').addEventListener('change', function () {
     applySearchAndGoCatalog(this.value);
@@ -3981,20 +4899,29 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   if (cartCouponBtn) {
     cartCouponBtn.onclick = async function () {
       var code = (document.getElementById('cartCouponInput') || {}).value;
-      if (!code) return;
-      state.couponCode = String(code).trim();
-      var sub = state._cartSnap && state._cartSnap.total != null ? parseFloat(state._cartSnap.total) : 0;
-      var r = await api('validateCoupon', { code: state.couponCode, total: String(sub) });
-      state.couponValid = r;
-      var msg = document.getElementById('cartCouponMsg');
-      if (r.valid) {
-        if (msg) { msg.style.display = 'block'; msg.textContent = tr('cart_coupon_ok'); }
-        toast(tr('cart_coupon_ok'));
-      } else {
-        if (msg) { msg.style.display = 'block'; msg.textContent = r.error || '—'; }
-        toast(r.error || '—');
-      }
+      var res = await applyCouponCode(code, getCartSubtotal());
+      if (res.ok) toast(tr('cart_coupon_ok'));
+      else toast(res.error || '—');
+      updateCartCouponDisplay();
     };
+  }
+  var cartCouponRemove = document.getElementById('cartCouponRemove');
+  if (cartCouponRemove) {
+    cartCouponRemove.onclick = function () {
+      clearCouponState();
+      var cci = document.getElementById('cartCouponInput');
+      if (cci) cci.value = '';
+      updateCartCouponDisplay();
+    };
+  }
+  var cartCouponInput = document.getElementById('cartCouponInput');
+  if (cartCouponInput) {
+    cartCouponInput.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' && cartCouponBtn) {
+        ev.preventDefault();
+        cartCouponBtn.click();
+      }
+    });
   }
   var compareOpen = document.getElementById('compareBarOpen');
   if (compareOpen) compareOpen.onclick = openCompareModal;
@@ -4034,6 +4961,7 @@ localStorage « erp_api_url » sert de secours si valide — même comportement 
   window.addEventListener('hashchange', router);
 
   setupMobileNav();
+  setupProductCardDelegation();
 
   var btnTheme = document.getElementById('btnThemeToggle');
   if (btnTheme) btnTheme.onclick = function () { toggleBoutiqueTheme(); };

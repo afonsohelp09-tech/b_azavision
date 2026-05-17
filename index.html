@@ -3172,27 +3172,28 @@
       (function () {
         var norm = (typeof window._erpNormalizeGsUrl === 'function') ? window._erpNormalizeGsUrl : function (x) { return String(x == null ? '' : x).trim(); };
         var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
+        function looseGsExec(u) {
+          u = norm(u);
+          if (!u || u.indexOf('INSEREZ_VOTRE') !== -1) return '';
+          var base = u.split(/[?#]/)[0].replace(/\/$/, '');
+          if (/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/i.test(base)) return base;
+          return '';
+        }
         var inline = (typeof API_URL !== 'undefined' && API_URL) ? norm(API_URL) : '';
         var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? norm(window.ERP_API_URL_DEFAULT) : '';
-        var chosen = parse(inline) || parse(def);
-        if (chosen) {
-          API_URL = chosen;
-        } else if (!inline || inline.indexOf('INSEREZ_VOTRE') !== -1) {
-          API_URL = def || '';
+        var fromLs = typeof localStorage !== 'undefined' ? norm(localStorage.getItem('erp_api_url') || '') : '';
+        var resolved =
+          parse(inline) || parse(def) || parse(fromLs) ||
+          looseGsExec(inline) || looseGsExec(def) || looseGsExec(fromLs);
+        if (resolved) {
+          API_URL = resolved;
+          return;
+        }
+        if (!inline || inline.indexOf('INSEREZ_VOTRE') !== -1) {
+          API_URL = def || fromLs || '';
         } else {
           API_URL = inline;
         }
-      })();
-    </script>
-    <script>
-      (function () {
-        var parse = (typeof window._erpParseGsUrl === 'function') ? window._erpParseGsUrl : function () { return null; };
-        var cur = (typeof API_URL !== 'undefined' && API_URL) ? API_URL : '';
-        var def = (typeof window.ERP_API_URL_DEFAULT === 'string') ? window.ERP_API_URL_DEFAULT : '';
-        var fromFile = parse(cur) || parse(def);
-        var fromLs = parse(typeof localStorage !== 'undefined' ? (localStorage.getItem('erp_api_url') || '') : '');
-        if (fromFile) API_URL = fromFile;
-        else if (fromLs) API_URL = fromLs;
       })();
     </script>
     <script>
